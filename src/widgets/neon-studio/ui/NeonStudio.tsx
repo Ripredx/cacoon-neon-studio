@@ -306,7 +306,8 @@ export default function NeonStudio() {
       ctx.save();
       ctx.beginPath();
       if (activeBorderId === "circle") {
-        ctx.arc(800, 430, 220, 0, Math.PI * 2);
+        const radius = Math.min(360, Math.round(220 * (estimate.widthCm / 50)));
+        ctx.arc(800, 430, radius, 0, Math.PI * 2);
       } else {
         const padX = 270;
         const padY = 130;
@@ -1692,6 +1693,12 @@ export default function NeonStudio() {
                         ? `0 20px 60px rgba(0,0,0,0.85), 0 0 42px rgba(${activeColor.glowRgb}, 0.24), inset 0 0 22px rgba(${activeColor.glowRgb}, 0.12)`
                         : undefined,
                     ...neonBorderStyle,
+                    ...(activeBorderId === "circle"
+                      ? {
+                          width: `clamp(14rem, ${(estimate.widthCm / 50) * 16}rem, 26rem)`,
+                          height: `clamp(14rem, ${(estimate.heightCm / 50) * 16}rem, 26rem)`,
+                        }
+                      : undefined),
                   }}
                   class={`relative transition-all duration-300 ${backboardShapeClass} ${
                     activeBorderId !== "none" ? "border-[3px]" : ""
@@ -1805,9 +1812,16 @@ export default function NeonStudio() {
                     {estimate.heightCm}cm
                   </span>
                   <div
+                    style={
+                      activeBorderId === "circle"
+                        ? {
+                            height: `clamp(12rem, ${(estimate.heightCm / 50) * 15}rem, 24rem)`,
+                          }
+                        : undefined
+                    }
                     class={`flex flex-col items-center ${
                       activeBorderId === "circle"
-                        ? "h-48 sm:h-64"
+                        ? ""
                         : activeBorderId === "pill"
                           ? "h-28 sm:h-36"
                           : "h-36 sm:h-44"
@@ -1823,10 +1837,15 @@ export default function NeonStudio() {
               {/* ALT YATAY GENİŞLİK OKU */}
               <div
                 aria-hidden="true"
-                class={`mt-6 flex items-center gap-3 font-mono text-white ${
+                style={
                   activeBorderId === "circle"
-                    ? "w-48 sm:w-64"
-                    : "w-[85%] max-w-xl"
+                    ? {
+                        width: `clamp(14rem, ${(estimate.widthCm / 50) * 16}rem, 26rem)`,
+                      }
+                    : undefined
+                }
+                class={`mt-6 flex items-center gap-3 font-mono text-white ${
+                  activeBorderId === "circle" ? "" : "w-[85%] max-w-xl"
                 }`}
               >
                 <span class="text-xs text-white/80">←</span>

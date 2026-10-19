@@ -113,6 +113,65 @@ describe("Custom Neon Pricing Engine (3 Exact Combination Comparisons)", () => {
     assert.equal(est.minPrice, 3250);
     assert.equal(est.maxPrice, 4000);
   });
+
+  it("Circle border dynamically expands diameter when symbol is added (TEST vs TEST+heart)", () => {
+    const withoutSymbol = calculateNeonPrice({
+      text: "TEST",
+      fontId: "modern",
+      colorId: "pink",
+      sizeId: "sm",
+      backboardId: "rectangle",
+      borderId: "circle",
+      symbolId: "none",
+      environment: "indoor",
+    });
+    const withSymbol = calculateNeonPrice({
+      text: "TEST",
+      fontId: "modern",
+      colorId: "pink",
+      sizeId: "sm",
+      backboardId: "rectangle",
+      borderId: "circle",
+      symbolId: "heart",
+      environment: "indoor",
+    });
+
+    assert.equal(withoutSymbol.widthCm, 50);
+    assert.equal(withoutSymbol.heightCm, 50);
+
+    // Sembol eklenince fiziksel daire çapı en az 68cm'ye genişler:
+    assert.equal(withSymbol.widthCm, 68);
+    assert.equal(withSymbol.heightCm, 68);
+    assert.ok(withSymbol.widthCm > withoutSymbol.widthCm);
+    assert.ok(withSymbol.neonLengthMeters > withoutSymbol.neonLengthMeters);
+  });
+
+  it("Pill border dynamically expands width when symbol is added", () => {
+    const withoutSymbol = calculateNeonPrice({
+      text: "TEST",
+      fontId: "modern",
+      colorId: "pink",
+      sizeId: "sm",
+      backboardId: "rectangle",
+      borderId: "pill",
+      symbolId: "none",
+      environment: "indoor",
+    });
+    const withSymbol = calculateNeonPrice({
+      text: "TEST",
+      fontId: "modern",
+      colorId: "pink",
+      sizeId: "sm",
+      backboardId: "rectangle",
+      borderId: "pill",
+      symbolId: "heart",
+      environment: "indoor",
+    });
+
+    assert.equal(withoutSymbol.widthCm, 50);
+    assert.equal(withSymbol.widthCm, 62);
+    assert.ok(withSymbol.widthCm > withoutSymbol.widthCm);
+  });
 });
 
 describe("Turkish Locale & WhatsApp URL Encoding", () => {

@@ -489,11 +489,33 @@ export function calculateNeonPrice(spec: CustomNeonSpec): PriceEstimate {
 
   // Çerçeve Geometrisi Kontrolleri:
   if (spec.borderId === "circle") {
-    // Daire tam kare çap baz alır:
-    calculatedWidthCm = Math.max(calculatedWidthCm, calculatedHeightCm);
-    calculatedHeightCm = calculatedWidthCm;
+    // Dairesel çerçeve: İçerik (metin + sembol) dairesel yayın içine sığmalıdır.
+    // Geometrik kural: Daire içine yerleşen dikdörtgenin köşegen uzunluğu + dairesel yay payı.
+    const contentWidth = Math.max(
+      minRequiredWidthCm,
+      maxLineLength * 7.5 + symbolBonusCm,
+    );
+    const contentHeight = Math.max(16, 16 + (lineCount - 1) * 14);
+    const requiredDiameter =
+      Math.ceil(
+        (Math.sqrt(
+          contentWidth * contentWidth + contentHeight * contentHeight,
+        ) +
+          16) /
+          2,
+      ) * 2;
+    const circleDiameter = Math.max(sizeConfig.widthCm, requiredDiameter);
+    calculatedWidthCm = circleDiameter;
+    calculatedHeightCm = circleDiameter;
   } else if (spec.borderId === "pill") {
-    calculatedHeightCm = Math.round(calculatedWidthCm * 0.48);
+    // Kapsül çerçeve: Yuvarlatılmış uçlar ve sembol için genişletme
+    if (minRequiredWidthCm + 14 > sizeConfig.widthCm) {
+      calculatedWidthCm = minRequiredWidthCm + 14;
+    }
+    calculatedHeightCm = Math.max(
+      Math.round(calculatedWidthCm * 0.48),
+      18 + (lineCount - 1) * 16 + 10,
+    );
   }
 
   // Fiyat Hesaplama:
