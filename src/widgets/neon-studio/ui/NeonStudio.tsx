@@ -20,6 +20,7 @@ import {
 } from "@/entities/custom-neon/model/pricing";
 import { buildCustomNeonWhatsAppUrl } from "@/features/whatsapp-order/model/buildWhatsAppUrl";
 import { NEON_ENGINE_CONFIG } from "@/shared/config/business";
+import GridScan from "@/shared/ui/grid-scan/GridScan";
 import { useEffect, useRef, useState } from "preact/hooks";
 
 type StudioTabId =
@@ -1596,6 +1597,22 @@ export default function NeonStudio() {
               <span>B</span>
               <span>C</span>
             </div>
+
+            {/* 3D CAD Holografik GridScan Arka Planı */}
+            {sceneBg === "blueprint" && (
+              <div class="pointer-events-none absolute inset-0 z-0 opacity-25 overflow-hidden">
+                <GridScan
+                  linesColor="#1a1a24"
+                  scanColor={activeColor.hex}
+                  cells={7}
+                  depth={3.0}
+                  scanDuration={2.4}
+                  scanDelay={1.6}
+                  clickEffect="ping"
+                  glow={0.5}
+                />
+              </div>
+            )}
 
             {/* Duvara Düşen Atmosferik Neon Işık Havuzu */}
             <div
