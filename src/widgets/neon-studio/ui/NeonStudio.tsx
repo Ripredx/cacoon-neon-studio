@@ -150,7 +150,6 @@ export default function NeonStudio() {
   const activeBorderId: NeonBorderId = spec.borderId || "none";
   const activeBorder = NEON_BORDERS[activeBorderId];
   const activeTechId: NeonTubeTechId = spec.tubeTech || "standard";
-  const whatsappUrl = buildCustomNeonWhatsAppUrl(spec, estimate);
 
   const rawDisplay = spec.text.trim().length > 0 ? spec.text : "Open Late";
   const formattedText = activeFont.uppercase
@@ -248,12 +247,16 @@ export default function NeonStudio() {
     setTimeout(() => setCopiedLink(false), 2200);
   }
 
-  function handleExportPng() {
+  const [isOrdering, setIsOrdering] = useState(false);
+  const [orderStatus, setOrderStatus] = useState<string | null>(null);
+
+  function generatePaftaDataUrl(): string | null {
+    if (typeof document === "undefined") return null;
     const canvas = document.createElement("canvas");
     canvas.width = 1600;
     canvas.height = 1000;
     const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    if (!ctx) return null;
 
     ctx.fillStyle = "#050505";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -285,11 +288,11 @@ export default function NeonStudio() {
     ctx.fillStyle = activeColor.hex;
     ctx.font = "700 28px sans-serif";
     ctx.textAlign = "left";
-    ctx.fillText("GÖRSEL ÖNİZLEME · C/CNEON'S GLOW", 80, 85);
+    ctx.fillText("TEKNİK ÜRETİM PAFTASI · C/CNEON'S GLOW", 80, 85);
     ctx.fillStyle = "rgba(255, 255, 255, 0.55)";
     ctx.font = "400 17px monospace";
     ctx.fillText(
-      "EL İŞÇİLİĞİ SİLİKON NEON · ÜRETİM ÖNCESİ CNC KESİM ONAYI ALINIR",
+      "EL İŞÇİLİĞİ SİLİKON NEON · 4MM CNC AKRİLİK TABAN · 12V DC CE SERTİFİKALI",
       80,
       118,
     );
@@ -327,15 +330,15 @@ export default function NeonStudio() {
     ctx.strokeRect(80, 820, 1440, 110);
 
     const cols = [
-      { title: "TABELA ADI", val: formattedText.slice(0, 18) },
+      { title: "TABELA METNİ", val: formattedText.slice(0, 18) },
       {
-        title: "AKRİLİK TABAN",
+        title: "AKRİLİK ÖLÇÜ",
         val: `${estimate.widthCm} × ${estimate.heightCm} cm`,
       },
-      { title: "TOPLAM NEON", val: `${estimate.neonLengthMeters} m` },
+      { title: "TOPLAM METRAJ", val: `~${estimate.neonLengthMeters} m` },
       {
         title: "GÜÇ / TRAFO",
-        val: `${estimate.powerWatts} W`,
+        val: `${estimate.powerWatts} W (${estimate.recommendedAmps}A)`,
       },
       {
         title: "TAHMİNİ ARALIK",
@@ -355,9 +358,72 @@ export default function NeonStudio() {
       ctx.fillText(col.val, x, 895);
     });
 
+    return canvas.toDataURL("image/png");
+  }
+
+  async function handleOrderClick() {
+    if (isOrdering) return;
+    setIsOrdering(true);
+    setOrderStatus("Teknik pafta hazırlanıyor...");
+
+    try {
+      syncUrlHash(spec);
+      const liveUrl =
+        typeof window !== "undefined" ? window.location.href : undefined;
+      const dataUrl = generatePaftaDataUrl();
+
+      let imageUrl: string | undefined = undefined;
+
+      if (dataUrl) {
+        setOrderStatus("Görsel buluta aktarılıyor...");
+        const fd = new FormData();
+        fd.append("file", dataUrl);
+        fd.append("upload_preset", "ccneons");
+
+        const uploadRes = await fetch(
+          "https://api.cloudinary.com/v1_1/ujxsaiez/image/upload",
+          {
+            method: "POST",
+            body: fd,
+          },
+        );
+
+        if (uploadRes.ok) {
+          const uploadData = await uploadRes.json();
+          imageUrl = uploadData.secure_url || uploadData.url;
+        }
+      }
+
+      setOrderStatus("WhatsApp hazırlanıyor...");
+      const finalUrl = buildCustomNeonWhatsAppUrl(spec, estimate, {
+        imageUrl,
+        liveUrl,
+      });
+
+      if (typeof window !== "undefined") {
+        window.open(finalUrl, "_blank", "noopener,noreferrer");
+      }
+    } catch (err) {
+      console.error("Order dispatch error:", err);
+      // Fallback direct WhatsApp without image
+      const fallbackUrl = buildCustomNeonWhatsAppUrl(spec, estimate);
+      if (typeof window !== "undefined") {
+        window.open(fallbackUrl, "_blank", "noopener,noreferrer");
+      }
+    } finally {
+      setTimeout(() => {
+        setIsOrdering(false);
+        setOrderStatus(null);
+      }, 1500);
+    }
+  }
+
+  function handleExportPng() {
+    const dataUrl = generatePaftaDataUrl();
+    if (!dataUrl) return;
     const link = document.createElement("a");
     link.download = `ccneons-glow-pafta-${rawDisplay.toLowerCase().replace(/[^a-z0-9ğüşıöç]/gi, "-")}.png`;
-    link.href = canvas.toDataURL("image/png");
+    link.href = dataUrl;
     link.click();
   }
 
@@ -521,14 +587,40 @@ export default function NeonStudio() {
             </span>
           </div>
 
-          <a
-            href={whatsappUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="cursor-pointer whitespace-nowrap inline-flex h-10 sm:h-11 items-center gap-2 rounded-full border border-white/20 bg-white/[0.08] px-4 sm:px-6 font-mono text-xs font-bold uppercase tracking-wider text-white transition-all duration-200 hover:border-[var(--neon-color)] hover:bg-white/[0.15] hover:shadow-[0_0_24px_rgba(var(--neon-rgb),0.4)]"
+          <button
+            type="button"
+            onClick={handleOrderClick}
+            disabled={isOrdering}
+            class="cursor-pointer whitespace-nowrap inline-flex h-10 sm:h-11 items-center gap-2 rounded-full border border-white/20 bg-white/[0.08] px-4 sm:px-6 font-mono text-xs font-bold uppercase tracking-wider text-white transition-all duration-200 hover:border-[var(--neon-color)] hover:bg-white/[0.15] hover:shadow-[0_0_24px_rgba(var(--neon-rgb),0.4)] disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            <span>SİPARİŞ VER →</span>
-          </a>
+            {isOrdering ? (
+              <>
+                <svg
+                  class="size-4 animate-spin text-[var(--neon-color)]"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <title>Yükleniyor</title>
+                  <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  />
+                  <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
+                </svg>
+                <span>{orderStatus || "HAZIRLANIYOR..."}</span>
+              </>
+            ) : (
+              <span>SİPARİŞ VER →</span>
+            )}
+          </button>
         </div>
       </header>
 
@@ -1322,14 +1414,18 @@ export default function NeonStudio() {
                     </div>
                   </div>
 
-                  <a
-                    href={whatsappUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="cursor-pointer flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-[#1CFF8A]/50 bg-[#1CFF8A]/15 px-4 py-3 font-mono text-xs font-bold uppercase tracking-wider text-white transition-all hover:bg-[#1CFF8A]/25"
+                  <button
+                    type="button"
+                    onClick={handleOrderClick}
+                    disabled={isOrdering}
+                    class="cursor-pointer flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-[#1CFF8A]/50 bg-[#1CFF8A]/15 px-4 py-3 font-mono text-xs font-bold uppercase tracking-wider text-white transition-all hover:bg-[#1CFF8A]/25 disabled:opacity-60 disabled:cursor-not-allowed"
                   >
-                    <span>BU REÇETEYİ WHATSAPP'TAN SİPARİŞ ET →</span>
-                  </a>
+                    {isOrdering ? (
+                      <span>{orderStatus || "HAZIRLANIYOR..."}</span>
+                    ) : (
+                      <span>BU REÇETEYİ WHATSAPP'TAN SİPARİŞ ET →</span>
+                    )}
+                  </button>
                 </div>
               )}
 

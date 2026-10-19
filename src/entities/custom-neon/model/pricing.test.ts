@@ -99,13 +99,30 @@ describe("Turkish Locale & WhatsApp URL Encoding", () => {
     assert.ok(est.powerWatts >= 12);
     assert.ok(est.recommendedAmps >= 2);
 
-    const url = buildCustomNeonWhatsAppUrl(spec, est);
+    const url = buildCustomNeonWhatsAppUrl(spec, est, {
+      imageUrl: "https://res.cloudinary.com/ujxsaiez/image/upload/sample.png",
+      liveUrl: "http://localhost:4321/tasarla#preview",
+    });
     const decoded = decodeURIComponent(url);
-    assert.ok(url.startsWith("https://wa.me/905394682412?text="));
+    assert.ok(url.startsWith("https://wa.me/905530460610?text="));
     assert.ok(decoded.includes("IŞIK & İZ"));
-    assert.ok(decoded.includes("Dış Mekan (IP67 Su Geçirmez)"));
+    assert.ok(
+      decoded.includes(
+        "Dış Mekan (IP67 Sıvı Silikon İzolasyonlu & Su Geçirmez)",
+      ),
+    );
     assert.ok(decoded.includes("Kral Tacı"));
     assert.ok(decoded.includes("Kapsül (Oval) Neon Çerçeve"));
     assert.ok(decoded.includes("Luminex™ Pro"));
+    assert.ok(
+      decoded.includes(
+        "Teknik Üretim Paftası (Görsel): https://res.cloudinary.com/ujxsaiez/image/upload/sample.png",
+      ),
+    );
+    assert.ok(
+      decoded.includes(
+        "Canlı Stüdyo 3D Simülasyonu: http://localhost:4321/tasarla#preview",
+      ),
+    );
   });
 });

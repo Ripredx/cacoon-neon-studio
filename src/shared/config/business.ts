@@ -7,12 +7,17 @@ export const BUSINESS_CONFIG = {
     "https://cdn.shopier.app/logo_468/ccneonsglow_71d8ac3e4e7e07e06ae696efd6901290.jpeg",
   phones: [
     {
-      label: "Sipariş & WhatsApp Hattı 1",
+      label: "Test WhatsApp & Sipariş Hattı",
+      raw: "905530460610",
+      display: "+90 553 046 06 10",
+    },
+    {
+      label: "Atölye Hattı 2",
       raw: "905394682412",
       display: "+90 539 468 24 12",
     },
     {
-      label: "Sipariş & WhatsApp Hattı 2",
+      label: "Atölye Hattı 3",
       raw: "905378664207",
       display: "+90 537 866 42 07",
     },
