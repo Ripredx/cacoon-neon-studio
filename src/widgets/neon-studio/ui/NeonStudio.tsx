@@ -750,9 +750,8 @@ export default function NeonStudio() {
               {estimate.minPrice.toLocaleString("tr-TR")} ₺
               <span class="hidden sm:inline text-white/70"> – {estimate.maxPrice.toLocaleString("tr-TR")} ₺</span>
             </output>
-            <span class="font-mono block text-[9px] sm:text-[11px] text-[#1CFF8A] sm:text-white/55 font-medium leading-none mt-0.5">
+            <span class="font-mono block text-[9px] sm:text-[11px] text-white/55 font-medium leading-none mt-0.5">
               <span class="hidden sm:inline-block size-1.5 rounded-full mr-1" style={{ backgroundColor: activeColor.hex }} />
-              <span class="sm:hidden">ÖZEL İNDİRİM · </span>
               <span>{NEON_SIZES[spec.sizeId].label}</span>
             </span>
           </div>
