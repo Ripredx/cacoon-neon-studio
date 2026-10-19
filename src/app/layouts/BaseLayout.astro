@@ -2,6 +2,7 @@
 import { ClientRouter } from "astro:transitions";
 import "@/app/styles/global.css";
 import { BUSINESS_CONFIG, NEON_ENGINE_CONFIG } from "@/shared/config/business";
+import GridScan from "@/shared/ui/grid-scan/GridScan";
 
 interface Props {
   title?: string;
@@ -71,6 +72,24 @@ const {
     data-lenis-lerp={NEON_ENGINE_CONFIG.lenisLerp}
     class="min-h-dvh bg-[#050505] text-[#F4F4F6] antialiased selection:bg-white/20 selection:text-white overflow-x-clip"
   >
+    <!-- SAYFA GENELİ ARKA PLANI: React Bits <GridScan /> 3D Cyber Izgara -->
+    <div
+      id="global-page-gridscan"
+      aria-hidden="true"
+      class="fixed inset-0 z-0 pointer-events-none overflow-hidden opacity-40"
+    >
+      <GridScan
+        client:load
+        linesColor="#4d4757"
+        scanColor="#7dd3fc"
+        cells={7}
+        depth={3.3}
+        scanDuration={2.4}
+        scanDelay={1.6}
+        clickEffect="ping"
+      />
+    </div>
+
     <svg class="sr-only" aria-hidden="true" focusable="false">
       <defs>
         <filter id="physical-neon-filter" x="-50%" y="-50%" width="200%" height="200%">
@@ -87,7 +106,9 @@ const {
       </defs>
     </svg>
 
-    <slot />
+    <div class="relative z-10 flex min-h-dvh flex-col">
+      <slot />
+    </div>
 
     <script is:inline>
       function initStudioMotion() {
