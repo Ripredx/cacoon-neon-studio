@@ -72,6 +72,7 @@ export const NEON_FONTS: Record<
     description: string;
     tubeType: string;
     uppercase?: boolean;
+    canvasWeight: number;
   }
 > = {
   script: {
@@ -79,12 +80,14 @@ export const NEON_FONTS: Record<
     cssFamily: "'Pacifico', cursive",
     description: "Akıcı el yazısı neon kıvrımı",
     tubeType: "Single Neon · 6mm Esnek Silikon",
+    canvasWeight: 400,
   },
   modern: {
     label: "Modern Sans",
     cssFamily: "'Tilt Neon', sans-serif",
     description: "Gerçek neon tüp geometrisi ve net hatlar",
     tubeType: "Single Neon · 8mm Keskin Hat",
+    canvasWeight: 400,
   },
   display: {
     label: "Kalın Tabela",
@@ -92,6 +95,7 @@ export const NEON_FONTS: Record<
     description: "İşletme ve vitrinler için yüksek görünürlük",
     tubeType: "Bold Neon · 8mm Yüksek Kontrast",
     uppercase: true,
+    canvasWeight: 700,
   },
   retro: {
     label: "Çift Hat Retro",
@@ -99,6 +103,7 @@ export const NEON_FONTS: Record<
     description: "80'ler synthwave paralel çift tüp stili",
     tubeType: "Double Neon · Çift Kanal Tüp",
     uppercase: true,
+    canvasWeight: 400,
   },
 };
 

@@ -7,10 +7,11 @@ import NeonStudio from "@/widgets/neon-studio/ui/NeonStudio";
 <BaseLayout
   title={`Canlı Neon Atölyesi | ${BUSINESS_CONFIG.name}`}
   description="Yazınızı girin, font, neon rengi ve boyut seçerek canlı önizleme yapın, PNG paftasını indirin ve WhatsApp üzerinden anında fiyat alın."
+  showGridScan={false}
 >
   <main
     transition:name="neon-stage"
-    class="min-h-dvh lg:h-dvh w-full bg-transparent lg:overflow-hidden flex flex-col"
+    class="min-h-dvh lg:h-dvh w-full bg-[#050505] lg:overflow-hidden flex flex-col"
   >
     <NeonStudio client:load />
   </main>

@@ -11,6 +11,26 @@ import {
 } from "../../../entities/custom-neon/model/pricing.ts";
 import { BUSINESS_CONFIG } from "../../../shared/config/business.ts";
 
+export function buildLiveStudioUrl(
+  spec: CustomNeonSpec,
+  origin?: string,
+): string {
+  const base = origin || BUSINESS_CONFIG.siteUrl || "https://ccneons.com";
+  const params = new URLSearchParams({
+    text: spec.text,
+    font: spec.fontId,
+    color: spec.colorId,
+    size: spec.sizeId,
+    board: spec.backboardId,
+    env: spec.environment,
+    sym: spec.symbolId || "none",
+    symColor: spec.symbolColorId || spec.colorId,
+    border: spec.borderId || "none",
+    tech: spec.tubeTech || "standard",
+  });
+  return `${base.replace(/\/$/, "")}/tasarla?${params.toString()}`;
+}
+
 export function buildCustomNeonWhatsAppUrl(
   spec: CustomNeonSpec,
   estimate: PriceEstimate,
@@ -62,8 +82,14 @@ export function buildCustomNeonWhatsAppUrl(
     ? `• Teknik Üretim Paftası (Görsel): ${options.imageUrl}`
     : null;
 
-  const liveLine = options?.liveUrl
-    ? `• Canlı Stüdyo 3D Simülasyonu: ${options.liveUrl}`
+  const rawLive = options?.liveUrl || buildLiveStudioUrl(spec);
+  // WhatsApp '#' parçalarını bazen link dışı bıraktığından '?' query string ile garantile
+  const cleanLiveUrl = rawLive.includes("#")
+    ? rawLive.replace("#", rawLive.includes("?") ? "&" : "?")
+    : rawLive;
+
+  const liveLine = cleanLiveUrl
+    ? `• Canlı Stüdyo 3D Simülasyonu: ${cleanLiveUrl}`
     : null;
 
   const linesOfText = spec.text

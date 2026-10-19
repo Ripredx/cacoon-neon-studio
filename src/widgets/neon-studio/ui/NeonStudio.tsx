@@ -34,7 +34,7 @@ type StudioTabId =
 
 const PRESET_TEXTS = [
   "Open Late",
-  "C/CNEON'S",
+  "CC NEON'S",
   "LOUNGE",
   "STUDIO",
   "MINDSET",
@@ -57,12 +57,27 @@ const DEFAULT_SPEC: CustomNeonSpec = {
   align: "center",
 };
 
-function parseInitialSpecFromHash(): CustomNeonSpec {
-  if (typeof window === "undefined" || !window.location.hash) {
+function parseInitialSpecFromUrl(): CustomNeonSpec {
+  if (typeof window === "undefined") {
     return DEFAULT_SPEC;
   }
 
-  const params = new URLSearchParams(window.location.hash.slice(1));
+  // Hem ? query parametrelerini hem # hash parametrelerini destekle
+  let searchStr = "";
+  if (window.location.search && window.location.search.length > 1) {
+    searchStr = window.location.search.slice(1);
+  } else if (window.location.hash && window.location.hash.length > 1) {
+    searchStr = window.location.hash.replace(/^#\/?/, "");
+    if (searchStr.includes("?")) {
+      searchStr = searchStr.split("?")[1] || searchStr;
+    }
+  }
+
+  if (!searchStr) {
+    return DEFAULT_SPEC;
+  }
+
+  const params = new URLSearchParams(searchStr);
   const rawText = params.get("text");
   const rawFont = params.get("font") as NeonFontId | null;
   const rawColor = params.get("color") as NeonColorId | null;
@@ -126,11 +141,14 @@ export default function NeonStudio() {
   const debounceRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (window.location.hash) {
-      const fromHash = parseInitialSpecFromHash();
-      setSpec(fromHash);
-      setHistory([fromHash]);
-      setHistoryIndex(0);
+    const fromUrl = parseInitialSpecFromUrl();
+    setSpec(fromUrl);
+    setHistory([fromUrl]);
+    setHistoryIndex(0);
+    if (fromUrl.colorId && NEON_COLORS[fromUrl.colorId]) {
+      const c = NEON_COLORS[fromUrl.colorId];
+      document.documentElement.style.setProperty("--neon-color", c.hex);
+      document.documentElement.style.setProperty("--neon-rgb", c.glowRgb);
     }
     return () => {
       if (debounceRef.current !== null) {
@@ -180,7 +198,8 @@ export default function NeonStudio() {
       border: next.borderId || "none",
       tech: next.tubeTech || "standard",
     });
-    window.history.replaceState(null, "", `#${hashParams.toString()}`);
+    // WhatsApp ve tüm mobil istemcilerde eksiksiz taranabilen query parametresi olarak senkronize et
+    window.history.replaceState(null, "", `?${hashParams.toString()}`);
   }
 
   function updateSpec(
@@ -255,17 +274,29 @@ export default function NeonStudio() {
   const [isOrdering, setIsOrdering] = useState(false);
   const [orderStatus, setOrderStatus] = useState<string | null>(null);
 
-  function generatePaftaDataUrl(): string | null {
+  async function generatePaftaDataUrl(): Promise<string | null> {
     if (typeof document === "undefined") return null;
+
+    // Fontların tam yüklenmesini bekle (fallback sans-serif'e düşüşü engeller)
+    if (document.fonts?.ready) {
+      try {
+        await document.fonts.ready;
+      } catch {
+        // Fallback
+      }
+    }
+
     const canvas = document.createElement("canvas");
     canvas.width = 1600;
     canvas.height = 1000;
     const ctx = canvas.getContext("2d");
     if (!ctx) return null;
 
+    // Koyu Atölye CAD Zemin
     ctx.fillStyle = "#050505";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    // CAD Kılavuz Grid Ağı
     ctx.strokeStyle = "rgba(255, 255, 255, 0.045)";
     ctx.lineWidth = 1;
     for (let x = 0; x < canvas.width; x += 48) {
@@ -281,19 +312,21 @@ export default function NeonStudio() {
       ctx.stroke();
     }
 
+    // Ortam Parıltısı (Radial Glow)
     if (isLit) {
       const grad = ctx.createRadialGradient(800, 430, 30, 800, 430, 520);
-      grad.addColorStop(0, `rgba(${activeColor.glowRgb}, 0.42)`);
-      grad.addColorStop(0.5, `rgba(${activeColor.glowRgb}, 0.14)`);
+      grad.addColorStop(0, `rgba(${activeColor.glowRgb}, 0.38)`);
+      grad.addColorStop(0.5, `rgba(${activeColor.glowRgb}, 0.12)`);
       grad.addColorStop(1, "rgba(5, 5, 5, 0)");
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
+    // Üst Başlık & Sertifika Metinleri
     ctx.fillStyle = activeColor.hex;
     ctx.font = "700 28px sans-serif";
     ctx.textAlign = "left";
-    ctx.fillText("TEKNİK ÜRETİM PAFTASI · C/CNEON'S GLOW", 80, 85);
+    ctx.fillText("TEKNİK ÜRETİM PAFTASI · CC NEON'S", 80, 85);
     ctx.fillStyle = "rgba(255, 255, 255, 0.55)";
     ctx.font = "400 17px monospace";
     ctx.fillText(
@@ -302,15 +335,16 @@ export default function NeonStudio() {
       118,
     );
 
+    // Çerçeve (Border) & Montaj Vidaları
     if (activeBorderId !== "none") {
       ctx.save();
       ctx.beginPath();
       if (activeBorderId === "circle") {
-        const radius = Math.min(360, Math.round(220 * (estimate.widthCm / 50)));
+        const radius = 320;
         ctx.arc(800, 430, radius, 0, Math.PI * 2);
       } else {
-        const padX = 270;
-        const padY = 130;
+        const padX = 280;
+        const padY = 140;
         const rx = 800 - padX;
         const ry = 430 - padY;
         const rw = padX * 2;
@@ -328,23 +362,90 @@ export default function NeonStudio() {
         ctx.shadowBlur = 24;
         ctx.stroke();
         ctx.strokeStyle = "#FFFFFF";
-        ctx.shadowBlur = 5;
+        ctx.shadowBlur = 4;
         ctx.stroke();
       } else {
         ctx.strokeStyle = activeColor.unlitHex;
         ctx.stroke();
       }
       ctx.restore();
+
+      // Montaj Vidaları (4x Paslanmaz Krom Yükseltme Vidası)
+      if (activeBorderId === "circle") {
+        const screwDist = 320 * 0.65;
+        const screws = [
+          { x: 800 - screwDist, y: 430 - screwDist },
+          { x: 800 + screwDist, y: 430 - screwDist },
+          { x: 800 - screwDist, y: 430 + screwDist },
+          { x: 800 + screwDist, y: 430 + screwDist },
+        ];
+        screws.forEach((s) => {
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, 6.5, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(255, 255, 255, 0.45)";
+          ctx.fill();
+          ctx.strokeStyle = "rgba(0, 0, 0, 0.9)";
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+        });
+
+        // Canlı Atölyedeki gibi Ölçü Kılavuz Çizgileri
+        ctx.save();
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.25)";
+        ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 4]);
+
+        const dimY = 430 + 320 + 40;
+        ctx.beginPath();
+        ctx.moveTo(800 - 320, dimY);
+        ctx.lineTo(800 + 320, dimY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Oklar
+        ctx.beginPath();
+        ctx.moveTo(800 - 320 + 8, dimY - 4);
+        ctx.lineTo(800 - 320, dimY);
+        ctx.lineTo(800 - 320 + 8, dimY + 4);
+        ctx.moveTo(800 + 320 - 8, dimY - 4);
+        ctx.lineTo(800 + 320, dimY);
+        ctx.lineTo(800 + 320 - 8, dimY + 4);
+        ctx.stroke();
+
+        ctx.textAlign = "center";
+        ctx.textBaseline = "top";
+        ctx.font = "700 14px monospace";
+        ctx.fillText(`${estimate.widthCm}cm`, 800, dimY + 6);
+        ctx.font = "400 11px monospace";
+        ctx.fillStyle = "rgba(255, 255, 255, 0.45)";
+        ctx.fillText("çap ölçüsü", 800, dimY + 24);
+        ctx.restore();
+      }
     }
 
+    // Metin Çizimi (Neon Parıltısı & Çift Kanal Retro Desteği)
     ctx.save();
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    const lineSpacing = Math.round(90 * activeSize.scaleFactor);
-    const canvasFontSize = Math.round(
-      (formattedLines.length > 1 ? 82 : 100) * activeSize.scaleFactor,
+
+    const maxCharsInLine = Math.max(
+      ...formattedLines.map((l) => l.length),
+      1,
     );
-    ctx.font = `700 ${canvasFontSize}px ${activeFont.cssFamily}`;
+    const circleFontScale =
+      activeBorderId === "circle"
+        ? Math.min(1.0, 5.2 / Math.max(maxCharsInLine, 4.5))
+        : 1.0;
+
+    const canvasFontSize = Math.round(
+      (formattedLines.length > 1 ? 82 : 100) *
+        activeSize.scaleFactor *
+        circleFontScale,
+    );
+    const lineSpacing = Math.round(canvasFontSize * 1.25);
+    const canvasFontWeight = activeFont.canvasWeight || 400;
+    ctx.font = `${canvasFontWeight} ${canvasFontSize}px ${activeFont.cssFamily}`;
 
     const totalHeight = (formattedLines.length - 1) * lineSpacing;
     const startY = 430 - totalHeight / 2;
@@ -357,16 +458,22 @@ export default function NeonStudio() {
           : lineText;
 
       if (isLit) {
-        ctx.shadowColor = activeColor.hex;
-        ctx.shadowBlur = 65;
+        // 1. Katman: Geniş dış parıltı (neon aurası)
+        ctx.shadowColor = `rgba(${activeColor.glowRgb}, 0.75)`;
+        ctx.shadowBlur = 55;
         ctx.fillStyle = activeColor.hex;
         ctx.fillText(textToDraw, 800, lineY);
 
-        ctx.shadowBlur = 26;
+        // 2. Katman: Orta gövde halesi
+        ctx.shadowBlur = 20;
+        ctx.shadowColor = activeColor.hex;
+        ctx.fillStyle = activeColor.hex;
         ctx.fillText(textToDraw, 800, lineY);
 
-        ctx.shadowBlur = 6;
-        ctx.fillStyle = "#FFFFFF";
+        // 3. Katman: İnce beyaz tüp çekirdeği (harf rengini silmeden canlı neon efekti)
+        ctx.shadowColor = "#FFFFFF";
+        ctx.shadowBlur = 4;
+        ctx.fillStyle = activeColor.hex;
         ctx.fillText(textToDraw, 800, lineY);
       } else {
         ctx.fillStyle = activeColor.unlitHex;
@@ -375,6 +482,7 @@ export default function NeonStudio() {
     });
     ctx.restore();
 
+    // Alt Teknik Bilgi Tablosu
     ctx.strokeStyle = "rgba(255, 255, 255, 0.14)";
     ctx.fillStyle = "#0A0A0E";
     ctx.fillRect(80, 820, 1440, 110);
@@ -395,7 +503,7 @@ export default function NeonStudio() {
         title: "TAHMİNİ ARALIK",
         val: `${estimate.minPrice.toLocaleString("tr-TR")} - ${estimate.maxPrice.toLocaleString("tr-TR")} ₺`,
       },
-      { title: "ÜRETİCİ ATÖLYE", val: "C/CNEON'S GLOW" },
+      { title: "ÜRETİCİ ATÖLYE", val: "CC NEON'S" },
     ];
 
     cols.forEach((col, i) => {
@@ -421,7 +529,7 @@ export default function NeonStudio() {
       syncUrlHash(spec);
       const liveUrl =
         typeof window !== "undefined" ? window.location.href : undefined;
-      const dataUrl = generatePaftaDataUrl();
+      const dataUrl = await generatePaftaDataUrl();
 
       let imageUrl: string | undefined = undefined;
 
@@ -469,8 +577,8 @@ export default function NeonStudio() {
     }
   }
 
-  function handleExportPng() {
-    const dataUrl = generatePaftaDataUrl();
+  async function handleExportPng() {
+    const dataUrl = await generatePaftaDataUrl();
     if (!dataUrl) return;
     const link = document.createElement("a");
     link.download = `ccneons-glow-pafta-${rawDisplay.toLowerCase().replace(/[^a-z0-9ğüşıöç]/gi, "-")}.png`;
@@ -486,9 +594,15 @@ export default function NeonStudio() {
   const hasExplicitFrame =
     spec.backboardId !== "contour" || activeBorderId !== "none";
 
+  const maxCharsInLine = Math.max(...formattedLines.map((l) => l.length), 1);
+  const circleFontScale =
+    activeBorderId === "circle"
+      ? Math.min(1.0, 5.2 / Math.max(maxCharsInLine, 4.5))
+      : 1.0;
+
   const backboardShapeClass =
     activeBorderId === "circle"
-      ? "aspect-square rounded-full flex flex-col items-center justify-center p-8 sm:p-14"
+      ? "aspect-square rounded-full flex items-center justify-center p-4 relative"
       : activeBorderId === "pill"
         ? "rounded-full px-10 sm:px-16 py-6 sm:py-8"
         : activeBorderId === "ticket"
@@ -513,7 +627,7 @@ export default function NeonStudio() {
 
   const wallTextureClass =
     sceneBg === "blueprint"
-      ? "bg-black/50 backdrop-blur-[2px]"
+      ? "bg-[#050505]"
       : sceneBg === "brick"
         ? "wall-texture-brick"
         : "wall-texture-concrete";
@@ -583,7 +697,7 @@ export default function NeonStudio() {
   return (
     <div
       id="neon-studio-app"
-      class="flex flex-col w-full min-h-dvh lg:h-dvh bg-transparent text-white lg:overflow-hidden select-none"
+      class="flex flex-col w-full min-h-dvh lg:h-dvh bg-[#050505] text-white lg:overflow-hidden select-none"
       style={{
         "--neon-color": activeColor.hex,
         "--neon-rgb": activeColor.glowRgb,
@@ -597,7 +711,7 @@ export default function NeonStudio() {
             class="cursor-pointer flex items-center gap-2.5 focus-visible:outline-none"
           >
             <span class="font-display text-lg sm:text-xl font-bold tracking-tight text-white">
-              C/CNEON'S GLOW
+              CC NEON'S
               <span class="text-xs font-mono text-white/45 ml-0.5">™</span>
             </span>
           </a>
@@ -1255,68 +1369,123 @@ export default function NeonStudio() {
                     )}
                   </div>
 
-                  <div class="rounded-xl border border-white/[0.07] bg-[#050505] p-3.5 space-y-2">
-                    <div class="flex items-center justify-between font-mono text-[11px] text-white/65">
-                      <span>İNSAN ÖLÇEĞİ (170 CM)</span>
-                      <span class="text-white font-bold">
-                        {estimate.widthCm} × {estimate.heightCm} cm
-                      </span>
-                    </div>
-                    <svg
-                      role="img"
-                      viewBox="0 0 360 150"
-                      class="w-full h-32 rounded-lg bg-[#0A0A0E] border border-white/[0.07]"
-                      aria-label="170 cm insan silüeti yanında tabela ölçeği"
-                    >
-                      <line
-                        x1="45"
-                        y1="15"
-                        x2="45"
-                        y2="135"
-                        stroke="rgba(255,255,255,0.2)"
-                        stroke-width="1"
-                      />
-                      <text
-                        x="22"
-                        y="80"
-                        fill="rgba(255,255,255,0.5)"
-                        font-size="9"
-                        text-anchor="middle"
-                      >
-                        170cm
-                      </text>
-                      <circle
-                        cx="75"
-                        cy="28"
-                        r="10"
-                        fill="rgba(255,255,255,0.25)"
-                      />
-                      <path
-                        d="M58 55 C58 42, 92 42, 92 55 L90 95 L84 95 L82 135 L68 135 L66 95 L60 95 Z"
-                        fill="rgba(255,255,255,0.25)"
-                      />
-                      <rect
-                        x="125"
-                        y="35"
-                        width={Math.round(estimate.widthCm * 1.3)}
-                        height={Math.round(estimate.heightCm * 1.3)}
-                        rx="6"
-                        fill="rgba(53, 231, 255, 0.12)"
-                        stroke={activeColor.hex}
-                        stroke-width="1.5"
-                      />
-                      <text
-                        x={125 + Math.round((estimate.widthCm * 1.3) / 2)}
-                        y={39 + Math.round((estimate.heightCm * 1.3) / 2)}
-                        fill="#FFFFFF"
-                        font-size="11"
-                        font-weight="bold"
-                        text-anchor="middle"
-                      >
-                        {estimate.widthCm}×{estimate.heightCm}cm
-                      </text>
-                    </svg>
-                  </div>
+                  {(() => {
+                    const humanPx = 115; // 170cm = 115px (y=20 to y=135)
+                    const cmScale = humanPx / 170; // ~0.676 px/cm
+                    const signW = Math.max(28, Math.round(estimate.widthCm * cmScale));
+                    const signH = Math.max(20, Math.round(estimate.heightCm * cmScale));
+                    const signCenterX = 235;
+                    const signCenterY = 70;
+                    const signX = Math.round(signCenterX - signW / 2);
+                    const signY = Math.round(signCenterY - signH / 2);
+                    const isCircle = activeBorderId === "circle";
+                    const isPill = activeBorderId === "pill";
+                    const radius = Math.round(Math.min(signW, signH) / 2);
+
+                    return (
+                      <div class="rounded-xl border border-white/[0.07] bg-[#050505] p-3.5 space-y-2">
+                        <div class="flex items-center justify-between font-mono text-[11px] text-white/65">
+                          <span>İNSAN ÖLÇEĞİ (170 CM)</span>
+                          <span class="text-white font-bold">
+                            {estimate.widthCm} × {estimate.heightCm} cm
+                          </span>
+                        </div>
+                        <svg
+                          role="img"
+                          viewBox="0 0 360 150"
+                          class="w-full h-32 rounded-lg bg-[#0A0A0E] border border-white/[0.07]"
+                          aria-label="170 cm insan silüeti yanında tabela ölçeği"
+                        >
+                          {/* Zemin çizgisi */}
+                          <line
+                            x1="25"
+                            y1="135"
+                            x2="335"
+                            y2="135"
+                            stroke="rgba(255,255,255,0.12)"
+                            stroke-width="1"
+                            stroke-dasharray="3 3"
+                          />
+
+                          {/* 170 cm Yükseklik Cetveli */}
+                          <line
+                            x1="45"
+                            y1="20"
+                            x2="45"
+                            y2="135"
+                            stroke="rgba(255,255,255,0.2)"
+                            stroke-width="1"
+                          />
+                          <path
+                            d="M42 24 L45 20 L48 24 M42 131 L45 135 L48 131"
+                            stroke="rgba(255,255,255,0.3)"
+                            stroke-width="1"
+                            fill="none"
+                          />
+                          <text
+                            x="24"
+                            y="78"
+                            fill="rgba(255,255,255,0.5)"
+                            font-size="9"
+                            font-family="monospace"
+                            text-anchor="middle"
+                          >
+                            170cm
+                          </text>
+
+                          {/* 170 cm İnsan Silüeti */}
+                          <circle
+                            cx="75"
+                            cy="30"
+                            r="10"
+                            fill="rgba(255,255,255,0.25)"
+                          />
+                          <path
+                            d="M58 55 C58 43, 92 43, 92 55 L90 95 L84 95 L82 135 L68 135 L66 95 L60 95 Z"
+                            fill="rgba(255,255,255,0.25)"
+                          />
+
+                          {/* Tabela Gövdesi (Gerçek Ölçekli & Seçili Çerçeve Formunda) */}
+                          {isCircle ? (
+                            <circle
+                              cx={signCenterX}
+                              cy={signCenterY}
+                              r={radius}
+                              fill={`rgba(${activeColor.glowRgb}, 0.16)`}
+                              stroke={activeColor.hex}
+                              stroke-width="1.5"
+                            />
+                          ) : (
+                            <rect
+                              x={signX}
+                              y={signY}
+                              width={signW}
+                              height={signH}
+                              rx={isPill ? Math.round(signH / 2) : 6}
+                              fill={`rgba(${activeColor.glowRgb}, 0.16)`}
+                              stroke={activeColor.hex}
+                              stroke-width="1.5"
+                            />
+                          )}
+
+                          {/* Tabela Ölçü Metni */}
+                          <text
+                            x={signCenterX}
+                            y={signCenterY + 4}
+                            fill="#FFFFFF"
+                            font-size={Math.min(11, Math.max(8, Math.round(signH * 0.28)))}
+                            font-weight="bold"
+                            font-family="monospace"
+                            text-anchor="middle"
+                          >
+                            {isCircle
+                              ? `Ø${estimate.widthCm}cm`
+                              : `${estimate.widthCm}×${estimate.heightCm}cm`}
+                          </text>
+                        </svg>
+                      </div>
+                    );
+                  })()}
                 </div>
               )}
 
@@ -1690,8 +1859,8 @@ export default function NeonStudio() {
                   ...neonBorderStyle,
                   ...(activeBorderId === "circle"
                     ? {
-                        width: `clamp(14rem, ${(estimate.widthCm / 50) * 16}rem, 26rem)`,
-                        height: `clamp(14rem, ${(estimate.heightCm / 50) * 16}rem, 26rem)`,
+                        width: `clamp(16rem, ${(estimate.widthCm / 50) * 18}rem, 28rem)`,
+                        height: `clamp(16rem, ${(estimate.heightCm / 50) * 18}rem, 28rem)`,
                       }
                     : undefined),
                 }}
@@ -1708,10 +1877,10 @@ export default function NeonStudio() {
                 {hasExplicitFrame &&
                   (activeBorderId === "circle" ? (
                     <>
-                      <span class="absolute top-[18%] left-[18%] size-2 rounded-full bg-white/40 ring-1 ring-black" />
-                      <span class="absolute top-[18%] right-[18%] size-2 rounded-full bg-white/40 ring-1 ring-black" />
-                      <span class="absolute bottom-[18%] left-[18%] size-2 rounded-full bg-white/40 ring-1 ring-black" />
-                      <span class="absolute bottom-[18%] right-[18%] size-2 rounded-full bg-white/40 ring-1 ring-black" />
+                      <span class="absolute top-[16%] left-[16%] size-2 rounded-full bg-white/40 ring-1 ring-black pointer-events-none" />
+                      <span class="absolute top-[16%] right-[16%] size-2 rounded-full bg-white/40 ring-1 ring-black pointer-events-none" />
+                      <span class="absolute bottom-[16%] left-[16%] size-2 rounded-full bg-white/40 ring-1 ring-black pointer-events-none" />
+                      <span class="absolute bottom-[16%] right-[16%] size-2 rounded-full bg-white/40 ring-1 ring-black pointer-events-none" />
                     </>
                   ) : activeBorderId === "pill" ? (
                     <>
@@ -1731,11 +1900,13 @@ export default function NeonStudio() {
 
                 <div
                   class={`relative z-10 flex flex-wrap items-center gap-5 ${
-                    spec.align === "left"
-                      ? "justify-start text-left"
-                      : spec.align === "right"
-                        ? "justify-end text-right"
-                        : "justify-center text-center"
+                    activeBorderId === "circle"
+                      ? "absolute inset-0 m-auto flex items-center justify-center p-4"
+                      : spec.align === "left"
+                        ? "justify-start text-left"
+                        : spec.align === "right"
+                          ? "justify-end text-right"
+                          : "justify-center text-center"
                   }`}
                 >
                   {/* Fiziksel Neon Boyut & Tüp Kalibrasyonlu Çok Satırlı Metin */}
@@ -1744,7 +1915,7 @@ export default function NeonStudio() {
                       fontFamily: activeFont.cssFamily,
                       color: isLit ? activeColor.hex : activeColor.unlitHex,
                       textShadow: tubeShadow,
-                      fontSize: `clamp(1.8rem, ${activeSize.fontScaleRem * 1.05}vw, ${activeSize.fontScaleRem * 1.3}rem)`,
+                      fontSize: `clamp(1.4rem, ${(activeSize.fontScaleRem * circleFontScale) * 0.95}vw, ${(activeSize.fontScaleRem * circleFontScale) * 1.15}rem)`,
                       letterSpacing:
                         spec.sizeId === "sm"
                           ? "0.06em"
@@ -1752,7 +1923,7 @@ export default function NeonStudio() {
                             ? "0.03em"
                             : "0.01em",
                     }}
-                    class={`select-none leading-[1.2] transition-all duration-300 flex flex-col ${
+                    class={`select-none leading-[1.15] transition-all duration-300 flex flex-col ${
                       spec.align === "left"
                         ? "items-start text-left"
                         : spec.align === "right"
@@ -1965,7 +2136,7 @@ export default function NeonStudio() {
                   ÜRETİCİ ATÖLYE
                 </span>
                 <strong class="mt-0.5 block text-xs sm:text-sm font-bold text-white truncate">
-                  C/CNEON'S GLOW™
+                  CC NEON'S™
                 </strong>
               </div>
             </div>

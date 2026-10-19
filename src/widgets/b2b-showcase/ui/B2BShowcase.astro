@@ -73,7 +73,7 @@ const waOffice = buildB2BWhatsAppUrl("03 / Kurumsal Ofis");
           aria-selected="true"
           data-b2b-tab="lounge"
           data-b2b-photo="/scenes/b2b-lounge-scene.jpg"
-          data-b2b-title="C/CNEON'S LOUNGE"
+          data-b2b-title="CC NEON'S LOUNGE"
           data-b2b-sub="Cocktails & Late Night"
           data-b2b-spec="120x55 CM · IP67 DIŞ/İÇ CEPHE"
           data-b2b-rgb="255, 176, 32"
@@ -123,7 +123,7 @@ const waOffice = buildB2BWhatsAppUrl("03 / Kurumsal Ofis");
           aria-selected="false"
           data-b2b-tab="office"
           data-b2b-photo="/scenes/b2b-office-wall.jpg"
-          data-b2b-title="C/CNEON'S GLOW"
+          data-b2b-title="CC NEON'S"
           data-b2b-sub="Creative Architecture Lab"
           data-b2b-spec="135x50 CM · KURUMSAL LOBİ"
           data-b2b-rgb="28, 255, 138"
@@ -189,7 +189,7 @@ const waOffice = buildB2BWhatsAppUrl("03 / Kurumsal Ofis");
               id="b2b-live-title"
               type="text"
               maxlength="20"
-              value="C/CNEON'S LOUNGE"
+              value="CC NEON'S LOUNGE"
               class="w-36 sm:w-44 rounded-lg border border-white/10 bg-[#0A0A0E] px-2.5 py-1 font-mono text-xs font-bold text-white focus:border-white/30 focus:outline-none"
             />
 
@@ -270,7 +270,7 @@ const waOffice = buildB2BWhatsAppUrl("03 / Kurumsal Ofis");
               class="animate-neon-ignite font-neon-mono text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight select-none transition-all duration-500"
               style="color: var(--neon-color); mix-blend-mode: screen; text-shadow: 0 0 5px #fff, 0 0 20px currentColor, 0 0 40px currentColor, 0 0 85px var(--neon-color);"
             >
-              C/CNEON'S LOUNGE
+              CC NEON'S LOUNGE
             </p>
 
             <p
@@ -502,7 +502,7 @@ const waOffice = buildB2BWhatsAppUrl("03 / Kurumsal Ofis");
       liveTitleInput.addEventListener("input", () => {
         switchToTextMode();
         const clean = (
-          liveTitleInput.value || "C/CNEON'S LOUNGE"
+          liveTitleInput.value || "CC NEON'S LOUNGE"
         ).toLocaleUpperCase("tr-TR");
         mainText.textContent = clean;
       });
@@ -512,7 +512,7 @@ const waOffice = buildB2BWhatsAppUrl("03 / Kurumsal Ofis");
       tab.addEventListener("click", () => {
         const photoUrl =
           tab.getAttribute("data-b2b-photo") || "/scenes/b2b-lounge-scene.jpg";
-        const title = tab.getAttribute("data-b2b-title") || "C/CNEON'S LOUNGE";
+        const title = tab.getAttribute("data-b2b-title") || "CC NEON'S LOUNGE";
         const sub =
           tab.getAttribute("data-b2b-sub") || "Cocktails & Late Night";
         const spec =

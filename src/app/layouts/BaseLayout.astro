@@ -7,11 +7,13 @@ import GridScan from "@/shared/ui/grid-scan/GridScan";
 interface Props {
   title?: string;
   description?: string;
+  showGridScan?: boolean;
 }
 
 const {
   title = `${BUSINESS_CONFIG.name} | Antalya Manavgat Özel Tasarım LED Neon Tabela & Tablo`,
   description = "Antalya / Manavgat merkezli kişiye ve işletmeye özel LED neon tabela, pleksi neon ve kanvas neon tablo üretimi. Kendi neon yazınızı canlı tasarlayın veya hazır Shopier koleksiyonunu inceleyin.",
+  showGridScan = true,
 } = Astro.props;
 ---
 
@@ -19,7 +21,7 @@ const {
 <!--
   ==========================================================================
   CRAFTED BY : archc.studio (https://archc.studio)
-  CLIENT     : C/CNEON'S (@neons.glow) — Antalya / Manavgat LED Neon Atölyesi
+  CLIENT     : CC NEON'S (@neons.glow) — Antalya / Manavgat LED Neon Atölyesi
   DATE       : 2026-10
   ==========================================================================
 -->
@@ -72,23 +74,27 @@ const {
     data-lenis-lerp={NEON_ENGINE_CONFIG.lenisLerp}
     class="min-h-dvh bg-[#050505] text-[#F4F4F6] antialiased selection:bg-white/20 selection:text-white overflow-x-clip"
   >
-    <!-- SAYFA GENELİ ARKA PLANI: React Bits <GridScan /> 3D Cyber Izgara -->
-    <div
-      id="global-page-gridscan"
-      aria-hidden="true"
-      class="fixed inset-0 z-0 pointer-events-none overflow-hidden opacity-40"
-    >
-      <GridScan
-        client:load
-        linesColor="#4d4757"
-        scanColor="#7dd3fc"
-        cells={7}
-        depth={3.3}
-        scanDuration={2.4}
-        scanDelay={1.6}
-        clickEffect="ping"
-      />
-    </div>
+    <!-- SAYFA GENELİ ARKA PLANI: React Bits <GridScan /> 3D Cyber Izgara (Vitrin Sayfaları İçin) -->
+    {
+      showGridScan && (
+        <div
+          id="global-page-gridscan"
+          aria-hidden="true"
+          class="fixed inset-0 z-0 pointer-events-none overflow-hidden opacity-40"
+        >
+          <GridScan
+            client:load
+            linesColor="#4d4757"
+            scanColor="#7dd3fc"
+            cells={7}
+            depth={3.3}
+            scanDuration={2.4}
+            scanDelay={1.6}
+            clickEffect="ping"
+          />
+        </div>
+      )
+    }
 
     <svg class="sr-only" aria-hidden="true" focusable="false">
       <defs>

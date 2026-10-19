@@ -1,8 +1,9 @@
 export const BUSINESS_CONFIG = {
-  name: "C/CNEON'S GLOW",
+  name: "CC NEON'S",
   handle: "neons.glow",
   slogan: "Color your life",
   location: "Antalya / Manavgat",
+  siteUrl: "https://ccneons.com",
   logoUrl:
     "https://cdn.shopier.app/logo_468/ccneonsglow_71d8ac3e4e7e07e06ae696efd6901290.jpeg",
   phones: [
