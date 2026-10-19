@@ -1634,14 +1634,29 @@ export default function NeonStudio() {
                         : ""
                   } ${isLit ? "animate-neon-ignite" : ""}`}
                 >
-                  {hasExplicitFrame && (
-                    <>
-                      <span class="absolute top-3 left-3 size-2 rounded-full bg-white/40 ring-1 ring-black" />
-                      <span class="absolute top-3 right-3 size-2 rounded-full bg-white/40 ring-1 ring-black" />
-                      <span class="absolute bottom-3 left-3 size-2 rounded-full bg-white/40 ring-1 ring-black" />
-                      <span class="absolute bottom-3 right-3 size-2 rounded-full bg-white/40 ring-1 ring-black" />
-                    </>
-                  )}
+                  {hasExplicitFrame &&
+                    (activeBorderId === "circle" ? (
+                      <>
+                        <span class="absolute top-[18%] left-[18%] size-2 rounded-full bg-white/40 ring-1 ring-black" />
+                        <span class="absolute top-[18%] right-[18%] size-2 rounded-full bg-white/40 ring-1 ring-black" />
+                        <span class="absolute bottom-[18%] left-[18%] size-2 rounded-full bg-white/40 ring-1 ring-black" />
+                        <span class="absolute bottom-[18%] right-[18%] size-2 rounded-full bg-white/40 ring-1 ring-black" />
+                      </>
+                    ) : activeBorderId === "pill" ? (
+                      <>
+                        <span class="absolute top-3.5 left-7 size-2 rounded-full bg-white/40 ring-1 ring-black" />
+                        <span class="absolute top-3.5 right-7 size-2 rounded-full bg-white/40 ring-1 ring-black" />
+                        <span class="absolute bottom-3.5 left-7 size-2 rounded-full bg-white/40 ring-1 ring-black" />
+                        <span class="absolute bottom-3.5 right-7 size-2 rounded-full bg-white/40 ring-1 ring-black" />
+                      </>
+                    ) : (
+                      <>
+                        <span class="absolute top-3 left-3 size-2 rounded-full bg-white/40 ring-1 ring-black" />
+                        <span class="absolute top-3 right-3 size-2 rounded-full bg-white/40 ring-1 ring-black" />
+                        <span class="absolute bottom-3 left-3 size-2 rounded-full bg-white/40 ring-1 ring-black" />
+                        <span class="absolute bottom-3 right-3 size-2 rounded-full bg-white/40 ring-1 ring-black" />
+                      </>
+                    ))}
 
                   <div
                     class={`relative z-10 flex flex-wrap items-center gap-5 ${
@@ -1689,7 +1704,7 @@ export default function NeonStudio() {
                   </div>
                 </div>
 
-                {/* SAĞ DİKEY YÜKSEKLİK OKU (Görsel 2'deki "25cm" Dikey Çizgi) */}
+                {/* SAĞ DİKEY YÜKSEKLİK OKU */}
                 <div
                   aria-hidden="true"
                   class="hidden sm:flex flex-col items-center ml-8 lg:ml-12 font-mono text-white"
@@ -1697,7 +1712,15 @@ export default function NeonStudio() {
                   <span class="mb-1.5 text-xs font-bold">
                     {estimate.heightCm}cm
                   </span>
-                  <div class="flex flex-col items-center h-36 sm:h-44">
+                  <div
+                    class={`flex flex-col items-center ${
+                      activeBorderId === "circle"
+                        ? "h-48 sm:h-64"
+                        : activeBorderId === "pill"
+                          ? "h-28 sm:h-36"
+                          : "h-36 sm:h-44"
+                    }`}
+                  >
                     <span class="text-xs leading-none text-white/80">↑</span>
                     <div class="w-px flex-1 bg-white/60" />
                     <span class="text-xs leading-none text-white/80">↓</span>
@@ -1705,10 +1728,14 @@ export default function NeonStudio() {
                 </div>
               </div>
 
-              {/* ALT YATAY GENİŞLİK OKU (Görsel 2'deki "77cm / acrylic size" Yatay Çizgi) */}
+              {/* ALT YATAY GENİŞLİK OKU */}
               <div
                 aria-hidden="true"
-                class="mt-6 flex w-[85%] max-w-xl items-center gap-3 font-mono text-white"
+                class={`mt-6 flex items-center gap-3 font-mono text-white ${
+                  activeBorderId === "circle"
+                    ? "w-48 sm:w-64"
+                    : "w-[85%] max-w-xl"
+                }`}
               >
                 <span class="text-xs text-white/80">←</span>
                 <div class="h-px flex-1 bg-white/60" />
@@ -1717,7 +1744,9 @@ export default function NeonStudio() {
                     {estimate.widthCm}cm
                   </span>
                   <span class="block text-[10px] text-white/55">
-                    akrilik ölçüsü
+                    {activeBorderId === "circle"
+                      ? "çap ölçüsü"
+                      : "akrilik ölçüsü"}
                   </span>
                 </div>
                 <div class="h-px flex-1 bg-white/60" />

@@ -446,12 +446,25 @@ export function calculateNeonPrice(spec: CustomNeonSpec): PriceEstimate {
   const powerWatts = Math.max(12, Math.round(neonLengthMeters * wattsPerMeter));
   const recommendedAmps = Math.max(2, Math.ceil((powerWatts * 1.25) / 12));
 
+  // Çerçeve geometrisine göre akrilik ve dış hat ölçüsü kalibrasyonu:
+  // Daire çerçevede en ve boy eşittir (Çap = widthCm). Kapsülde oranlar yuvarlatılmış uçlara göre dengelenir.
+  const calculatedWidthCm = sizeConfig.widthCm;
+  let calculatedHeightCm = sizeConfig.heightCm;
+
+  if (spec.borderId === "circle") {
+    // Rozet/Daire çerçeve tam daireseldir: Çap taban genişliği baz alınır
+    calculatedHeightCm = calculatedWidthCm;
+  } else if (spec.borderId === "pill") {
+    // Kapsül çerçeve stadyum formunda olduğundan yüksekliği daha dolgun bir orana kavuşur
+    calculatedHeightCm = Math.round(calculatedWidthCm * 0.48);
+  }
+
   return {
     minPrice,
     maxPrice: Math.max(minPrice + 150, maxPrice),
     charCount: cleanText.length,
-    widthCm: sizeConfig.widthCm,
-    heightCm: sizeConfig.heightCm,
+    widthCm: calculatedWidthCm,
+    heightCm: calculatedHeightCm,
     neonLengthMeters,
     powerWatts,
     recommendedAmps,
