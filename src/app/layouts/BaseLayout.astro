@@ -44,26 +44,29 @@ const {
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content="/og-neon-card.svg" />
 
-    <!-- Google Fonts: Space Grotesk (700 Heading) + Plus Jakarta Sans (Body) + JetBrains Mono (Specs/Prices) + Neon Preview Fonts -->
+    <!-- Google Fonts: Preconnect + Non-blocking Asynchronous Stylesheet -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
+      rel="preload"
+      as="style"
       href="https://fonts.googleapis.com/css2?family=Bungee+Inline&family=JetBrains+Mono:wght@400;500;600;700&family=Oswald:wght@600;700&family=Pacifico&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&family=Tilt+Neon&display=swap"
-      rel="stylesheet"
     />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Bungee+Inline&family=JetBrains+Mono:wght@400;500;600;700&family=Oswald:wght@600;700&family=Pacifico&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&family=Tilt+Neon&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Bungee+Inline&family=JetBrains+Mono:wght@400;500;600;700&family=Oswald:wght@600;700&family=Pacifico&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&family=Tilt+Neon&display=swap"
+      />
+    </noscript>
 
     <ClientRouter fallback="swap" />
 
-    <script
-      is:inline
-      defer
-      src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/gsap.min.js"
-    ></script>
-    <script
-      is:inline
-      defer
-      src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/ScrollTrigger.min.js"
-    ></script>
     <script
       is:inline
       defer
@@ -74,16 +77,22 @@ const {
     data-lenis-lerp={NEON_ENGINE_CONFIG.lenisLerp}
     class="min-h-dvh bg-[#050505] text-[#F4F4F6] antialiased selection:bg-white/20 selection:text-white overflow-x-clip"
   >
-    <!-- SAYFA GENELİ ARKA PLANI: React Bits <GridScan /> 3D Cyber Izgara (Vitrin Sayfaları İçin) -->
+    <!-- Mobil için hafif ve performanslı CSS ızgara arka planı (0 KB JS, 0 ms TBT) -->
+    <div
+      aria-hidden="true"
+      class="lg:hidden fixed inset-0 z-0 pointer-events-none opacity-25 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0a_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_35%,#000_60%,transparent_100%)]"
+    />
+
+    <!-- Masaüstü için React Bits <GridScan /> 3D Cyber Izgara (Sadece lg+ ekranlarda client:media ile yüklenir) -->
     {
       showGridScan && (
         <div
           id="global-page-gridscan"
           aria-hidden="true"
-          class="fixed inset-0 z-0 pointer-events-none overflow-hidden opacity-40"
+          class="hidden lg:block fixed inset-0 z-0 pointer-events-none overflow-hidden opacity-40"
         >
           <GridScan
-            client:load
+            client:media="(min-width: 1024px)"
             linesColor="#4d4757"
             scanColor="#7dd3fc"
             cells={7}
@@ -127,7 +136,9 @@ const {
           window.__ccneonsRafId = null;
         }
 
-        if (window.Lenis) {
+        // Yalnızca dokunmatik olmayan masaüstü ekranlarda Lenis çalıştır
+        const isTouch = window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 1024;
+        if (!isTouch && window.Lenis) {
           const lenis = new window.Lenis({
             lerp: 0.1,
             orientation: "vertical",
@@ -139,11 +150,6 @@ const {
           });
 
           window.__ccneonsLenis = lenis;
-
-          if (window.gsap && window.ScrollTrigger) {
-            window.gsap.registerPlugin(window.ScrollTrigger);
-            lenis.on("scroll", window.ScrollTrigger.update);
-          }
 
           function raf(time) {
             lenis.raf(time);

@@ -206,10 +206,13 @@ const customLogoWaText = encodeURIComponent(
                   )}
 
                   <img
-                    src={product.imageUrl}
+                    src={product.imageUrl.replace('/pictures_large/', '/pictures_mid/')}
+                    srcset={`${product.imageUrl.replace('/pictures_large/', '/pictures_small/')} 330w, ${product.imageUrl.replace('/pictures_large/', '/pictures_mid/')} 458w, ${product.imageUrl} 916w`}
+                    sizes="(max-width: 640px) 46vw, (max-width: 1024px) 31vw, 280px"
                     alt={product.title}
-                    loading="lazy"
-                    decoding="async"
+                    loading={index < 2 ? "eager" : "lazy"}
+                    decoding={index < 2 ? "sync" : "async"}
+                    fetchpriority={index < 2 ? "high" : "auto"}
                     width="400"
                     height="500"
                     class={`size-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04] ${
