@@ -33,10 +33,53 @@ describe("Custom Neon Pricing Engine (3 Exact Combination Comparisons)", () => {
       environment: "indoor",
     });
     assert.equal(est.charCount, 4);
-    assert.equal(est.widthCm, 50);
-    assert.equal(est.heightCm, 22);
+    assert.equal(est.widthCm, 38); // 4 harf contour: 4 * 9.5 = 38 cm (harf kesim pleksi boyutu)
+    assert.equal(est.heightCm, 18);
     assert.equal(est.minPrice, 900);
     assert.equal(est.maxPrice, 1100);
+  });
+
+  it("Single letter 'A' contour cuts precise acrylic (~18x18 cm) instead of blank 50cm sheet", () => {
+    const est = calculateNeonPrice({
+      text: "A",
+      fontId: "modern",
+      colorId: "cyan",
+      sizeId: "sm",
+      backboardId: "contour",
+      environment: "indoor",
+    });
+    assert.equal(est.charCount, 1);
+    assert.equal(est.widthCm, 18); // Tek harf harf kesim akrilik
+    assert.equal(est.heightCm, 18);
+    assert.equal(est.isSizeConstrained, false);
+  });
+
+  it("Detects size constraint when long text is entered for small size and recommends upgrade", () => {
+    const est = calculateNeonPrice({
+      text: "WELCOME TO THE LOUNGE",
+      fontId: "modern",
+      colorId: "pink",
+      sizeId: "sm", // 50 cm
+      backboardId: "contour",
+      environment: "indoor",
+    });
+    assert.equal(est.isSizeConstrained, true);
+    assert.ok(est.minRecommendedWidthCm > 75);
+    assert.ok(est.recommendedSizeId === "lg" || est.recommendedSizeId === "xl");
+  });
+
+  it("Supports multiline text splitting with lineCount and scaled height", () => {
+    const est = calculateNeonPrice({
+      text: "OPEN\nLATE",
+      fontId: "modern",
+      colorId: "pink",
+      sizeId: "md",
+      backboardId: "rectangle",
+      environment: "indoor",
+    });
+    assert.equal(est.lineCount, 2);
+    assert.equal(est.charCount, 8);
+    assert.ok(est.heightCm > 32); // 2 satır için akrilik yüksekliği genişler
   });
 
   it("Combination 2: 'Color Your Life' indoor MD rectangle matches exact legacy formula (2200 TL - 2650 TL)", () => {

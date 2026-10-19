@@ -53,8 +53,12 @@ export interface PriceEstimate {
   minPrice: number;
   maxPrice: number;
   charCount: number;
+  lineCount: number;
   widthCm: number;
   heightCm: number;
+  minRecommendedWidthCm: number;
+  isSizeConstrained: boolean;
+  recommendedSizeId?: NeonSizeId;
   neonLengthMeters: number;
   powerWatts: number;
   recommendedAmps: number;
@@ -419,14 +423,84 @@ const PRICING_RULES = {
 } as const;
 
 export function calculateNeonPrice(spec: CustomNeonSpec): PriceEstimate {
-  const cleanText = spec.text.replace(/\s+/g, "");
-  const effectiveCharCount = Math.max(1, Math.min(cleanText.length, 30));
+  // Satır kırılımlarını (Enter) destekle:
+  const lines = spec.text
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0);
+  const effectiveLines = lines.length > 0 ? lines : ["GLOW"];
+  const lineCount = effectiveLines.length;
+
+  // En uzun satırdaki karakter sayısı fiziksel genişlik sınırını belirler:
+  const maxLineLength = Math.max(
+    ...effectiveLines.map((l) => l.replace(/\s+/g, "").length),
+    1,
+  );
+  const totalChars = effectiveLines.reduce(
+    (acc, l) => acc + l.replace(/\s+/g, "").length,
+    0,
+  );
+  const effectiveCharCount = Math.max(1, Math.min(totalChars, 45));
+
   const sizeConfig = NEON_SIZES[spec.sizeId];
   const backboardConfig = NEON_BACKBOARDS[spec.backboardId];
 
+  // Fiziksel Neon Atölye Kuralı:
+  // 6mm-8mm silikon tüpün harf oluşturabilmesi için harf başı min 7.5cm yer gerekir.
+  // Sembol varsa +18cm ek genişlik gerekir.
+  const symbolBonusCm = spec.symbolId && spec.symbolId !== "none" ? 18 : 0;
+  const minRequiredWidthCm = Math.round(maxLineLength * 7.5 + symbolBonusCm);
+
+  // Müşterinin seçtiği boyut metni taşırıyor mu?
+  const isSizeConstrained = minRequiredWidthCm > sizeConfig.widthCm;
+  let recommendedSizeId: NeonSizeId | undefined = undefined;
+  if (isSizeConstrained) {
+    if (minRequiredWidthCm <= 75) recommendedSizeId = "md";
+    else if (minRequiredWidthCm <= 100) recommendedSizeId = "lg";
+    else recommendedSizeId = "xl";
+  }
+
+  // Gerçek Akrilik Ölçüsü Kalibrasyonu:
+  // Eğer "Harf Kesim (contour)" seçiliyse ve harf sayısı azsa pleksi devasa kalmaz, harfe oturur.
+  let calculatedWidthCm = sizeConfig.widthCm;
+  let calculatedHeightCm = sizeConfig.heightCm;
+
+  if (
+    (spec.backboardId === "contour" && !spec.borderId) ||
+    spec.borderId === "none"
+  ) {
+    // Harf Kesim Pleksi: Harf adedine göre gerçek kesim eni
+    const naturalWidth = Math.max(
+      18,
+      Math.round(maxLineLength * 9.5 + symbolBonusCm),
+    );
+    // Çok satırlıysa her ek satır +16cm ekler
+    const naturalHeight = Math.max(18, Math.round(18 + (lineCount - 1) * 16));
+    calculatedWidthCm = Math.min(naturalWidth, sizeConfig.widthCm);
+    calculatedHeightCm = naturalHeight;
+  } else {
+    // Dikdörtgen / Pano / Çerçeveli: Çok satırlıysa pleksi boyunu otomatik genişlet
+    if (lineCount > 1) {
+      calculatedHeightCm = Math.round(
+        sizeConfig.heightCm * (1 + (lineCount - 1) * 0.45),
+      );
+    }
+  }
+
+  // Çerçeve Geometrisi Kontrolleri:
+  if (spec.borderId === "circle") {
+    // Daire tam kare çap baz alır:
+    calculatedWidthCm = Math.max(calculatedWidthCm, calculatedHeightCm);
+    calculatedHeightCm = calculatedWidthCm;
+  } else if (spec.borderId === "pill") {
+    calculatedHeightCm = Math.round(calculatedWidthCm * 0.48);
+  }
+
+  // Fiyat Hesaplama:
+  const lineMultiplier = 1 + (lineCount - 1) * 0.28; // Çok satırlı lehim/kablo işçilik farkı
   const rawCore =
     (PRICING_RULES.baseCostTl +
-      effectiveCharCount * PRICING_RULES.perCharCostTl) *
+      effectiveCharCount * PRICING_RULES.perCharCostTl * lineMultiplier) *
     sizeConfig.multiplier;
 
   const envCost =
@@ -443,44 +517,35 @@ export function calculateNeonPrice(spec: CustomNeonSpec): PriceEstimate {
     Math.round(maxRaw / PRICING_RULES.roundingStepTl) *
     PRICING_RULES.roundingStepTl;
 
-  // Mühendislik Paftası (Blueprint CAD Title Block) için gerçekçi LED metraj ve Güç (Watt / Amper) hesabı
+  // Mühendislik Paftası için gerçekçi LED metraj ve Güç (Watt / Amper) hesabı:
   const symbolExtraMeters =
     spec.symbolId && spec.symbolId !== "none"
       ? NEON_SYMBOLS[spec.symbolId].extraMeters
       : 0;
   const borderExtraMeters =
     spec.borderId && spec.borderId !== "none"
-      ? NEON_BORDERS[spec.borderId].extraMeters * (sizeConfig.widthCm / 75)
+      ? NEON_BORDERS[spec.borderId].extraMeters * (calculatedWidthCm / 75)
       : 0;
 
   const rawMeters =
-    effectiveCharCount * 0.24 * (sizeConfig.widthCm / 75) +
+    effectiveCharCount * 0.24 * (calculatedWidthCm / 75) +
     symbolExtraMeters +
     borderExtraMeters;
-  const neonLengthMeters = Math.max(0.8, Math.round(rawMeters * 10) / 10);
+  const neonLengthMeters = Math.max(0.6, Math.round(rawMeters * 10) / 10);
   const wattsPerMeter = spec.tubeTech === "luminex" ? 11.5 : 9.0;
-  const powerWatts = Math.max(12, Math.round(neonLengthMeters * wattsPerMeter));
+  const powerWatts = Math.max(10, Math.round(neonLengthMeters * wattsPerMeter));
   const recommendedAmps = Math.max(2, Math.ceil((powerWatts * 1.25) / 12));
-
-  // Çerçeve geometrisine göre akrilik ve dış hat ölçüsü kalibrasyonu:
-  // Daire çerçevede en ve boy eşittir (Çap = widthCm). Kapsülde oranlar yuvarlatılmış uçlara göre dengelenir.
-  const calculatedWidthCm = sizeConfig.widthCm;
-  let calculatedHeightCm = sizeConfig.heightCm;
-
-  if (spec.borderId === "circle") {
-    // Rozet/Daire çerçeve tam daireseldir: Çap taban genişliği baz alınır
-    calculatedHeightCm = calculatedWidthCm;
-  } else if (spec.borderId === "pill") {
-    // Kapsül çerçeve stadyum formunda olduğundan yüksekliği daha dolgun bir orana kavuşur
-    calculatedHeightCm = Math.round(calculatedWidthCm * 0.48);
-  }
 
   return {
     minPrice,
     maxPrice: Math.max(minPrice + 150, maxPrice),
-    charCount: cleanText.length,
+    charCount: totalChars,
+    lineCount,
     widthCm: calculatedWidthCm,
     heightCm: calculatedHeightCm,
+    minRecommendedWidthCm: Math.max(minRequiredWidthCm, 30),
+    isSizeConstrained,
+    recommendedSizeId,
     neonLengthMeters,
     powerWatts,
     recommendedAmps,

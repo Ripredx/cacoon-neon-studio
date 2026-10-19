@@ -153,9 +153,13 @@ export default function NeonStudio() {
   const activeSize = NEON_SIZES[spec.sizeId];
 
   const rawDisplay = spec.text.trim().length > 0 ? spec.text : "Open Late";
-  const formattedText = activeFont.uppercase
-    ? rawDisplay.toLocaleUpperCase("tr-TR")
-    : rawDisplay;
+  const displayLines = rawDisplay
+    .split(/\r?\n/)
+    .filter((l) => l.trim().length > 0);
+  const formattedLines = displayLines.map((line) =>
+    activeFont.uppercase ? line.toLocaleUpperCase("tr-TR") : line,
+  );
+  const formattedText = formattedLines.join(" / ");
 
   function syncUrlHash(next: CustomNeonSpec) {
     if (typeof window === "undefined") return;
@@ -335,29 +339,39 @@ export default function NeonStudio() {
     ctx.save();
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    const canvasFontSize = Math.round(100 * activeSize.scaleFactor);
+    const lineSpacing = Math.round(90 * activeSize.scaleFactor);
+    const canvasFontSize = Math.round(
+      (formattedLines.length > 1 ? 82 : 100) * activeSize.scaleFactor,
+    );
     ctx.font = `700 ${canvasFontSize}px ${activeFont.cssFamily}`;
-    const displayFull =
-      activeSymbolId !== "none"
-        ? `${formattedText} ${activeSymbol.glyph}`
-        : formattedText;
 
-    if (isLit) {
-      ctx.shadowColor = activeColor.hex;
-      ctx.shadowBlur = 65;
-      ctx.fillStyle = activeColor.hex;
-      ctx.fillText(displayFull, 800, 430);
+    const totalHeight = (formattedLines.length - 1) * lineSpacing;
+    const startY = 430 - totalHeight / 2;
 
-      ctx.shadowBlur = 26;
-      ctx.fillText(displayFull, 800, 430);
+    formattedLines.forEach((lineText, idx) => {
+      const lineY = startY + idx * lineSpacing;
+      const textToDraw =
+        idx === formattedLines.length - 1 && activeSymbolId !== "none"
+          ? `${lineText} ${activeSymbol.glyph}`
+          : lineText;
 
-      ctx.shadowBlur = 6;
-      ctx.fillStyle = "#FFFFFF";
-      ctx.fillText(displayFull, 800, 430);
-    } else {
-      ctx.fillStyle = activeColor.unlitHex;
-      ctx.fillText(displayFull, 800, 430);
-    }
+      if (isLit) {
+        ctx.shadowColor = activeColor.hex;
+        ctx.shadowBlur = 65;
+        ctx.fillStyle = activeColor.hex;
+        ctx.fillText(textToDraw, 800, lineY);
+
+        ctx.shadowBlur = 26;
+        ctx.fillText(textToDraw, 800, lineY);
+
+        ctx.shadowBlur = 6;
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fillText(textToDraw, 800, lineY);
+      } else {
+        ctx.fillStyle = activeColor.unlitHex;
+        ctx.fillText(textToDraw, 800, lineY);
+      }
+    });
     ctx.restore();
 
     ctx.strokeStyle = "rgba(255, 255, 255, 0.14)";
@@ -833,30 +847,83 @@ export default function NeonStudio() {
                       </div>
                     </div>
 
-                    {/* Seçili Fontla Canlı Yazı Kutusu + Sağ Alt Karakter Sayacı */}
+                    {/* Seçili Fontla Canlı Çok Satırlı Yazı Alanı (Enter tuşu ile yeni satır) */}
                     <div
-                      class="relative rounded-xl border-2 bg-[#0A0A0E] px-3.5 pt-3 pb-6 transition-colors"
+                      class="relative rounded-xl border-2 bg-[#0A0A0E] px-3.5 pt-3 pb-7 transition-colors"
                       style={{
-                        borderColor: activeColor.hex,
+                        borderColor: estimate.isSizeConstrained
+                          ? "#FFB020"
+                          : activeColor.hex,
                       }}
                     >
-                      <input
+                      <textarea
                         id="neon-text-input"
-                        type="text"
-                        maxLength={30}
+                        rows={
+                          estimate.lineCount > 1
+                            ? Math.min(estimate.lineCount, 3)
+                            : 1
+                        }
+                        maxLength={45}
                         value={spec.text}
                         onInput={(e) => {
-                          const rawVal = (e.target as HTMLInputElement).value;
+                          const rawVal = (e.target as HTMLTextAreaElement)
+                            .value;
                           updateSpec({ text: rawVal }, true, true);
                         }}
-                        placeholder="Open Late"
+                        placeholder="Open Late&#10;(Yeni satır için Enter'a basabilirsiniz)"
                         style={{ fontFamily: activeFont.cssFamily }}
-                        class="w-full bg-transparent text-2xl text-white placeholder:text-white/25 focus:outline-none"
+                        class="w-full resize-none bg-transparent text-xl sm:text-2xl text-white placeholder:text-white/25 focus:outline-none leading-snug"
                       />
-                      <span class="font-mono absolute bottom-2 right-3 text-[11px] text-white/45">
-                        {spec.text.replace(/\s+/g, "").length} / 30
-                      </span>
+                      <div class="absolute bottom-2 left-3.5 right-3 flex items-center justify-between font-mono text-[11px]">
+                        <span class="text-white/45">
+                          {estimate.lineCount > 1
+                            ? `${estimate.lineCount} SATIR`
+                            : "TEK SATIR"}{" "}
+                          · {spec.text.replace(/\s+/g, "").length} / 45
+                        </span>
+                        <span class="text-[10px] text-white/35">
+                          ↵ Enter ile alt satır
+                        </span>
+                      </div>
                     </div>
+
+                    {/* Boyut Sıkışma / Üretilebilirlik Uyarısı & Otomatik Tavsiye */}
+                    {estimate.isSizeConstrained && (
+                      <div class="rounded-xl border border-[#FFB020]/40 bg-[#FFB020]/10 p-3 flex flex-col gap-1.5 text-left font-mono">
+                        <div class="flex items-center gap-2 text-xs font-bold text-[#FFB020]">
+                          <span>⚠️</span>
+                          <span>ATÖLYE ÜRETİM UYARISI</span>
+                        </div>
+                        <p class="text-[11px] text-white/80 leading-relaxed">
+                          Yazınızın uzunluğu seçtiğiniz{" "}
+                          <strong>{NEON_SIZES[spec.sizeId].label}</strong> için
+                          sıkışık kalabilir. 6mm LED tüp kıvrımının net
+                          okunabilmesi için minimum{" "}
+                          <strong>~{estimate.minRecommendedWidthCm} cm</strong>{" "}
+                          tavsiye edilir.
+                        </p>
+                        {estimate.recommendedSizeId &&
+                          estimate.recommendedSizeId !== spec.sizeId &&
+                          (() => {
+                            const recSize = estimate.recommendedSizeId;
+                            return (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  updateSpec({
+                                    sizeId: recSize,
+                                  })
+                                }
+                                class="cursor-pointer mt-1 inline-flex w-fit items-center gap-1.5 rounded-lg border border-[#FFB020] bg-[#FFB020]/20 px-2.5 py-1 text-[11px] font-bold text-[#FFB020] hover:bg-[#FFB020]/35 transition-colors"
+                              >
+                                <span>
+                                  ⚡ {NEON_SIZES[recSize].label} Ebadına Yükselt
+                                </span>
+                              </button>
+                            );
+                          })()}
+                      </div>
+                    )}
 
                     {/* Hızlı Hazır Kelimeler */}
                     <div class="flex flex-wrap items-center gap-1.5 pt-0.5">
@@ -1669,13 +1736,13 @@ export default function NeonStudio() {
                           : "justify-center text-center"
                     }`}
                   >
-                    {/* Fiziksel Neon Boyut & Tüp Kalibrasyonlu Metin */}
-                    <p
+                    {/* Fiziksel Neon Boyut & Tüp Kalibrasyonlu Çok Satırlı Metin */}
+                    <div
                       style={{
                         fontFamily: activeFont.cssFamily,
                         color: isLit ? activeColor.hex : activeColor.unlitHex,
                         textShadow: tubeShadow,
-                        fontSize: `clamp(2.0rem, ${activeSize.fontScaleRem * 1.05}vw, ${activeSize.fontScaleRem * 1.3}rem)`,
+                        fontSize: `clamp(1.8rem, ${activeSize.fontScaleRem * 1.05}vw, ${activeSize.fontScaleRem * 1.3}rem)`,
                         letterSpacing:
                           spec.sizeId === "sm"
                             ? "0.06em"
@@ -1683,10 +1750,20 @@ export default function NeonStudio() {
                               ? "0.03em"
                               : "0.01em",
                       }}
-                      class="select-none text-balance leading-tight transition-all duration-300"
+                      class={`select-none leading-[1.2] transition-all duration-300 flex flex-col ${
+                        spec.align === "left"
+                          ? "items-start text-left"
+                          : spec.align === "right"
+                            ? "items-end text-right"
+                            : "items-center text-center"
+                      }`}
                     >
-                      {formattedText}
-                    </p>
+                      {formattedLines.map((line) => (
+                        <span key={line} class="block whitespace-pre-wrap">
+                          {line}
+                        </span>
+                      ))}
+                    </div>
 
                     {activeSymbolId !== "none" && (
                       <svg

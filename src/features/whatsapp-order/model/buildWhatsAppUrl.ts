@@ -66,11 +66,20 @@ export function buildCustomNeonWhatsAppUrl(
     ? `• Canlı Stüdyo 3D Simülasyonu: ${options.liveUrl}`
     : null;
 
+  const linesOfText = spec.text
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0);
+  const textDisplay =
+    linesOfText.length > 1
+      ? linesOfText.map((l, i) => `Satır ${i + 1}: "${l}"`).join(" / ")
+      : `"${spec.text.trim() || "GLOW"}"`;
+
   const lines = [
     `Merhaba ${BUSINESS_CONFIG.name}, web sitenizdeki Tasarım Stüdyosu üzerinden özel neon fiyat teklifi almak istiyorum:`,
     "",
     ...(imageLine ? [imageLine, ""] : []),
-    `• Yazılacak Metin: "${spec.text.trim() || "GLOW"}"`,
+    `• Yazılacak Metin: ${textDisplay} (${estimate.lineCount > 1 ? `${estimate.lineCount} Satırlı Yerleşim` : "Tek Satır"})`,
     `• Font: ${font}`,
     `• Neon Rengi: ${color}`,
     ...(symbolLine ? [symbolLine] : []),
