@@ -150,6 +150,7 @@ export default function NeonStudio() {
   const activeBorderId: NeonBorderId = spec.borderId || "none";
   const activeBorder = NEON_BORDERS[activeBorderId];
   const activeTechId: NeonTubeTechId = spec.tubeTech || "standard";
+  const activeSize = NEON_SIZES[spec.sizeId];
 
   const rawDisplay = spec.text.trim().length > 0 ? spec.text : "Open Late";
   const formattedText = activeFont.uppercase
@@ -334,7 +335,8 @@ export default function NeonStudio() {
     ctx.save();
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.font = `700 104px ${activeFont.cssFamily}`;
+    const canvasFontSize = Math.round(100 * activeSize.scaleFactor);
+    ctx.font = `700 ${canvasFontSize}px ${activeFont.cssFamily}`;
     const displayFull =
       activeSymbolId !== "none"
         ? `${formattedText} ${activeSymbol.glyph}`
@@ -1135,9 +1137,6 @@ export default function NeonStudio() {
                           {bKey === "ticket" && (
                             <div class="h-6 w-16 rounded border-2 border-dashed border-[#FFB020]" />
                           )}
-                          {bKey === "heart" && (
-                            <span class="text-xl text-[#FF2E88]">♡</span>
-                          )}
                         </div>
                         <span class="text-xs font-bold text-white">
                           {bItem.label}
@@ -1175,6 +1174,9 @@ export default function NeonStudio() {
                             </span>
                             <span class="font-mono mt-0.5 text-[11px] text-[#35E7FF]">
                               ~{sizeItem.widthCm} × {sizeItem.heightCm} cm
+                            </span>
+                            <span class="font-mono mt-0.5 text-[10px] text-white/70">
+                              {sizeItem.tubeGaugeMm}
                             </span>
                             <span class="mt-1 text-[11px] text-white/50">
                               {sizeItem.recommendedFor}
@@ -1667,14 +1669,21 @@ export default function NeonStudio() {
                           : "justify-center text-center"
                     }`}
                   >
+                    {/* Fiziksel Neon Boyut & Tüp Kalibrasyonlu Metin */}
                     <p
                       style={{
                         fontFamily: activeFont.cssFamily,
                         color: isLit ? activeColor.hex : activeColor.unlitHex,
                         textShadow: tubeShadow,
-                        fontSize: "clamp(2.8rem, 5.8vw, 5.6rem)",
+                        fontSize: `clamp(2.0rem, ${activeSize.fontScaleRem * 1.05}vw, ${activeSize.fontScaleRem * 1.3}rem)`,
+                        letterSpacing:
+                          spec.sizeId === "sm"
+                            ? "0.06em"
+                            : spec.sizeId === "md"
+                              ? "0.03em"
+                              : "0.01em",
                       }}
-                      class="select-none text-balance leading-tight transition-[color,text-shadow] duration-300"
+                      class="select-none text-balance leading-tight transition-all duration-300"
                     >
                       {formattedText}
                     </p>
@@ -1686,7 +1695,13 @@ export default function NeonStudio() {
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke={isLit ? "#FFFFFF" : activeSymbolColor.unlitHex}
-                        stroke-width="1.9"
+                        stroke-width={
+                          spec.sizeId === "sm"
+                            ? "2.4"
+                            : spec.sizeId === "md"
+                              ? "2.0"
+                              : "1.6"
+                        }
                         stroke-linecap="round"
                         stroke-linejoin="round"
                         style={{
@@ -1694,7 +1709,7 @@ export default function NeonStudio() {
                             ? `drop-shadow(0 0 4px #FFFFFF) drop-shadow(0 0 14px ${activeSymbolColor.hex}) drop-shadow(0 0 28px ${activeSymbolColor.hex})`
                             : "none",
                         }}
-                        class="size-14 sm:size-20 shrink-0 transition-all duration-300"
+                        class={`${activeSize.symbolSizeClass} shrink-0 transition-all duration-300`}
                         aria-label={activeSymbol.label}
                       >
                         <title>{activeSymbol.label}</title>
