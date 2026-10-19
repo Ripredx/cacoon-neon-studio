@@ -223,7 +223,7 @@ describe("Turkish Locale & WhatsApp URL Encoding", () => {
     );
     assert.ok(
       decoded.includes(
-        "Canlı Stüdyo 3D Simülasyonu: http://localhost:4321/tasarla#preview",
+        "Canlı Stüdyo 3D Simülasyonu: http://localhost:4321/tasarla?preview",
       ),
     );
   });

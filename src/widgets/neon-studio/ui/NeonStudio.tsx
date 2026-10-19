@@ -19,7 +19,7 @@ import {
   calculateNeonPrice,
 } from "@/entities/custom-neon/model/pricing";
 import { buildCustomNeonWhatsAppUrl } from "@/features/whatsapp-order/model/buildWhatsAppUrl";
-import { NEON_ENGINE_CONFIG } from "@/shared/config/business";
+import { BUSINESS_CONFIG, NEON_ENGINE_CONFIG } from "@/shared/config/business";
 import { useEffect, useRef, useState } from "preact/hooks";
 
 type StudioTabId =
@@ -137,6 +137,7 @@ export default function NeonStudio() {
     "blueprint",
   );
   const [copiedLink, setCopiedLink] = useState<boolean>(false);
+  const [isMobileSheetOpen, setIsMobileSheetOpen] = useState<boolean>(false);
   const stageRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<number | null>(null);
 
@@ -597,7 +598,7 @@ export default function NeonStudio() {
   const maxCharsInLine = Math.max(...formattedLines.map((l) => l.length), 1);
   const circleFontScale =
     activeBorderId === "circle"
-      ? Math.min(1.0, 5.2 / Math.max(maxCharsInLine, 4.5))
+      ? Math.min(1.35, 7.8 / Math.max(maxCharsInLine, 4.0))
       : 1.0;
 
   const backboardShapeClass =
@@ -704,22 +705,22 @@ export default function NeonStudio() {
       }}
     >
       {/* 1. TAM GENİŞLİKLİ ÜST UYGULAMA BARI (Edge-to-Edge Studio Top Bar) */}
-      <header class="h-16 shrink-0 w-full border-b border-white/[0.07] bg-[#0A0A0E] px-4 sm:px-6 flex items-center justify-between gap-4 z-30">
-        <div class="flex items-center gap-3 sm:gap-5">
+      <header class="h-14 sm:h-16 shrink-0 w-full border-b border-white/[0.07] bg-[#0A0A0E] px-3.5 sm:px-6 flex items-center justify-between gap-2 sm:gap-4 z-30">
+        <div class="flex items-center gap-2 sm:gap-5">
           <a
             href="/"
-            class="cursor-pointer flex items-center gap-2.5 focus-visible:outline-none"
+            class="cursor-pointer flex items-center gap-2 focus-visible:outline-none"
           >
-            <span class="font-display text-lg sm:text-xl font-bold tracking-tight text-white">
+            <span class="font-display text-base sm:text-xl font-bold tracking-tight text-white">
               CC NEON'S
-              <span class="text-xs font-mono text-white/45 ml-0.5">™</span>
+              <span class="text-[10px] sm:text-xs font-mono text-white/45 ml-0.5">™</span>
             </span>
           </a>
 
           <span class="hidden sm:inline-block h-4 w-px bg-white/10" />
 
           <span
-            class="font-mono text-xs font-bold uppercase tracking-widest"
+            class="hidden sm:inline-block font-mono text-xs font-bold uppercase tracking-widest"
             style={{ color: activeColor.hex }}
           >
             TEXT TO NEON · CANLI ATÖLYE
@@ -733,7 +734,7 @@ export default function NeonStudio() {
           </a>
         </div>
 
-        <div class="flex items-center gap-3 sm:gap-5">
+        <div class="flex items-center gap-2.5 sm:gap-5">
           <div class="text-right">
             <span class="font-mono hidden sm:block text-[10px] uppercase tracking-wider text-white/45">
               ONLINE ATÖLYE FİYATI · KDV DAHİL
@@ -744,17 +745,15 @@ export default function NeonStudio() {
               style={{
                 animationDuration: `${NEON_ENGINE_CONFIG.priceRollDurationMs}ms`,
               }}
-              class="block font-mono text-base sm:text-xl font-bold text-white leading-tight"
+              class="block font-mono text-sm sm:text-xl font-bold text-white leading-tight"
             >
-              {estimate.minPrice.toLocaleString("tr-TR")} ₺ –{" "}
-              {estimate.maxPrice.toLocaleString("tr-TR")} ₺
+              {estimate.minPrice.toLocaleString("tr-TR")} ₺
+              <span class="hidden sm:inline text-white/70"> – {estimate.maxPrice.toLocaleString("tr-TR")} ₺</span>
             </output>
-            <span class="font-mono hidden sm:inline-flex items-center justify-end gap-1.5 text-[11px] text-white/55">
-              <span
-                class="size-1.5 rounded-full"
-                style={{ backgroundColor: activeColor.hex }}
-              />
-              <span>Canlı hesaplama · {NEON_SIZES[spec.sizeId].label}</span>
+            <span class="font-mono block text-[9px] sm:text-[11px] text-[#1CFF8A] sm:text-white/55 font-medium leading-none mt-0.5">
+              <span class="hidden sm:inline-block size-1.5 rounded-full mr-1" style={{ backgroundColor: activeColor.hex }} />
+              <span class="sm:hidden">ÖZEL İNDİRİM · </span>
+              <span>{NEON_SIZES[spec.sizeId].label}</span>
             </span>
           </div>
 
@@ -762,34 +761,28 @@ export default function NeonStudio() {
             type="button"
             onClick={handleOrderClick}
             disabled={isOrdering}
-            class="cursor-pointer whitespace-nowrap inline-flex h-10 sm:h-11 items-center gap-2 rounded-full border border-white/20 bg-white/[0.08] px-4 sm:px-6 font-mono text-xs font-bold uppercase tracking-wider text-white transition-all duration-200 hover:border-[var(--neon-color)] hover:bg-white/[0.15] hover:shadow-[0_0_24px_rgba(var(--neon-rgb),0.4)] disabled:opacity-60 disabled:cursor-not-allowed"
+            title="Sipariş Ver / Sepete Ekle"
+            aria-label="Sipariş Ver"
+            class="cursor-pointer whitespace-nowrap inline-flex h-9 sm:h-11 items-center justify-center gap-2 rounded-full border border-white/20 bg-white/[0.08] px-3 sm:px-6 font-mono text-xs font-bold uppercase tracking-wider text-white transition-all duration-200 hover:border-[var(--neon-color)] hover:bg-white/[0.15] hover:shadow-[0_0_24px_rgba(var(--neon-rgb),0.4)] disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {isOrdering ? (
-              <>
-                <svg
-                  class="size-4 animate-spin text-[var(--neon-color)]"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <title>Yükleniyor</title>
-                  <circle
-                    class="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    stroke-width="4"
-                  />
-                  <path
-                    class="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  />
-                </svg>
-                <span>{orderStatus || "HAZIRLANIYOR..."}</span>
-              </>
+              <svg
+                class="size-4 animate-spin text-[var(--neon-color)]"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
             ) : (
-              <span>SİPARİŞ VER →</span>
+              <>
+                <svg class="size-4 sm:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="9" cy="21" r="1" />
+                  <circle cx="20" cy="21" r="1" />
+                  <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                </svg>
+                <span class="hidden sm:inline">SİPARİŞ VER →</span>
+              </>
             )}
           </button>
         </div>
@@ -797,11 +790,11 @@ export default function NeonStudio() {
 
       {/* 2. ANA TAM EKRAN ÇALIŞMA ALANI (Sol İkon Rayı + Açılır/Kapanır Çekmece + Sağ CAD Sahnesi) */}
       <div class="flex-1 min-h-0 flex flex-col lg:flex-row overflow-hidden">
-        {/* BÖLGE A: Sol İnce Dikey İkon Rayı (68px) */}
+        {/* BÖLGE A: Sol İnce Dikey İkon Rayı (Masaüstünde sol ray, mobilde gizli çünkü mobilde en altta Bottom Bar var) */}
         <nav
           aria-label="Tasarım Adımları"
           data-lenis-prevent
-          class="studio-drawer-scroll flex lg:flex-col shrink-0 overflow-x-auto lg:overflow-y-auto border-b lg:border-b-0 lg:border-r border-white/[0.07] bg-[#050505] lg:w-[72px]"
+          class="hidden lg:flex studio-drawer-scroll flex-col shrink-0 overflow-y-auto border-r border-white/[0.07] bg-[#050505] w-[72px]"
         >
           {TABS.map((tab) => {
             const isActive = activeTab === tab.id;
@@ -813,7 +806,7 @@ export default function NeonStudio() {
                   setActiveTab(tab.id);
                   setIsDrawerOpen(true);
                 }}
-                class={`cursor-pointer relative flex flex-col items-center justify-center gap-1.5 px-3 py-3 lg:py-4 min-w-[68px] lg:min-w-0 lg:w-full text-center transition-all duration-150 border-b border-white/[0.04] ${
+                class={`cursor-pointer relative flex flex-col items-center justify-center gap-1.5 py-4 w-full text-center transition-all duration-150 border-b border-white/[0.04] ${
                   isActive
                     ? "bg-[#0A0A0E] text-white"
                     : "text-white/50 hover:bg-white/[0.03] hover:text-white/85"
@@ -821,7 +814,7 @@ export default function NeonStudio() {
               >
                 {isActive && (
                   <span
-                    class="absolute bottom-0 inset-x-0 h-0.5 lg:inset-y-0 lg:left-0 lg:right-auto lg:w-0.5 lg:h-full"
+                    class="absolute inset-y-0 left-0 w-0.5 h-full"
                     style={{
                       backgroundColor: activeColor.hex,
                       boxShadow: `0 0 8px ${activeColor.hex}`,
@@ -848,19 +841,31 @@ export default function NeonStudio() {
           })}
         </nav>
 
-        {/* BÖLGE B: Sol Araç Çekmecesi (380px, Daraltılabilir «) */}
-        {isDrawerOpen && (
+        {/* BÖLGE B: Sol Araç Çekmecesi (Masaüstünde sol sabit panel; mobilde ise alttan açılan Bottom Sheet) */}
+        {((isDrawerOpen && typeof window !== "undefined") || isMobileSheetOpen) && (
           <aside
             data-lenis-prevent
-            class="w-full lg:w-[380px] xl:w-[400px] shrink-0 border-b lg:border-b-0 lg:border-r border-white/[0.07] bg-[#0A0A0E] flex flex-col min-h-0 max-h-[62vh] lg:max-h-none"
+            class={`shrink-0 border-white/[0.07] bg-[#0A0A0E] flex flex-col z-40 transition-all duration-300 ${
+              isMobileSheetOpen
+                ? "fixed inset-x-0 bottom-0 max-h-[75vh] rounded-t-3xl border-t shadow-[0_-12px_40px_rgba(0,0,0,0.9)] lg:static lg:rounded-none lg:border-t-0 lg:border-r lg:shadow-none lg:w-[380px] xl:w-[400px] lg:max-h-none"
+                : "hidden lg:flex lg:w-[380px] xl:w-[400px] lg:border-r lg:max-h-none"
+            }`}
           >
-            {/* Çekmece Üst Başlığı + Daraltma («) Butonu */}
-            <div class="flex items-start justify-between gap-3 px-5 pt-5 pb-3 border-b border-white/[0.07]">
+            {/* Mobilde sürükleme / kapatma kulpu (Sheet Handle) */}
+            <div class="lg:hidden flex items-center justify-center pt-2.5 pb-1">
+              <span class="h-1.5 w-12 rounded-full bg-white/20" />
+            </div>
+
+            {/* Çekmece Üst Başlığı + KingsOfNeon Tarzı Aksiyon Butonları (Reset, Undo, Onay ✓) */}
+            <div class="flex items-center justify-between gap-3 px-4 sm:px-5 py-3 sm:py-3.5 border-b border-white/[0.07]">
               <div>
-                <h1 class="font-display text-lg font-bold uppercase tracking-tight text-white">
-                  {TABS.find((t) => t.id === activeTab)?.label}
+                <h1 class="font-display text-base sm:text-lg font-bold uppercase tracking-tight text-white flex items-center gap-2">
+                  <span>{TABS.find((t) => t.id === activeTab)?.label}</span>
+                  <span class="lg:hidden text-[10px] font-mono font-normal px-2 py-0.5 rounded-full bg-white/10 text-white/70">
+                    ADIM {TABS.findIndex((t) => t.id === activeTab) + 1}/{TABS.length}
+                  </span>
                 </h1>
-                <p class="mt-0.5 text-xs text-white/55 leading-relaxed">
+                <p class="hidden sm:block mt-0.5 text-xs text-white/55 leading-relaxed">
                   {activeTab === "text" &&
                     "Tabelanızda yazacak kelimeleri girin, ardından aşağıdan sembol ekleyin."}
                   {activeTab === "font" &&
@@ -880,15 +885,58 @@ export default function NeonStudio() {
                 </p>
               </div>
 
-              <button
-                type="button"
-                onClick={() => setIsDrawerOpen(false)}
-                title="Araç panelini daralt"
-                aria-label="Araç panelini daralt"
-                class="hidden lg:inline-flex cursor-pointer size-8 shrink-0 items-center justify-center rounded-full border border-white/10 bg-[#050505] font-mono text-xs text-white/70 transition-colors hover:border-white/30 hover:text-white"
-              >
-                «
-              </button>
+              {/* Sağ Aksiyon Grubu: Sıfırla + Geri Al + Mobil Onay (✓) / Masaüstü Daralt («) */}
+              <div class="flex items-center gap-1.5 sm:gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (activeTab === "text") updateSpec({ text: "Open Late", symbolId: "none" });
+                    else if (activeTab === "font") updateSpec({ fontId: "script" });
+                    else if (activeTab === "color") updateSpec({ colorId: "cyan", symbolColorId: "cyan" });
+                    else if (activeTab === "borders") updateSpec({ borderId: "none" });
+                    else if (activeTab === "size") updateSpec({ sizeId: "md" });
+                    else if (activeTab === "acrylic") updateSpec({ backboardId: "contour" });
+                    else if (activeTab === "options") updateSpec({ tubeTech: "standard", environment: "indoor", dimmer: "standard", mountType: "hanging" });
+                  }}
+                  title="Bu adımı varsayılana sıfırla"
+                  class="cursor-pointer rounded-full border border-white/15 bg-white/[0.04] px-2.5 py-1 font-mono text-[11px] font-semibold text-white/75 hover:bg-white/10 hover:text-white"
+                >
+                  Sıfırla
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleUndo}
+                  disabled={historyIndex <= 0}
+                  title="Geri Al"
+                  aria-label="Geri Al"
+                  class="cursor-pointer inline-flex size-7.5 sm:size-8 items-center justify-center rounded-full border border-white/15 bg-white/[0.04] font-mono text-xs text-white/75 transition-colors hover:bg-white/10 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  ↩
+                </button>
+
+                {/* Mobilde Yeşil Tik Onay Butonu (Görseldeki Gibi Sheet'i Kapatıp Sahneye Döner) */}
+                <button
+                  type="button"
+                  onClick={() => setIsMobileSheetOpen(false)}
+                  title="Uygula ve Önizlemeye Dön"
+                  aria-label="Uygula ve Önizlemeye Dön"
+                  class="lg:hidden cursor-pointer inline-flex size-8 items-center justify-center rounded-full bg-[#1CFF8A] text-black font-bold text-sm shadow-[0_0_12px_rgba(28,255,138,0.4)] active:scale-95 transition-transform"
+                >
+                  ✓
+                </button>
+
+                {/* Masaüstü Daraltma Butonu */}
+                <button
+                  type="button"
+                  onClick={() => setIsDrawerOpen(false)}
+                  title="Araç panelini daralt"
+                  aria-label="Araç panelini daralt"
+                  class="hidden lg:inline-flex cursor-pointer size-8 shrink-0 items-center justify-center rounded-full border border-white/10 bg-[#050505] font-mono text-xs text-white/70 transition-colors hover:border-white/30 hover:text-white"
+                >
+                  «
+                </button>
+              </div>
             </div>
 
             {/* Çekmece Kaydırılabilir İçerik Gövdesi */}
@@ -1727,10 +1775,10 @@ export default function NeonStudio() {
           </aside>
         )}
 
-        {/* BÖLGE C: SAĞ TAM SAHNE CAD ÖNİZLEME ALANI (Geriye Kalan Tüm Alan) */}
+        {/* BÖLGE C: SAĞ TAM SAHNE CAD ÖNİZLEME ALANI (Geriye Kalan Tüm Alan / Mobilde Ekranın Tamamı) */}
         <div
           ref={stageRef}
-          class={`relative flex-1 min-h-[520px] lg:min-h-0 h-full flex flex-col justify-between overflow-hidden transition-colors duration-300 border-l border-white/[0.07] ${wallTextureClass}`}
+          class={`relative flex-1 min-h-[460px] lg:min-h-0 h-full flex flex-col justify-between overflow-hidden transition-colors duration-300 lg:border-l border-white/[0.07] ${wallTextureClass}`}
           style={
             sceneBg === "blueprint"
               ? {
@@ -1772,34 +1820,40 @@ export default function NeonStudio() {
             }}
           />
 
-          {/* CAD KUTUSU ÜST BAŞLIK: "GÖRSEL ÖNİZLEME" + Sahne Kontrolleri */}
-          <div class="relative z-20 flex flex-wrap items-start justify-between gap-4 px-5 pt-5 sm:px-8 sm:pt-6">
+          {/* CAD KUTUSU ÜST BAŞLIK: "GÖRSEL ÖNİZLEME" + Sahne Kontrolleri (Mobilde Sade İkon Çubuğu) */}
+          <div class="relative z-20 flex items-center justify-between gap-2 px-3.5 pt-3 sm:px-8 sm:pt-6">
             <div class="text-left">
               <h2
-                class="font-display text-xl sm:text-2xl font-bold uppercase tracking-wide"
+                class="hidden sm:block font-display text-xl sm:text-2xl font-bold uppercase tracking-wide"
                 style={{ color: activeColor.hex }}
               >
                 GÖRSEL ÖNİZLEME
               </h2>
-              <p class="mt-0.5 max-w-md text-xs text-white/60 leading-relaxed">
+              <p class="hidden sm:block mt-0.5 max-w-md text-xs text-white/60 leading-relaxed">
                 Görsel tahmin amaçlı önizlemedir. Üretim öncesi nihai
                 profesyonel CNC kesim çizimi onayınıza sunulur.
               </p>
+              {/* Mobilde Minimal Durum Etiketi */}
+              <span class="sm:hidden font-mono text-[10px] tracking-widest uppercase text-white/50 flex items-center gap-1.5">
+                <span class="size-1.5 rounded-full" style={{ backgroundColor: activeColor.hex }} />
+                <span>CANLI CAD ÖNİZLEME</span>
+              </span>
             </div>
 
-            <div class="flex flex-wrap items-center gap-2">
+            <div class="flex items-center gap-1.5 sm:gap-2">
               <button
                 type="button"
                 onClick={handleTogglePower}
                 aria-pressed={isLit}
-                class={`cursor-pointer inline-flex h-8 items-center gap-2 rounded-lg border px-2.5 font-mono text-[11px] font-semibold transition-colors ${
+                title={isLit ? "Neon Işığını Kapat" : "Neon Işığını Aç"}
+                class={`cursor-pointer inline-flex h-7.5 sm:h-8 items-center gap-1.5 rounded-lg border px-2 sm:px-2.5 font-mono text-[10px] sm:text-[11px] font-semibold transition-colors ${
                   isLit
                     ? "border-white/25 bg-[#0A0A0E]/90 text-white"
                     : "border-white/10 bg-[#0A0A0E]/90 text-white/55"
                 }`}
               >
                 <span
-                  class="size-2 rounded-full"
+                  class="size-1.5 sm:size-2 rounded-full"
                   style={
                     isLit
                       ? {
@@ -1809,7 +1863,7 @@ export default function NeonStudio() {
                       : { backgroundColor: "rgba(255,255,255,0.25)" }
                   }
                 />
-                <span>{isLit ? "IŞIK: AÇIK" : "IŞIK: KAPALI"}</span>
+                <span class="hidden sm:inline">{isLit ? "IŞIK: AÇIK" : "IŞIK: KAPALI"}</span>
               </button>
 
               <div class="inline-flex rounded-lg border border-white/10 bg-[#0A0A0E]/90 p-0.5">
@@ -1824,7 +1878,7 @@ export default function NeonStudio() {
                     key={bg.id}
                     type="button"
                     onClick={() => setSceneBg(bg.id)}
-                    class={`cursor-pointer rounded-md px-2 py-1 font-mono text-[11px] font-medium ${
+                    class={`cursor-pointer rounded-md px-1.5 sm:px-2 py-0.5 sm:py-1 font-mono text-[10px] sm:text-[11px] font-medium ${
                       sceneBg === bg.id
                         ? "bg-white/15 text-white"
                         : "text-white/55 hover:text-white"
@@ -1835,18 +1889,33 @@ export default function NeonStudio() {
                 ))}
               </div>
 
+              <a
+                href={`https://wa.me/${BUSINESS_CONFIG.phones[0].raw}?text=${encodeURIComponent("Merhaba CC NEON'S, neon tabela tasarımıma dair destek almak istiyorum.")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="WhatsApp Destek"
+                aria-label="WhatsApp Canlı Danışman"
+                class="cursor-pointer inline-flex h-7.5 sm:h-8 items-center gap-1 rounded-lg border border-[#1CFF8A]/35 bg-[#1CFF8A]/10 px-2 sm:px-2.5 font-mono text-[10px] sm:text-[11px] font-semibold text-[#1CFF8A] hover:bg-[#1CFF8A]/20"
+              >
+                <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                </svg>
+                <span class="hidden sm:inline">DESTEK</span>
+              </a>
+
               <button
                 type="button"
                 onClick={handleExportPng}
-                class="cursor-pointer inline-flex h-8 items-center gap-1 rounded-lg border border-white/15 bg-[#0A0A0E]/90 px-2.5 font-mono text-[11px] font-semibold text-white hover:bg-white/15"
+                title="Teknik Paftayı PNG Olarak İndir"
+                class="cursor-pointer inline-flex h-7.5 sm:h-8 items-center gap-1 rounded-lg border border-white/15 bg-[#0A0A0E]/90 px-2 sm:px-2.5 font-mono text-[10px] sm:text-[11px] font-semibold text-white hover:bg-white/15"
               >
-                <span>PNG İNDİR ↓</span>
+                <span>PNG ↓</span>
               </button>
             </div>
           </div>
 
           {/* CAD KUTUSU MERKEZ: FERAH NEON ÖNİZLEME + SAĞ VE ALT ÖLÇÜ OKLARI */}
-          <div class="relative z-10 my-auto flex w-full flex-col items-center justify-center px-6 py-4">
+          <div class="relative z-10 my-auto flex w-full flex-col items-center justify-center px-4 sm:px-6 py-4">
             <div class="relative flex w-full items-center justify-center">
               {/* Neon Tabela Gövdesi */}
               <div
@@ -1859,8 +1928,8 @@ export default function NeonStudio() {
                   ...neonBorderStyle,
                   ...(activeBorderId === "circle"
                     ? {
-                        width: `clamp(16rem, ${(estimate.widthCm / 50) * 18}rem, 28rem)`,
-                        height: `clamp(16rem, ${(estimate.heightCm / 50) * 18}rem, 28rem)`,
+                        width: `clamp(18rem, 74vw, 32rem)`,
+                        height: `clamp(18rem, 74vw, 32rem)`,
                       }
                     : undefined),
                 }}
@@ -1901,7 +1970,7 @@ export default function NeonStudio() {
                 <div
                   class={`relative z-10 flex flex-wrap items-center gap-5 ${
                     activeBorderId === "circle"
-                      ? "absolute inset-0 m-auto flex items-center justify-center p-4"
+                      ? "absolute inset-0 m-auto flex items-center justify-center p-6"
                       : spec.align === "left"
                         ? "justify-start text-left"
                         : spec.align === "right"
@@ -1915,7 +1984,10 @@ export default function NeonStudio() {
                       fontFamily: activeFont.cssFamily,
                       color: isLit ? activeColor.hex : activeColor.unlitHex,
                       textShadow: tubeShadow,
-                      fontSize: `clamp(1.4rem, ${(activeSize.fontScaleRem * circleFontScale) * 0.95}vw, ${(activeSize.fontScaleRem * circleFontScale) * 1.15}rem)`,
+                      fontSize:
+                        activeBorderId === "circle"
+                          ? `clamp(2.6rem, 11vw, 4.4rem)`
+                          : `clamp(1.8rem, ${(activeSize.fontScaleRem * circleFontScale) * 1.3}vw, ${(activeSize.fontScaleRem * circleFontScale) * 1.55}rem)`,
                       letterSpacing:
                         spec.sizeId === "sm"
                           ? "0.06em"
@@ -1923,7 +1995,7 @@ export default function NeonStudio() {
                             ? "0.03em"
                             : "0.01em",
                     }}
-                    class={`select-none leading-[1.15] transition-all duration-300 flex flex-col ${
+                    class={`select-none leading-[1.12] transition-all duration-300 flex flex-col ${
                       spec.align === "left"
                         ? "items-start text-left"
                         : spec.align === "right"
@@ -1972,16 +2044,16 @@ export default function NeonStudio() {
               {/* SAĞ DİKEY YÜKSEKLİK OKU */}
               <div
                 aria-hidden="true"
-                class="hidden sm:flex flex-col items-center ml-8 lg:ml-12 font-mono text-white"
+                class="flex flex-col items-center ml-4 sm:ml-8 lg:ml-12 font-mono text-white"
               >
-                <span class="mb-1.5 text-xs font-bold">
+                <span class="mb-1 text-[11px] sm:text-xs font-bold text-white/90">
                   {estimate.heightCm}cm
                 </span>
                 <div
                   style={
                     activeBorderId === "circle"
                       ? {
-                          height: `clamp(12rem, ${(estimate.heightCm / 50) * 15}rem, 24rem)`,
+                          height: `clamp(9rem, ${(estimate.heightCm / 50) * 12}rem, 24rem)`,
                         }
                       : undefined
                   }
@@ -1989,8 +2061,8 @@ export default function NeonStudio() {
                     activeBorderId === "circle"
                       ? ""
                       : activeBorderId === "pill"
-                        ? "h-28 sm:h-36"
-                        : "h-36 sm:h-44"
+                        ? "h-24 sm:h-36"
+                        : "h-28 sm:h-44"
                   }`}
                 >
                   <span class="text-xs leading-none text-white/80">↑</span>
@@ -2006,12 +2078,12 @@ export default function NeonStudio() {
               style={
                 activeBorderId === "circle"
                   ? {
-                      width: `clamp(14rem, ${(estimate.widthCm / 50) * 16}rem, 26rem)`,
+                      width: `clamp(12rem, ${(estimate.widthCm / 50) * 14}rem, 26rem)`,
                     }
                   : undefined
               }
-              class={`mt-6 flex items-center gap-3 font-mono text-white ${
-                activeBorderId === "circle" ? "" : "w-[85%] max-w-xl"
+              class={`mt-4 sm:mt-6 flex items-center gap-2 sm:gap-3 font-mono text-white ${
+                activeBorderId === "circle" ? "" : "w-[90%] sm:w-[85%] max-w-xl"
               }`}
             >
               <span class="text-xs text-white/80">←</span>
@@ -2032,9 +2104,9 @@ export default function NeonStudio() {
           </div>
 
           {/* CAD KUTUSU ALT BÖLÜM: SIFIRLAMA KAPSÜLLERİ + KENARDAN KENARA 6 SÜTUNLU ANTET TABLOSU */}
-          <div class="relative z-20 space-y-3">
-            {/* Sıfırlama / Geri Al / İleri Al Kapsülleri */}
-            <div class="flex flex-wrap items-center justify-center gap-2 px-4">
+          <div class="relative z-20 space-y-3 pb-20 lg:pb-0">
+            {/* Sıfırlama / Geri Al / İleri Al Kapsülleri (Mobilde gizli veya kompakt) */}
+            <div class="hidden sm:flex flex-wrap items-center justify-center gap-2 px-4">
               <button
                 type="button"
                 onClick={handleUndo}
@@ -2089,53 +2161,53 @@ export default function NeonStudio() {
               </button>
             </div>
 
-            {/* KENARDAN KENARA YAPIŞIK 6 SÜTUNLU CAD MÜHENDİSLİK ANTETİ (Görsel 2'deki Alt Tablo) */}
-            <div class="grid grid-cols-2 sm:grid-cols-6 border-t border-[#35E7FF]/25 bg-[#050505]/95 divide-x divide-y sm:divide-y-0 divide-[#35E7FF]/20 text-left font-mono">
-              <div class="px-3.5 py-2.5 sm:py-3">
-                <span class="block text-[9px] uppercase tracking-wider text-[#35E7FF]">
+            {/* KENARDAN KENARA YAPIŞIK 6 SÜTUNLU CAD MÜHENDİSLİK ANTETİ (Masaüstünde tam, mobilde kompakt 3 sütun) */}
+            <div class="grid grid-cols-3 sm:grid-cols-6 border-t border-[#35E7FF]/25 bg-[#050505]/95 divide-x divide-y sm:divide-y-0 divide-[#35E7FF]/20 text-left font-mono">
+              <div class="px-2.5 py-1.5 sm:px-3.5 sm:py-3">
+                <span class="block text-[8px] sm:text-[9px] uppercase tracking-wider text-[#35E7FF]">
                   TABELA ADI
                 </span>
-                <strong class="mt-0.5 block text-xs sm:text-sm font-bold text-white truncate">
+                <strong class="mt-0.5 block text-[11px] sm:text-sm font-bold text-white truncate">
                   {formattedText}
                 </strong>
               </div>
-              <div class="px-3.5 py-2.5 sm:py-3">
-                <span class="block text-[9px] uppercase tracking-wider text-[#35E7FF]">
+              <div class="px-2.5 py-1.5 sm:px-3.5 sm:py-3">
+                <span class="block text-[8px] sm:text-[9px] uppercase tracking-wider text-[#35E7FF]">
                   AKRİLİK TABAN
                 </span>
-                <strong class="mt-0.5 block text-xs sm:text-sm font-bold text-white">
-                  {estimate.widthCm} × {estimate.heightCm} cm
+                <strong class="mt-0.5 block text-[11px] sm:text-sm font-bold text-white">
+                  {estimate.widthCm}×{estimate.heightCm} cm
                 </strong>
               </div>
-              <div class="px-3.5 py-2.5 sm:py-3">
-                <span class="block text-[9px] uppercase tracking-wider text-[#35E7FF]">
+              <div class="px-2.5 py-1.5 sm:px-3.5 sm:py-3">
+                <span class="block text-[8px] sm:text-[9px] uppercase tracking-wider text-[#35E7FF]">
                   TOPLAM NEON
                 </span>
-                <strong class="mt-0.5 block text-xs sm:text-sm font-bold text-white">
+                <strong class="mt-0.5 block text-[11px] sm:text-sm font-bold text-white">
                   {estimate.neonLengthMeters} m
                 </strong>
               </div>
-              <div class="px-3.5 py-2.5 sm:py-3">
+              <div class="hidden sm:block px-3.5 py-3">
                 <span class="block text-[9px] uppercase tracking-wider text-[#35E7FF]">
                   GÜÇ / TRAFO
                 </span>
-                <strong class="mt-0.5 block text-xs sm:text-sm font-bold text-white">
+                <strong class="mt-0.5 block text-sm font-bold text-white">
                   {estimate.powerWatts} W
                 </strong>
               </div>
-              <div class="px-3.5 py-2.5 sm:py-3">
+              <div class="hidden sm:block px-3.5 py-3">
                 <span class="block text-[9px] uppercase tracking-wider text-[#35E7FF]">
                   TARİH
                 </span>
-                <strong class="mt-0.5 block text-xs sm:text-sm font-bold text-white">
+                <strong class="mt-0.5 block text-sm font-bold text-white">
                   {fmtDate(today)} {today.getFullYear()}
                 </strong>
               </div>
-              <div class="px-3.5 py-2.5 sm:py-3">
+              <div class="hidden sm:block px-3.5 py-3">
                 <span class="block text-[9px] uppercase tracking-wider text-[#35E7FF]">
                   ÜRETİCİ ATÖLYE
                 </span>
-                <strong class="mt-0.5 block text-xs sm:text-sm font-bold text-white truncate">
+                <strong class="mt-0.5 block text-sm font-bold text-white truncate">
                   CC NEON'S™
                 </strong>
               </div>
@@ -2143,6 +2215,58 @@ export default function NeonStudio() {
           </div>
         </div>
       </div>
+
+      {/* 3. MOBİL SABİT ALT NAVİGASYON BARI (Siyah / Koyu Füme Stüdyo Teması) */}
+      <nav
+        aria-label="Mobil Tasarım Adımları"
+        class="lg:hidden fixed bottom-0 inset-x-0 z-50 bg-[#0A0A0E] border-t border-white/[0.08] py-2 px-1 shadow-[0_-8px_30px_rgba(0,0,0,0.95)] flex items-center justify-around"
+      >
+        {TABS.map((tab) => {
+          const isCurrentActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => {
+                setActiveTab(tab.id);
+                setIsMobileSheetOpen(true);
+              }}
+              class="relative flex flex-col items-center justify-center flex-1 py-1 px-0.5 text-center transition-transform active:scale-95"
+            >
+              {/* Yeşil Onay Rozeti (Adım Tamamlandı Rozeti) */}
+              <span class="absolute top-0 right-1 sm:right-2 size-3.5 rounded-full bg-[#1CFF8A] border-2 border-[#0A0A0E] flex items-center justify-center text-[8px] font-bold text-black shadow-xs">
+                ✓
+              </span>
+
+              <div
+                class={`size-6 flex items-center justify-center transition-colors ${
+                  isCurrentActive ? "text-white" : "text-white/55"
+                }`}
+              >
+                <svg
+                  class="size-4.5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d={tab.icon} />
+                </svg>
+              </div>
+
+              <span
+                class={`font-mono text-[10px] font-medium leading-tight tracking-tight mt-0.5 ${
+                  isCurrentActive ? "text-white font-bold" : "text-white/50"
+                }`}
+              >
+                {tab.shortLabel}
+              </span>
+            </button>
+          );
+        })}
+      </nav>
     </div>
   );
 }
