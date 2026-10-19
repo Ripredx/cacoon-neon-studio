@@ -1558,421 +1558,415 @@ export default function NeonStudio() {
           </aside>
         )}
 
-        {/* BÖLGE C: SAĞ TAM SAHNE ÇERÇEVELİ CAD ÖNİZLEME ALANI (Görsel 2 Mimarisi) */}
+        {/* BÖLGE C: SAĞ TAM SAHNE CAD ÖNİZLEME ALANI (Geriye Kalan Tüm Alan) */}
         <div
           ref={stageRef}
-          class="relative flex-1 min-h-[520px] lg:min-h-0 h-full bg-transparent flex items-center justify-center p-3 sm:p-5 lg:p-7 overflow-hidden"
+          class={`relative flex-1 min-h-[520px] lg:min-h-0 h-full flex flex-col justify-between overflow-hidden transition-colors duration-300 border-l border-white/[0.07] ${wallTextureClass}`}
+          style={
+            sceneBg === "blueprint"
+              ? {
+                  backgroundImage:
+                    "linear-gradient(rgba(53, 231, 255, 0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(53, 231, 255, 0.045) 1px, transparent 1px)",
+                  backgroundSize: "40px 40px",
+                }
+              : undefined
+          }
         >
           {/* Çekmece Daraltıldığında Sol Üstte Beliren "Paneli Aç »" Butonu */}
           {!isDrawerOpen && (
             <button
               type="button"
               onClick={() => setIsDrawerOpen(true)}
-              class="hidden lg:inline-flex cursor-pointer absolute top-7 left-7 z-30 items-center gap-2 rounded-xl border border-white/15 bg-[#0A0A0E]/90 px-3.5 py-2 font-mono text-xs font-semibold text-white backdrop-blur-md transition-colors hover:border-white/35"
+              class="hidden lg:inline-flex cursor-pointer absolute top-6 left-6 z-30 items-center gap-2 rounded-xl border border-white/15 bg-[#0A0A0E]/90 px-3.5 py-2 font-mono text-xs font-semibold text-white backdrop-blur-md transition-colors hover:border-white/35 shadow-lg"
             >
               <span>» Araç Panelini Aç</span>
             </button>
           )}
-
-          {/* ÇERÇEVELİ CAD BLUEPRINT KUTUSU (Görsel 2'deki Dış Çerçeve + Alt Antet Tablosu) */}
+          {/* Sol Kenar CAD Satır Koordinatları (A / B / C) */}
           <div
-            class={`relative flex flex-col justify-between w-full max-w-[980px] h-full max-h-[760px] border border-[#35E7FF]/20 overflow-hidden transition-colors duration-300 ${wallTextureClass}`}
-            style={
-              sceneBg === "blueprint"
-                ? {
-                    backgroundImage:
-                      "linear-gradient(rgba(53, 231, 255, 0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(53, 231, 255, 0.045) 1px, transparent 1px)",
-                    backgroundSize: "40px 40px",
-                  }
-                : undefined
-            }
+            aria-hidden="true"
+            class="pointer-events-none absolute left-3 top-28 bottom-36 hidden sm:flex flex-col justify-between font-mono text-xs font-semibold text-[#35E7FF]/40"
           >
-            {/* Sol Kenar CAD Satır Koordinatları (A / B / C) */}
-            <div
-              aria-hidden="true"
-              class="pointer-events-none absolute left-3 top-28 bottom-36 hidden sm:flex flex-col justify-between font-mono text-xs font-semibold text-[#35E7FF]/40"
-            >
-              <span>A</span>
-              <span>B</span>
-              <span>C</span>
+            <span>A</span>
+            <span>B</span>
+            <span>C</span>
+          </div>
+
+          {/* Duvara Düşen Atmosferik Neon Işık Havuzu */}
+          <div
+            aria-hidden="true"
+            class="pointer-events-none absolute inset-0 transition-opacity duration-300"
+            style={{
+              opacity: isLit ? NEON_ENGINE_CONFIG.wallSpillOpacity : 0,
+              background: `radial-gradient(circle at 50% 46%, rgba(${activeColor.glowRgb}, 0.5) 0%, rgba(${activeSymbolColor.glowRgb}, 0.16) 42%, transparent 72%)`,
+              mixBlendMode: "screen",
+            }}
+          />
+
+          {/* CAD KUTUSU ÜST BAŞLIK: "GÖRSEL ÖNİZLEME" + Sahne Kontrolleri */}
+          <div class="relative z-20 flex flex-wrap items-start justify-between gap-4 px-5 pt-5 sm:px-8 sm:pt-6">
+            <div class="text-left">
+              <h2
+                class="font-display text-xl sm:text-2xl font-bold uppercase tracking-wide"
+                style={{ color: activeColor.hex }}
+              >
+                GÖRSEL ÖNİZLEME
+              </h2>
+              <p class="mt-0.5 max-w-md text-xs text-white/60 leading-relaxed">
+                Görsel tahmin amaçlı önizlemedir. Üretim öncesi nihai
+                profesyonel CNC kesim çizimi onayınıza sunulur.
+              </p>
             </div>
 
-            {/* Duvara Düşen Atmosferik Neon Işık Havuzu */}
-            <div
-              aria-hidden="true"
-              class="pointer-events-none absolute inset-0 transition-opacity duration-300"
-              style={{
-                opacity: isLit ? NEON_ENGINE_CONFIG.wallSpillOpacity : 0,
-                background: `radial-gradient(circle at 50% 46%, rgba(${activeColor.glowRgb}, 0.5) 0%, rgba(${activeSymbolColor.glowRgb}, 0.16) 42%, transparent 72%)`,
-                mixBlendMode: "screen",
-              }}
-            />
-
-            {/* CAD KUTUSU ÜST BAŞLIK: "GÖRSEL ÖNİZLEME" + Sahne Kontrolleri */}
-            <div class="relative z-20 flex flex-wrap items-start justify-between gap-4 px-5 pt-5 sm:px-8 sm:pt-6">
-              <div class="text-left">
-                <h2
-                  class="font-display text-xl sm:text-2xl font-bold uppercase tracking-wide"
-                  style={{ color: activeColor.hex }}
-                >
-                  GÖRSEL ÖNİZLEME
-                </h2>
-                <p class="mt-0.5 max-w-md text-xs text-white/60 leading-relaxed">
-                  Görsel tahmin amaçlı önizlemedir. Üretim öncesi nihai
-                  profesyonel CNC kesim çizimi onayınıza sunulur.
-                </p>
-              </div>
-
-              <div class="flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onClick={handleTogglePower}
-                  aria-pressed={isLit}
-                  class={`cursor-pointer inline-flex h-8 items-center gap-2 rounded-lg border px-2.5 font-mono text-[11px] font-semibold transition-colors ${
-                    isLit
-                      ? "border-white/25 bg-[#0A0A0E]/90 text-white"
-                      : "border-white/10 bg-[#0A0A0E]/90 text-white/55"
-                  }`}
-                >
-                  <span
-                    class="size-2 rounded-full"
-                    style={
-                      isLit
-                        ? {
-                            backgroundColor: activeColor.hex,
-                            boxShadow: `0 0 8px ${activeColor.hex}`,
-                          }
-                        : { backgroundColor: "rgba(255,255,255,0.25)" }
-                    }
-                  />
-                  <span>{isLit ? "IŞIK: AÇIK" : "IŞIK: KAPALI"}</span>
-                </button>
-
-                <div class="inline-flex rounded-lg border border-white/10 bg-[#0A0A0E]/90 p-0.5">
-                  {(
-                    [
-                      { id: "blueprint", label: "CAD" },
-                      { id: "brick", label: "Tuğla" },
-                      { id: "concrete", label: "Beton" },
-                    ] as const
-                  ).map((bg) => (
-                    <button
-                      key={bg.id}
-                      type="button"
-                      onClick={() => setSceneBg(bg.id)}
-                      class={`cursor-pointer rounded-md px-2 py-1 font-mono text-[11px] font-medium ${
-                        sceneBg === bg.id
-                          ? "bg-white/15 text-white"
-                          : "text-white/55 hover:text-white"
-                      }`}
-                    >
-                      {bg.label}
-                    </button>
-                  ))}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleExportPng}
-                  class="cursor-pointer inline-flex h-8 items-center gap-1 rounded-lg border border-white/15 bg-[#0A0A0E]/90 px-2.5 font-mono text-[11px] font-semibold text-white hover:bg-white/15"
-                >
-                  <span>PNG İNDİR ↓</span>
-                </button>
-              </div>
-            </div>
-
-            {/* CAD KUTUSU MERKEZ: FERAH NEON ÖNİZLEME + SAĞ VE ALT ÖLÇÜ OKLARI */}
-            <div class="relative z-10 my-auto flex w-full flex-col items-center justify-center px-6 py-4">
-              <div class="relative flex w-full items-center justify-center">
-                {/* Neon Tabela Gövdesi */}
-                <div
-                  key={igniteTick}
-                  style={{
-                    boxShadow:
-                      hasExplicitFrame && isLit
-                        ? `0 20px 60px rgba(0,0,0,0.85), 0 0 42px rgba(${activeColor.glowRgb}, 0.24), inset 0 0 22px rgba(${activeColor.glowRgb}, 0.12)`
-                        : undefined,
-                    ...neonBorderStyle,
-                    ...(activeBorderId === "circle"
-                      ? {
-                          width: `clamp(14rem, ${(estimate.widthCm / 50) * 16}rem, 26rem)`,
-                          height: `clamp(14rem, ${(estimate.heightCm / 50) * 16}rem, 26rem)`,
-                        }
-                      : undefined),
-                  }}
-                  class={`relative transition-all duration-300 ${backboardShapeClass} ${
-                    activeBorderId !== "none" ? "border-[3px]" : ""
-                  } ${
-                    activeBorderId === "pill" || activeBorderId === "circle"
-                      ? "rounded-full"
-                      : activeBorderId === "ticket"
-                        ? "rounded-3xl border-dashed"
-                        : ""
-                  } ${isLit ? "animate-neon-ignite" : ""}`}
-                >
-                  {hasExplicitFrame &&
-                    (activeBorderId === "circle" ? (
-                      <>
-                        <span class="absolute top-[18%] left-[18%] size-2 rounded-full bg-white/40 ring-1 ring-black" />
-                        <span class="absolute top-[18%] right-[18%] size-2 rounded-full bg-white/40 ring-1 ring-black" />
-                        <span class="absolute bottom-[18%] left-[18%] size-2 rounded-full bg-white/40 ring-1 ring-black" />
-                        <span class="absolute bottom-[18%] right-[18%] size-2 rounded-full bg-white/40 ring-1 ring-black" />
-                      </>
-                    ) : activeBorderId === "pill" ? (
-                      <>
-                        <span class="absolute top-3.5 left-7 size-2 rounded-full bg-white/40 ring-1 ring-black" />
-                        <span class="absolute top-3.5 right-7 size-2 rounded-full bg-white/40 ring-1 ring-black" />
-                        <span class="absolute bottom-3.5 left-7 size-2 rounded-full bg-white/40 ring-1 ring-black" />
-                        <span class="absolute bottom-3.5 right-7 size-2 rounded-full bg-white/40 ring-1 ring-black" />
-                      </>
-                    ) : (
-                      <>
-                        <span class="absolute top-3 left-3 size-2 rounded-full bg-white/40 ring-1 ring-black" />
-                        <span class="absolute top-3 right-3 size-2 rounded-full bg-white/40 ring-1 ring-black" />
-                        <span class="absolute bottom-3 left-3 size-2 rounded-full bg-white/40 ring-1 ring-black" />
-                        <span class="absolute bottom-3 right-3 size-2 rounded-full bg-white/40 ring-1 ring-black" />
-                      </>
-                    ))}
-
-                  <div
-                    class={`relative z-10 flex flex-wrap items-center gap-5 ${
-                      spec.align === "left"
-                        ? "justify-start text-left"
-                        : spec.align === "right"
-                          ? "justify-end text-right"
-                          : "justify-center text-center"
-                    }`}
-                  >
-                    {/* Fiziksel Neon Boyut & Tüp Kalibrasyonlu Çok Satırlı Metin */}
-                    <div
-                      style={{
-                        fontFamily: activeFont.cssFamily,
-                        color: isLit ? activeColor.hex : activeColor.unlitHex,
-                        textShadow: tubeShadow,
-                        fontSize: `clamp(1.8rem, ${activeSize.fontScaleRem * 1.05}vw, ${activeSize.fontScaleRem * 1.3}rem)`,
-                        letterSpacing:
-                          spec.sizeId === "sm"
-                            ? "0.06em"
-                            : spec.sizeId === "md"
-                              ? "0.03em"
-                              : "0.01em",
-                      }}
-                      class={`select-none leading-[1.2] transition-all duration-300 flex flex-col ${
-                        spec.align === "left"
-                          ? "items-start text-left"
-                          : spec.align === "right"
-                            ? "items-end text-right"
-                            : "items-center text-center"
-                      }`}
-                    >
-                      {formattedLines.map((line) => (
-                        <span key={line} class="block whitespace-pre-wrap">
-                          {line}
-                        </span>
-                      ))}
-                    </div>
-
-                    {activeSymbolId !== "none" && (
-                      <svg
-                        key={activeSymbolId}
-                        role="img"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke={isLit ? "#FFFFFF" : activeSymbolColor.unlitHex}
-                        stroke-width={
-                          spec.sizeId === "sm"
-                            ? "2.4"
-                            : spec.sizeId === "md"
-                              ? "2.0"
-                              : "1.6"
-                        }
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        style={{
-                          filter: isLit
-                            ? `drop-shadow(0 0 4px #FFFFFF) drop-shadow(0 0 14px ${activeSymbolColor.hex}) drop-shadow(0 0 28px ${activeSymbolColor.hex})`
-                            : "none",
-                        }}
-                        class={`${activeSize.symbolSizeClass} shrink-0 transition-all duration-300`}
-                        aria-label={activeSymbol.label}
-                      >
-                        <title>{activeSymbol.label}</title>
-                        <path d={activeSymbol.svgPath} />
-                      </svg>
-                    )}
-                  </div>
-                </div>
-
-                {/* SAĞ DİKEY YÜKSEKLİK OKU */}
-                <div
-                  aria-hidden="true"
-                  class="hidden sm:flex flex-col items-center ml-8 lg:ml-12 font-mono text-white"
-                >
-                  <span class="mb-1.5 text-xs font-bold">
-                    {estimate.heightCm}cm
-                  </span>
-                  <div
-                    style={
-                      activeBorderId === "circle"
-                        ? {
-                            height: `clamp(12rem, ${(estimate.heightCm / 50) * 15}rem, 24rem)`,
-                          }
-                        : undefined
-                    }
-                    class={`flex flex-col items-center ${
-                      activeBorderId === "circle"
-                        ? ""
-                        : activeBorderId === "pill"
-                          ? "h-28 sm:h-36"
-                          : "h-36 sm:h-44"
-                    }`}
-                  >
-                    <span class="text-xs leading-none text-white/80">↑</span>
-                    <div class="w-px flex-1 bg-white/60" />
-                    <span class="text-xs leading-none text-white/80">↓</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* ALT YATAY GENİŞLİK OKU */}
-              <div
-                aria-hidden="true"
-                style={
-                  activeBorderId === "circle"
-                    ? {
-                        width: `clamp(14rem, ${(estimate.widthCm / 50) * 16}rem, 26rem)`,
-                      }
-                    : undefined
-                }
-                class={`mt-6 flex items-center gap-3 font-mono text-white ${
-                  activeBorderId === "circle" ? "" : "w-[85%] max-w-xl"
+            <div class="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={handleTogglePower}
+                aria-pressed={isLit}
+                class={`cursor-pointer inline-flex h-8 items-center gap-2 rounded-lg border px-2.5 font-mono text-[11px] font-semibold transition-colors ${
+                  isLit
+                    ? "border-white/25 bg-[#0A0A0E]/90 text-white"
+                    : "border-white/10 bg-[#0A0A0E]/90 text-white/55"
                 }`}
               >
-                <span class="text-xs text-white/80">←</span>
-                <div class="h-px flex-1 bg-white/60" />
-                <div class="text-center leading-tight px-1">
-                  <span class="block text-xs font-bold text-white">
-                    {estimate.widthCm}cm
-                  </span>
-                  <span class="block text-[10px] text-white/55">
-                    {activeBorderId === "circle"
-                      ? "çap ölçüsü"
-                      : "akrilik ölçüsü"}
-                  </span>
+                <span
+                  class="size-2 rounded-full"
+                  style={
+                    isLit
+                      ? {
+                          backgroundColor: activeColor.hex,
+                          boxShadow: `0 0 8px ${activeColor.hex}`,
+                        }
+                      : { backgroundColor: "rgba(255,255,255,0.25)" }
+                  }
+                />
+                <span>{isLit ? "IŞIK: AÇIK" : "IŞIK: KAPALI"}</span>
+              </button>
+
+              <div class="inline-flex rounded-lg border border-white/10 bg-[#0A0A0E]/90 p-0.5">
+                {(
+                  [
+                    { id: "blueprint", label: "CAD" },
+                    { id: "brick", label: "Tuğla" },
+                    { id: "concrete", label: "Beton" },
+                  ] as const
+                ).map((bg) => (
+                  <button
+                    key={bg.id}
+                    type="button"
+                    onClick={() => setSceneBg(bg.id)}
+                    class={`cursor-pointer rounded-md px-2 py-1 font-mono text-[11px] font-medium ${
+                      sceneBg === bg.id
+                        ? "bg-white/15 text-white"
+                        : "text-white/55 hover:text-white"
+                    }`}
+                  >
+                    {bg.label}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                type="button"
+                onClick={handleExportPng}
+                class="cursor-pointer inline-flex h-8 items-center gap-1 rounded-lg border border-white/15 bg-[#0A0A0E]/90 px-2.5 font-mono text-[11px] font-semibold text-white hover:bg-white/15"
+              >
+                <span>PNG İNDİR ↓</span>
+              </button>
+            </div>
+          </div>
+
+          {/* CAD KUTUSU MERKEZ: FERAH NEON ÖNİZLEME + SAĞ VE ALT ÖLÇÜ OKLARI */}
+          <div class="relative z-10 my-auto flex w-full flex-col items-center justify-center px-6 py-4">
+            <div class="relative flex w-full items-center justify-center">
+              {/* Neon Tabela Gövdesi */}
+              <div
+                key={igniteTick}
+                style={{
+                  boxShadow:
+                    hasExplicitFrame && isLit
+                      ? `0 20px 60px rgba(0,0,0,0.85), 0 0 42px rgba(${activeColor.glowRgb}, 0.24), inset 0 0 22px rgba(${activeColor.glowRgb}, 0.12)`
+                      : undefined,
+                  ...neonBorderStyle,
+                  ...(activeBorderId === "circle"
+                    ? {
+                        width: `clamp(14rem, ${(estimate.widthCm / 50) * 16}rem, 26rem)`,
+                        height: `clamp(14rem, ${(estimate.heightCm / 50) * 16}rem, 26rem)`,
+                      }
+                    : undefined),
+                }}
+                class={`relative transition-all duration-300 ${backboardShapeClass} ${
+                  activeBorderId !== "none" ? "border-[3px]" : ""
+                } ${
+                  activeBorderId === "pill" || activeBorderId === "circle"
+                    ? "rounded-full"
+                    : activeBorderId === "ticket"
+                      ? "rounded-3xl border-dashed"
+                      : ""
+                } ${isLit ? "animate-neon-ignite" : ""}`}
+              >
+                {hasExplicitFrame &&
+                  (activeBorderId === "circle" ? (
+                    <>
+                      <span class="absolute top-[18%] left-[18%] size-2 rounded-full bg-white/40 ring-1 ring-black" />
+                      <span class="absolute top-[18%] right-[18%] size-2 rounded-full bg-white/40 ring-1 ring-black" />
+                      <span class="absolute bottom-[18%] left-[18%] size-2 rounded-full bg-white/40 ring-1 ring-black" />
+                      <span class="absolute bottom-[18%] right-[18%] size-2 rounded-full bg-white/40 ring-1 ring-black" />
+                    </>
+                  ) : activeBorderId === "pill" ? (
+                    <>
+                      <span class="absolute top-3.5 left-7 size-2 rounded-full bg-white/40 ring-1 ring-black" />
+                      <span class="absolute top-3.5 right-7 size-2 rounded-full bg-white/40 ring-1 ring-black" />
+                      <span class="absolute bottom-3.5 left-7 size-2 rounded-full bg-white/40 ring-1 ring-black" />
+                      <span class="absolute bottom-3.5 right-7 size-2 rounded-full bg-white/40 ring-1 ring-black" />
+                    </>
+                  ) : (
+                    <>
+                      <span class="absolute top-3 left-3 size-2 rounded-full bg-white/40 ring-1 ring-black" />
+                      <span class="absolute top-3 right-3 size-2 rounded-full bg-white/40 ring-1 ring-black" />
+                      <span class="absolute bottom-3 left-3 size-2 rounded-full bg-white/40 ring-1 ring-black" />
+                      <span class="absolute bottom-3 right-3 size-2 rounded-full bg-white/40 ring-1 ring-black" />
+                    </>
+                  ))}
+
+                <div
+                  class={`relative z-10 flex flex-wrap items-center gap-5 ${
+                    spec.align === "left"
+                      ? "justify-start text-left"
+                      : spec.align === "right"
+                        ? "justify-end text-right"
+                        : "justify-center text-center"
+                  }`}
+                >
+                  {/* Fiziksel Neon Boyut & Tüp Kalibrasyonlu Çok Satırlı Metin */}
+                  <div
+                    style={{
+                      fontFamily: activeFont.cssFamily,
+                      color: isLit ? activeColor.hex : activeColor.unlitHex,
+                      textShadow: tubeShadow,
+                      fontSize: `clamp(1.8rem, ${activeSize.fontScaleRem * 1.05}vw, ${activeSize.fontScaleRem * 1.3}rem)`,
+                      letterSpacing:
+                        spec.sizeId === "sm"
+                          ? "0.06em"
+                          : spec.sizeId === "md"
+                            ? "0.03em"
+                            : "0.01em",
+                    }}
+                    class={`select-none leading-[1.2] transition-all duration-300 flex flex-col ${
+                      spec.align === "left"
+                        ? "items-start text-left"
+                        : spec.align === "right"
+                          ? "items-end text-right"
+                          : "items-center text-center"
+                    }`}
+                  >
+                    {formattedLines.map((line) => (
+                      <span key={line} class="block whitespace-pre-wrap">
+                        {line}
+                      </span>
+                    ))}
+                  </div>
+
+                  {activeSymbolId !== "none" && (
+                    <svg
+                      key={activeSymbolId}
+                      role="img"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke={isLit ? "#FFFFFF" : activeSymbolColor.unlitHex}
+                      stroke-width={
+                        spec.sizeId === "sm"
+                          ? "2.4"
+                          : spec.sizeId === "md"
+                            ? "2.0"
+                            : "1.6"
+                      }
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      style={{
+                        filter: isLit
+                          ? `drop-shadow(0 0 4px #FFFFFF) drop-shadow(0 0 14px ${activeSymbolColor.hex}) drop-shadow(0 0 28px ${activeSymbolColor.hex})`
+                          : "none",
+                      }}
+                      class={`${activeSize.symbolSizeClass} shrink-0 transition-all duration-300`}
+                      aria-label={activeSymbol.label}
+                    >
+                      <title>{activeSymbol.label}</title>
+                      <path d={activeSymbol.svgPath} />
+                    </svg>
+                  )}
                 </div>
-                <div class="h-px flex-1 bg-white/60" />
-                <span class="text-xs text-white/80">→</span>
+              </div>
+
+              {/* SAĞ DİKEY YÜKSEKLİK OKU */}
+              <div
+                aria-hidden="true"
+                class="hidden sm:flex flex-col items-center ml-8 lg:ml-12 font-mono text-white"
+              >
+                <span class="mb-1.5 text-xs font-bold">
+                  {estimate.heightCm}cm
+                </span>
+                <div
+                  style={
+                    activeBorderId === "circle"
+                      ? {
+                          height: `clamp(12rem, ${(estimate.heightCm / 50) * 15}rem, 24rem)`,
+                        }
+                      : undefined
+                  }
+                  class={`flex flex-col items-center ${
+                    activeBorderId === "circle"
+                      ? ""
+                      : activeBorderId === "pill"
+                        ? "h-28 sm:h-36"
+                        : "h-36 sm:h-44"
+                  }`}
+                >
+                  <span class="text-xs leading-none text-white/80">↑</span>
+                  <div class="w-px flex-1 bg-white/60" />
+                  <span class="text-xs leading-none text-white/80">↓</span>
+                </div>
               </div>
             </div>
 
-            {/* CAD KUTUSU ALT BÖLÜM: SIFIRLAMA KAPSÜLLERİ + KENARDAN KENARA 6 SÜTUNLU ANTET TABLOSU */}
-            <div class="relative z-20 space-y-3">
-              {/* Sıfırlama / Geri Al / İleri Al Kapsülleri */}
-              <div class="flex flex-wrap items-center justify-center gap-2 px-4">
-                <button
-                  type="button"
-                  onClick={handleUndo}
-                  disabled={historyIndex <= 0}
-                  class="cursor-pointer rounded-md border border-white/15 bg-[#0A0A0E]/90 px-3 py-1.5 font-mono text-[11px] font-semibold text-white/80 disabled:opacity-35 hover:border-white/35 hover:text-white"
-                >
-                  ↺ Geri Al
-                </button>
-                <button
-                  type="button"
-                  onClick={handleRedo}
-                  disabled={historyIndex >= history.length - 1}
-                  class="cursor-pointer rounded-md border border-white/15 bg-[#0A0A0E]/90 px-3 py-1.5 font-mono text-[11px] font-semibold text-white/80 disabled:opacity-35 hover:border-white/35 hover:text-white"
-                >
-                  ↻ İleri Al
-                </button>
-                <button
-                  type="button"
-                  onClick={() =>
-                    updateSpec({ colorId: "cyan", symbolColorId: "cyan" })
-                  }
-                  class="cursor-pointer rounded-md border border-[#35E7FF]/40 bg-[#0A0A0E]/90 px-3 py-1.5 font-mono text-[11px] font-semibold text-white hover:border-[#35E7FF]"
-                >
-                  ↺ Rengi Sıfırla
-                </button>
-                <button
-                  type="button"
-                  onClick={() =>
-                    updateSpec({
-                      sizeId: "md",
-                      backboardId: "contour",
-                      borderId: "none",
-                    })
-                  }
-                  class="cursor-pointer rounded-md border border-[#35E7FF]/40 bg-[#0A0A0E]/90 px-3 py-1.5 font-mono text-[11px] font-semibold text-white hover:border-[#35E7FF]"
-                >
-                  ↺ Ölçek & Boyut Sıfırla
-                </button>
-                <button
-                  type="button"
-                  onClick={() => updateSpec({ fontId: "script" })}
-                  class="cursor-pointer rounded-md border border-[#35E7FF]/40 bg-[#0A0A0E]/90 px-3 py-1.5 font-mono text-[11px] font-semibold text-white hover:border-[#35E7FF]"
-                >
-                  ↺ Fontu Sıfırla
-                </button>
-                <button
-                  type="button"
-                  onClick={handleCopyShareUrl}
-                  class="cursor-pointer rounded-md border border-white/20 bg-white/[0.06] px-3 py-1.5 font-mono text-[11px] font-semibold text-white hover:bg-white/15"
-                >
-                  {copiedLink ? "Link Kopyalandı ✓" : "🔗 Linki Kopyala"}
-                </button>
+            {/* ALT YATAY GENİŞLİK OKU */}
+            <div
+              aria-hidden="true"
+              style={
+                activeBorderId === "circle"
+                  ? {
+                      width: `clamp(14rem, ${(estimate.widthCm / 50) * 16}rem, 26rem)`,
+                    }
+                  : undefined
+              }
+              class={`mt-6 flex items-center gap-3 font-mono text-white ${
+                activeBorderId === "circle" ? "" : "w-[85%] max-w-xl"
+              }`}
+            >
+              <span class="text-xs text-white/80">←</span>
+              <div class="h-px flex-1 bg-white/60" />
+              <div class="text-center leading-tight px-1">
+                <span class="block text-xs font-bold text-white">
+                  {estimate.widthCm}cm
+                </span>
+                <span class="block text-[10px] text-white/55">
+                  {activeBorderId === "circle"
+                    ? "çap ölçüsü"
+                    : "akrilik ölçüsü"}
+                </span>
               </div>
+              <div class="h-px flex-1 bg-white/60" />
+              <span class="text-xs text-white/80">→</span>
+            </div>
+          </div>
 
-              {/* KENARDAN KENARA YAPIŞIK 6 SÜTUNLU CAD MÜHENDİSLİK ANTETİ (Görsel 2'deki Alt Tablo) */}
-              <div class="grid grid-cols-2 sm:grid-cols-6 border-t border-[#35E7FF]/25 bg-[#050505]/95 divide-x divide-y sm:divide-y-0 divide-[#35E7FF]/20 text-left font-mono">
-                <div class="px-3.5 py-2.5 sm:py-3">
-                  <span class="block text-[9px] uppercase tracking-wider text-[#35E7FF]">
-                    TABELA ADI
-                  </span>
-                  <strong class="mt-0.5 block text-xs sm:text-sm font-bold text-white truncate">
-                    {formattedText}
-                  </strong>
-                </div>
-                <div class="px-3.5 py-2.5 sm:py-3">
-                  <span class="block text-[9px] uppercase tracking-wider text-[#35E7FF]">
-                    AKRİLİK TABAN
-                  </span>
-                  <strong class="mt-0.5 block text-xs sm:text-sm font-bold text-white">
-                    {estimate.widthCm} × {estimate.heightCm} cm
-                  </strong>
-                </div>
-                <div class="px-3.5 py-2.5 sm:py-3">
-                  <span class="block text-[9px] uppercase tracking-wider text-[#35E7FF]">
-                    TOPLAM NEON
-                  </span>
-                  <strong class="mt-0.5 block text-xs sm:text-sm font-bold text-white">
-                    {estimate.neonLengthMeters} m
-                  </strong>
-                </div>
-                <div class="px-3.5 py-2.5 sm:py-3">
-                  <span class="block text-[9px] uppercase tracking-wider text-[#35E7FF]">
-                    GÜÇ / TRAFO
-                  </span>
-                  <strong class="mt-0.5 block text-xs sm:text-sm font-bold text-white">
-                    {estimate.powerWatts} W
-                  </strong>
-                </div>
-                <div class="px-3.5 py-2.5 sm:py-3">
-                  <span class="block text-[9px] uppercase tracking-wider text-[#35E7FF]">
-                    TARİH
-                  </span>
-                  <strong class="mt-0.5 block text-xs sm:text-sm font-bold text-white">
-                    {fmtDate(today)} {today.getFullYear()}
-                  </strong>
-                </div>
-                <div class="px-3.5 py-2.5 sm:py-3">
-                  <span class="block text-[9px] uppercase tracking-wider text-[#35E7FF]">
-                    ÜRETİCİ ATÖLYE
-                  </span>
-                  <strong class="mt-0.5 block text-xs sm:text-sm font-bold text-white truncate">
-                    C/CNEON'S GLOW™
-                  </strong>
-                </div>
+          {/* CAD KUTUSU ALT BÖLÜM: SIFIRLAMA KAPSÜLLERİ + KENARDAN KENARA 6 SÜTUNLU ANTET TABLOSU */}
+          <div class="relative z-20 space-y-3">
+            {/* Sıfırlama / Geri Al / İleri Al Kapsülleri */}
+            <div class="flex flex-wrap items-center justify-center gap-2 px-4">
+              <button
+                type="button"
+                onClick={handleUndo}
+                disabled={historyIndex <= 0}
+                class="cursor-pointer rounded-md border border-white/15 bg-[#0A0A0E]/90 px-3 py-1.5 font-mono text-[11px] font-semibold text-white/80 disabled:opacity-35 hover:border-white/35 hover:text-white"
+              >
+                ↺ Geri Al
+              </button>
+              <button
+                type="button"
+                onClick={handleRedo}
+                disabled={historyIndex >= history.length - 1}
+                class="cursor-pointer rounded-md border border-white/15 bg-[#0A0A0E]/90 px-3 py-1.5 font-mono text-[11px] font-semibold text-white/80 disabled:opacity-35 hover:border-white/35 hover:text-white"
+              >
+                ↻ İleri Al
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  updateSpec({ colorId: "cyan", symbolColorId: "cyan" })
+                }
+                class="cursor-pointer rounded-md border border-[#35E7FF]/40 bg-[#0A0A0E]/90 px-3 py-1.5 font-mono text-[11px] font-semibold text-white hover:border-[#35E7FF]"
+              >
+                ↺ Rengi Sıfırla
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  updateSpec({
+                    sizeId: "md",
+                    backboardId: "contour",
+                    borderId: "none",
+                  })
+                }
+                class="cursor-pointer rounded-md border border-[#35E7FF]/40 bg-[#0A0A0E]/90 px-3 py-1.5 font-mono text-[11px] font-semibold text-white hover:border-[#35E7FF]"
+              >
+                ↺ Ölçek & Boyut Sıfırla
+              </button>
+              <button
+                type="button"
+                onClick={() => updateSpec({ fontId: "script" })}
+                class="cursor-pointer rounded-md border border-[#35E7FF]/40 bg-[#0A0A0E]/90 px-3 py-1.5 font-mono text-[11px] font-semibold text-white hover:border-[#35E7FF]"
+              >
+                ↺ Fontu Sıfırla
+              </button>
+              <button
+                type="button"
+                onClick={handleCopyShareUrl}
+                class="cursor-pointer rounded-md border border-white/20 bg-white/[0.06] px-3 py-1.5 font-mono text-[11px] font-semibold text-white hover:bg-white/15"
+              >
+                {copiedLink ? "Link Kopyalandı ✓" : "🔗 Linki Kopyala"}
+              </button>
+            </div>
+
+            {/* KENARDAN KENARA YAPIŞIK 6 SÜTUNLU CAD MÜHENDİSLİK ANTETİ (Görsel 2'deki Alt Tablo) */}
+            <div class="grid grid-cols-2 sm:grid-cols-6 border-t border-[#35E7FF]/25 bg-[#050505]/95 divide-x divide-y sm:divide-y-0 divide-[#35E7FF]/20 text-left font-mono">
+              <div class="px-3.5 py-2.5 sm:py-3">
+                <span class="block text-[9px] uppercase tracking-wider text-[#35E7FF]">
+                  TABELA ADI
+                </span>
+                <strong class="mt-0.5 block text-xs sm:text-sm font-bold text-white truncate">
+                  {formattedText}
+                </strong>
+              </div>
+              <div class="px-3.5 py-2.5 sm:py-3">
+                <span class="block text-[9px] uppercase tracking-wider text-[#35E7FF]">
+                  AKRİLİK TABAN
+                </span>
+                <strong class="mt-0.5 block text-xs sm:text-sm font-bold text-white">
+                  {estimate.widthCm} × {estimate.heightCm} cm
+                </strong>
+              </div>
+              <div class="px-3.5 py-2.5 sm:py-3">
+                <span class="block text-[9px] uppercase tracking-wider text-[#35E7FF]">
+                  TOPLAM NEON
+                </span>
+                <strong class="mt-0.5 block text-xs sm:text-sm font-bold text-white">
+                  {estimate.neonLengthMeters} m
+                </strong>
+              </div>
+              <div class="px-3.5 py-2.5 sm:py-3">
+                <span class="block text-[9px] uppercase tracking-wider text-[#35E7FF]">
+                  GÜÇ / TRAFO
+                </span>
+                <strong class="mt-0.5 block text-xs sm:text-sm font-bold text-white">
+                  {estimate.powerWatts} W
+                </strong>
+              </div>
+              <div class="px-3.5 py-2.5 sm:py-3">
+                <span class="block text-[9px] uppercase tracking-wider text-[#35E7FF]">
+                  TARİH
+                </span>
+                <strong class="mt-0.5 block text-xs sm:text-sm font-bold text-white">
+                  {fmtDate(today)} {today.getFullYear()}
+                </strong>
+              </div>
+              <div class="px-3.5 py-2.5 sm:py-3">
+                <span class="block text-[9px] uppercase tracking-wider text-[#35E7FF]">
+                  ÜRETİCİ ATÖLYE
+                </span>
+                <strong class="mt-0.5 block text-xs sm:text-sm font-bold text-white truncate">
+                  C/CNEON'S GLOW™
+                </strong>
               </div>
             </div>
           </div>
