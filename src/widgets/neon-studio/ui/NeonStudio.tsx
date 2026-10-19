@@ -297,37 +297,7 @@ export default function NeonStudio() {
       118,
     );
 
-    if (activeBorderId === "heart") {
-      ctx.save();
-      ctx.translate(800, 430);
-      const scaleX = 4.8;
-      const scaleY = 3.6;
-      ctx.scale(scaleX, scaleY);
-      ctx.beginPath();
-      // Centered heart path (-50 to +50 range)
-      ctx.moveTo(0, 38);
-      ctx.bezierCurveTo(-28, 16, -46, -2, -46, -22);
-      ctx.bezierCurveTo(-46, -38, -34, -46, -20, -46);
-      ctx.bezierCurveTo(-11, -46, -4, -41, 0, -34);
-      ctx.bezierCurveTo(4, -41, 11, -46, 20, -46);
-      ctx.bezierCurveTo(34, -46, 46, -38, 46, -22);
-      ctx.bezierCurveTo(46, -2, 28, 16, 0, 38);
-      ctx.closePath();
-      ctx.lineWidth = 1.2;
-      if (isLit) {
-        ctx.strokeStyle = activeColor.hex;
-        ctx.shadowColor = activeColor.hex;
-        ctx.shadowBlur = 18;
-        ctx.stroke();
-        ctx.strokeStyle = "#FFFFFF";
-        ctx.shadowBlur = 4;
-        ctx.stroke();
-      } else {
-        ctx.strokeStyle = activeColor.unlitHex;
-        ctx.stroke();
-      }
-      ctx.restore();
-    } else if (activeBorderId !== "none") {
+    if (activeBorderId !== "none") {
       ctx.save();
       ctx.beginPath();
       const padX = 260;
@@ -1640,15 +1610,13 @@ export default function NeonStudio() {
                   key={igniteTick}
                   style={{
                     boxShadow:
-                      hasExplicitFrame && isLit && activeBorderId !== "heart"
+                      hasExplicitFrame && isLit
                         ? `0 20px 60px rgba(0,0,0,0.85), 0 0 42px rgba(${activeColor.glowRgb}, 0.24), inset 0 0 22px rgba(${activeColor.glowRgb}, 0.12)`
                         : undefined,
-                    ...(activeBorderId !== "heart" ? neonBorderStyle : {}),
+                    ...neonBorderStyle,
                   }}
                   class={`relative transition-all duration-300 ${backboardShapeClass} ${
-                    activeBorderId !== "none" && activeBorderId !== "heart"
-                      ? "border-[3px]"
-                      : ""
+                    activeBorderId !== "none" ? "border-[3px]" : ""
                   } ${
                     activeBorderId === "pill" || activeBorderId === "circle"
                       ? "rounded-full"
@@ -1657,40 +1625,7 @@ export default function NeonStudio() {
                         : ""
                   } ${isLit ? "animate-neon-ignite" : ""}`}
                 >
-                  {/* KALP NEON ÇERÇEVE (SVG Silhouette) */}
-                  {activeBorderId === "heart" && (
-                    <div
-                      aria-hidden="true"
-                      class="pointer-events-none absolute inset-[-35px] sm:inset-[-55px] z-0 flex items-center justify-center"
-                    >
-                      <svg
-                        viewBox="0 0 100 100"
-                        preserveAspectRatio="none"
-                        class="h-full w-full"
-                        style={{
-                          filter: isLit
-                            ? `drop-shadow(0 0 4px #FFFFFF) drop-shadow(0 0 12px ${activeColor.hex}) drop-shadow(0 0 28px rgba(${activeColor.glowRgb}, 0.75))`
-                            : "none",
-                        }}
-                      >
-                        <title>Kalp Neon Çerçeve</title>
-                        <path
-                          d="M 50,88 C 22,66 4,48 4,28 C 4,12 16,4 30,4 C 39,4 46,9 50,16 C 54,9 61,4 70,4 C 84,4 96,12 96,28 C 96,48 78,66 50,88 Z"
-                          fill={
-                            spec.backboardId === "rectangle" ||
-                            spec.backboardId === "canvas"
-                              ? "rgba(10, 10, 14, 0.4)"
-                              : "none"
-                          }
-                          stroke={isLit ? "#FFFFFF" : activeColor.unlitHex}
-                          stroke-width="2.5"
-                          stroke-linejoin="round"
-                        />
-                      </svg>
-                    </div>
-                  )}
-
-                  {hasExplicitFrame && activeBorderId !== "heart" && (
+                  {hasExplicitFrame && (
                     <>
                       <span class="absolute top-3 left-3 size-2 rounded-full bg-white/40 ring-1 ring-black" />
                       <span class="absolute top-3 right-3 size-2 rounded-full bg-white/40 ring-1 ring-black" />

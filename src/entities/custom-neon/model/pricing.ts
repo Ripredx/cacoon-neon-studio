@@ -25,13 +25,7 @@ export type NeonSymbolId =
   | "music"
   | "sparkles";
 
-export type NeonBorderId =
-  | "none"
-  | "rectangle"
-  | "pill"
-  | "circle"
-  | "ticket"
-  | "heart";
+export type NeonBorderId = "none" | "rectangle" | "pill" | "circle" | "ticket";
 
 export type NeonTubeTechId = "standard" | "luminex";
 export type NeonDimmerId = "standard" | "wireless";
@@ -362,11 +356,6 @@ export const NEON_BORDERS: Record<
     label: "Sinema Bileti (Ticket) Çerçeve",
     description: "Köşeleri içe oyuk klasik sinema/bar tabelası bordürü",
     extraMeters: 1.7,
-  },
-  heart: {
-    label: "Kalp Neon Çerçeve",
-    description: "Yazıyı kalp silüeti içine alan özel tasarım bordür",
-    extraMeters: 1.65,
   },
 };
 
