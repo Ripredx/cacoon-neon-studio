@@ -5,330 +5,326 @@ import { BUSINESS_CONFIG } from "@/shared/config/business";
 <section
   id="hero-stage"
   style="--neon-color: #35E7FF; --neon-rgb: 53, 231, 255;"
-  class="relative min-h-dvh flex flex-col justify-between bg-[#050505] pt-28 sm:pt-32 border-b border-white/[0.07] overflow-hidden"
+  class="relative min-h-dvh flex flex-col justify-between bg-[#050505] pt-24 sm:pt-28 border-b border-white/[0.07] overflow-hidden"
 >
   <div class="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 my-auto py-8 sm:py-12">
-    <div class="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-8 items-stretch">
-      <!-- Sol Kolon (5 Sütun): Güçlü Mimari Tipografi & Monospace Mühendislik Rozetleri -->
-      <div class="lg:col-span-5 flex flex-col justify-between rounded-xl border border-white/[0.07] bg-[#0A0A0E] p-6 sm:p-8 text-left">
-        <div class="space-y-6">
-          <div class="flex flex-wrap items-center gap-2">
-            <span class="font-mono inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-1 text-xs font-medium uppercase tracking-wider text-white/80">
-              <span
-                id="hero-eyebrow-dot"
-                class="size-1.5 rounded-full transition-all duration-300"
-                style="background-color: var(--neon-color); box-shadow: 0 0 8px var(--neon-color);"
-              ></span>
-              EL İŞÇİLİĞİ
-            </span>
-            <span class="font-mono rounded-lg border border-white/[0.07] bg-[#050505] px-2.5 py-1 text-xs text-white/50">
-              CACOON ATELIER · {BUSINESS_CONFIG.location.toUpperCase()}
-            </span>
-          </div>
-
-          <h1
-            class="font-display font-bold text-white tracking-tight"
-            style="font-size: clamp(2.1rem, 3.4vw, 3.45rem); line-height: 1.04;"
-          >
-            <span class="block">Karanlığı Kesen</span>
-            <span class="block text-white/90">El İşçiliği</span>
-            <span
-              id="hero-title-neon"
-              class="mt-1 block transition-all duration-300"
-              style="color: var(--neon-color); text-shadow: 0 0 5px #fff, 0 0 20px currentColor, 0 0 40px currentColor;"
-            >
-              Özel Neon Mimari.
-            </span>
-          </h1>
-
-          <p class="text-sm sm:text-base text-white/60 leading-relaxed">
-            Standart fabrikasyon kalıplar değil; mekanınızın dokusuna göre CNC lazerle
-            kesilen, el işçiliğiyle bükülen 1. sınıf silikon neon tablolar ve kurumsal
-            tabelalar. Sağdaki canlı atölye sahnesinde metninizi, fontu ve ışığı anında
-            test edin.
-          </p>
-        </div>
-
-        <div class="mt-8 space-y-5 pt-6 border-t border-white/[0.07]">
-          <!-- Monospace Mühendislik Özeti -->
-          <div class="grid grid-cols-3 gap-2">
-            <div class="rounded-lg border border-white/[0.07] bg-[#050505] p-2.5">
-              <span class="font-mono block text-[10px] uppercase tracking-wider text-white/40">
-                STANDART ÖLÇÜ
-              </span>
-              <span id="hero-spec-size" class="font-mono mt-0.5 block text-xs sm:text-sm font-semibold text-white">
-                60x40 CM
-              </span>
-            </div>
-            <div class="rounded-lg border border-white/[0.07] bg-[#050505] p-2.5">
-              <span class="font-mono block text-[10px] uppercase tracking-wider text-white/40">
-                GÜÇ & DONANIM
-              </span>
-              <span id="hero-spec-power" class="font-mono mt-0.5 block text-xs sm:text-sm font-semibold text-white">
-                12V · 2A TRAFO
-              </span>
-            </div>
-            <div class="rounded-lg border border-white/[0.07] bg-[#050505] p-2.5">
-              <span class="font-mono block text-[10px] uppercase tracking-wider text-white/40">
-                TAHMİNİ FİYAT
-              </span>
-              <span id="hero-spec-price" class="font-mono mt-0.5 block text-xs sm:text-sm font-bold text-white">
-                1.400 ₺
-              </span>
-            </div>
-          </div>
-
-          <div class="flex flex-wrap items-center gap-3">
-            <a
-              id="hero-to-studio-cta"
-              href="/tasarla#text=CACOON&color=cyan&font=modern"
-              data-astro-prefetch="viewport"
-              class="cursor-pointer flex-1 whitespace-nowrap inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/[0.06] px-5 py-3 font-mono text-xs sm:text-sm font-semibold uppercase tracking-wider text-white transition-all duration-300 hover:border-[var(--neon-color)] hover:bg-white/[0.12] hover:shadow-[0_0_28px_rgba(var(--neon-rgb),0.35)]"
-            >
-              <span>DETAYLI CAD STÜDYOYA GEÇ →</span>
-            </a>
-
-            <a
-              href="#koleksiyon"
-              class="cursor-pointer whitespace-nowrap inline-flex min-h-12 items-center justify-center rounded-xl border border-white/[0.07] bg-[#050505] px-5 py-3 font-mono text-xs sm:text-sm font-medium text-white/75 transition-all duration-200 hover:border-white/20 hover:text-white"
-            >
-              KOLEKSİYON [16]
-            </a>
-          </div>
-        </div>
+    <!-- Ana Mimari Galeri Çerçevesi -->
+    <div class="relative rounded-xl border border-white/[0.07] bg-[#0A0A0E] overflow-hidden">
+      <!-- Arka Plan Katmanı: Yalnızca Sağdaki Neon Enstalasyondan Sızan Dinamik Işık -->
+      <div
+        id="hero-ambient-glow"
+        aria-hidden="true"
+        class="pointer-events-none absolute inset-0 transition-all duration-700"
+        style="background: radial-gradient(circle at 74% 46%, rgba(var(--neon-rgb), 0.24) 0%, rgba(var(--neon-rgb), 0.06) 42%, transparent 72%);"
+      >
       </div>
 
-      <!-- Sağ Kolon (7 Sütun): Tam Sahne "Canlı Neon Atölyesi (Interactive Customizer)" -->
-      <div class="lg:col-span-7 flex flex-col">
+      <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 items-stretch">
+        <!-- SOL KOLON (6 Sütun): Mimari Manifesto & Canlı Neon Atölyesi (/tasarla) Yönlendirme Kapıları -->
+        <div class="lg:col-span-6 flex flex-col justify-between p-6 sm:p-10 lg:p-12 border-b lg:border-b-0 lg:border-r border-white/[0.07] text-left">
+          <div class="space-y-6">
+            <!-- Üst Teknik Rozetler -->
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="font-mono inline-flex items-center gap-2 rounded-lg border border-white/10 bg-[#050505] px-3 py-1 text-xs font-medium uppercase tracking-wider text-white/85">
+                <span
+                  id="hero-eyebrow-dot"
+                  class="size-1.5 rounded-full transition-all duration-500"
+                  style="background-color: var(--neon-color); box-shadow: 0 0 8px var(--neon-color);"
+                ></span>
+                EL İŞÇİLİĞİ · ÖZEL ÜRETİM
+              </span>
+              <span class="font-mono rounded-lg border border-white/[0.07] bg-[#050505]/70 px-2.5 py-1 text-xs text-white/50">
+                C/CNEON'S GLOW · {BUSINESS_CONFIG.location.toUpperCase()}
+              </span>
+            </div>
+
+            <!-- Ana Başlık (Space Grotesk 700) -->
+            <h1
+              class="font-display font-bold text-white tracking-tight"
+              style="font-size: clamp(2.25rem, 3.8vw, 3.65rem); line-height: 1.03;"
+            >
+              <span class="block">Karanlığı Kesen</span>
+              <span class="block text-white/90">El İşçiliği</span>
+              <span
+                id="hero-title-neon"
+                class="mt-1.5 block transition-all duration-500"
+                style="color: var(--neon-color); text-shadow: 0 0 5px #fff, 0 0 20px currentColor, 0 0 42px currentColor;"
+              >
+                Özel Neon Mimari.
+              </span>
+            </h1>
+
+            <!-- Galeri Açıklaması -->
+            <p class="max-w-[54ch] text-sm sm:text-base text-white/60 leading-relaxed">
+              Standart fabrikasyon kalıplar değil; mekanınızın dokusuna göre 1. sınıf
+              şeffaf akrilik üzerine CNC lazerle işlenen, el işçiliğiyle bükülen silikon
+              LED neon tablolar ve kurumsal mekan tabelaları.
+            </p>
+
+            <!-- Birincil Aksiyon Kapıları: Canlı Neon Atölyesi (/tasarla) & Hazır Koleksiyon -->
+            <div class="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <a
+                id="hero-to-studio-cta"
+                href="/tasarla#text=C%2FCNEON'S&color=cyan&font=modern&size=md"
+                data-astro-prefetch="viewport"
+                class="cursor-pointer group flex-1 whitespace-nowrap inline-flex min-h-13 items-center justify-center gap-3 rounded-xl border border-white/20 bg-white/[0.07] px-6 py-3.5 font-mono text-xs sm:text-sm font-semibold uppercase tracking-wider text-white transition-all duration-300 hover:border-[var(--neon-color)] hover:bg-white/[0.12] hover:shadow-[0_0_32px_rgba(var(--neon-rgb),0.4)]"
+              >
+                <span
+                  class="size-2 rounded-full transition-all duration-300"
+                  style="background-color: var(--neon-color); box-shadow: 0 0 10px var(--neon-color);"
+                ></span>
+                <span>CANLI NEON ATÖLYESİNİ AÇ →</span>
+              </a>
+
+              <a
+                href="#koleksiyon"
+                class="cursor-pointer whitespace-nowrap inline-flex min-h-13 items-center justify-center rounded-xl border border-white/[0.07] bg-[#050505] px-5 py-3.5 font-mono text-xs sm:text-sm font-medium text-white/75 transition-all duration-200 hover:border-white/25 hover:text-white"
+              >
+                KOLEKSİYON [16] ↓
+              </a>
+            </div>
+          </div>
+
+          <!-- Alt Bölüm: Hızlı Şablon Başlatıcıları (Tıklandığında İlgili Şablonla /tasarla Açılır) -->
+          <div class="mt-10 pt-6 border-t border-white/[0.07] space-y-3">
+            <div class="flex items-center justify-between gap-2">
+              <span class="font-mono text-[11px] uppercase tracking-wider text-white/45">
+                HIZLI ATÖLYE ŞABLONLARI (DOĞRUDAN STÜDYODA AÇAR)
+              </span>
+              <span class="font-mono text-[11px] text-white/35">
+                2D CAD · ANINDA FİYAT
+              </span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <a
+                href="/tasarla#text=LOUNGE&color=amber&font=script&size=lg&board=contour"
+                data-astro-prefetch="viewport"
+                class="cursor-pointer group flex items-center justify-between rounded-xl border border-white/[0.07] bg-[#050505] px-3.5 py-2.5 transition-all duration-200 hover:border-[#FFB020]/50 hover:bg-white/[0.03]"
+              >
+                <div class="flex items-center gap-2.5">
+                  <span class="size-2 rounded-full bg-[#FFB020] shadow-[0_0_8px_#FFB020]"></span>
+                  <span class="font-mono text-xs font-medium text-white/85 group-hover:text-white">
+                    Kafe & Bar Tabelası
+                  </span>
+                </div>
+                <span class="font-mono text-[11px] text-white/40 group-hover:text-[#FFB020] transition-colors">
+                  Tasarla →
+                </span>
+              </a>
+
+              <a
+                href="/tasarla#text=CYBER&color=pink&font=display&size=md&board=rectangle"
+                data-astro-prefetch="viewport"
+                class="cursor-pointer group flex items-center justify-between rounded-xl border border-white/[0.07] bg-[#050505] px-3.5 py-2.5 transition-all duration-200 hover:border-[#FF2E88]/50 hover:bg-white/[0.03]"
+              >
+                <div class="flex items-center gap-2.5">
+                  <span class="size-2 rounded-full bg-[#FF2E88] shadow-[0_0_8px_#FF2E88]"></span>
+                  <span class="font-mono text-xs font-medium text-white/85 group-hover:text-white">
+                    Oyun & Yayın Odası
+                  </span>
+                </div>
+                <span class="font-mono text-[11px] text-white/40 group-hover:text-[#FF2E88] transition-colors">
+                  Tasarla →
+                </span>
+              </a>
+
+              <a
+                href="/tasarla#text=STUDIO&color=cyan&font=modern&size=lg&board=contour"
+                data-astro-prefetch="viewport"
+                class="cursor-pointer group flex items-center justify-between rounded-xl border border-white/[0.07] bg-[#050505] px-3.5 py-2.5 transition-all duration-200 hover:border-[#35E7FF]/50 hover:bg-white/[0.03]"
+              >
+                <div class="flex items-center gap-2.5">
+                  <span class="size-2 rounded-full bg-[#35E7FF] shadow-[0_0_8px_#35E7FF]"></span>
+                  <span class="font-mono text-xs font-medium text-white/85 group-hover:text-white">
+                    Ofis & Stüdyo Logosu
+                  </span>
+                </div>
+                <span class="font-mono text-[11px] text-white/40 group-hover:text-[#35E7FF] transition-colors">
+                  Tasarla →
+                </span>
+              </a>
+
+              <a
+                href="/tasarla#text=GOOD%20VIBES&color=green&font=script&size=sm&board=contour"
+                data-astro-prefetch="viewport"
+                class="cursor-pointer group flex items-center justify-between rounded-xl border border-white/[0.07] bg-[#050505] px-3.5 py-2.5 transition-all duration-200 hover:border-[#1CFF8A]/50 hover:bg-white/[0.03]"
+              >
+                <div class="flex items-center gap-2.5">
+                  <span class="size-2 rounded-full bg-[#1CFF8A] shadow-[0_0_8px_#1CFF8A]"></span>
+                  <span class="font-mono text-xs font-medium text-white/85 group-hover:text-white">
+                    Ev & Oda Dekoru
+                  </span>
+                </div>
+                <span class="font-mono text-[11px] text-white/40 group-hover:text-[#1CFF8A] transition-colors">
+                  Tasarla →
+                </span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- SAĞ KOLON (6 Sütun): Sinematik Galeri Vitrini & Otomatik Sahne Geçişi -->
         <div
           id="hero-sign-frame"
           transition:name="neon-stage"
-          class="gpu-layer relative flex flex-1 min-h-[520px] sm:min-h-[560px] w-full flex-col justify-between rounded-xl border border-white/[0.07] bg-[#0A0A0E] overflow-hidden"
+          class="relative lg:col-span-6 flex min-h-[460px] sm:min-h-[540px] flex-col justify-between bg-[#050505] overflow-hidden"
         >
-          <!-- Katman 1: Koyu Tuğla / Beton Duvar Fotoğrafı & Mimari Dokular -->
+          <!-- Katman 1: Gerçek Mimari Duvar Dokusu -->
           <img
             id="hero-scene-photo"
             src="/scenes/hero-brick-cafe.jpg"
-            alt="Koyu tuğla ve beton neon atölye duvarı"
+            alt="C/CNEON'S GLOW özel üretim neon enstalasyon sahnesi"
             width="1200"
             height="800"
             fetchpriority="high"
-            class="pointer-events-none absolute inset-0 size-full object-cover object-center transition-all duration-500"
-            style="filter: brightness(0.28) contrast(1.22) saturate(0.85);"
+            class="pointer-events-none absolute inset-0 size-full object-cover object-center transition-all duration-700"
+            style="filter: brightness(0.24) contrast(1.22) saturate(0.85);"
           />
           <div
             aria-hidden="true"
-            class="pointer-events-none absolute inset-0 wall-texture-brick opacity-55"
-          >
-          </div>
-          <div
-            aria-hidden="true"
-            class="pointer-events-none absolute inset-0 wall-texture-concrete opacity-45"
+            class="pointer-events-none absolute inset-0 wall-texture-brick opacity-50"
           >
           </div>
           <div
             aria-hidden="true"
             class="pointer-events-none absolute inset-0"
-            style="background: radial-gradient(circle at 50% 42%, rgba(5, 5, 5, 0.1) 0%, rgba(5, 5, 5, 0.88) 88%);"
+            style="background: radial-gradient(circle at 50% 45%, rgba(5, 5, 5, 0.1) 0%, rgba(5, 5, 5, 0.9) 88%);"
           >
           </div>
 
-          <!-- Katman 2: Yalnızca Aktif Neon Önizlemesinden Duvara Düşen Dinamik Ambiyans Işığı (--neon-color) -->
+          <!-- Katman 2: Yalnızca Aktif Neondan Duvara Düşen Ambiyans Işığı -->
           <div
             id="hero-neon-backdrop"
             aria-hidden="true"
-            class="pointer-events-none absolute inset-0 transition-all duration-300"
-            style="background: radial-gradient(circle at 50% 42%, rgba(var(--neon-rgb), 0.48) 0%, rgba(var(--neon-rgb), 0.16) 38%, transparent 70%); mix-blend-mode: screen;"
+            class="pointer-events-none absolute inset-0 transition-all duration-700"
+            style="background: radial-gradient(circle at 50% 45%, rgba(var(--neon-rgb), 0.54) 0%, rgba(var(--neon-rgb), 0.18) 38%, transparent 70%); mix-blend-mode: screen;"
           >
           </div>
 
-          <!-- Üst Sahne Bilgi Çubuğu -->
-          <div class="relative z-20 flex flex-wrap items-center justify-between gap-2 border-b border-white/[0.07] bg-[#050505]/80 px-4 py-3 backdrop-blur-md">
+          <!-- Üst Vitrin Barı: Canlı Enstalasyon Telemetrisi + Atölyede Düzenle Kapsülü -->
+          <div class="relative z-20 flex flex-wrap items-center justify-between gap-2 border-b border-white/[0.07] bg-[#050505]/75 px-4 py-3 sm:px-6 backdrop-blur-md">
             <div class="flex items-center gap-2">
               <span
-                class="size-2 rounded-full transition-colors duration-300"
-                style="background-color: var(--neon-color); box-shadow: 0 0 10px var(--neon-color);"
+                class="size-2 rounded-full transition-colors duration-500"
+                style="background-color: var(--neon-color); box-shadow: 0 0 8px var(--neon-color);"
               ></span>
-              <span class="font-mono text-xs font-semibold uppercase tracking-wider text-white/90">
-                CANLI NEON ATÖLYESİ · INTERACTIVE CUSTOMIZER
+              <span
+                id="hero-showcase-badge"
+                class="font-mono text-[11px] font-medium uppercase tracking-wider text-white/80"
+              >
+                ENSTALASYON 01 / ATELIER · 85x45 CM
               </span>
             </div>
 
-            <div class="flex items-center gap-2">
-              <button
-                type="button"
-                data-preset-text="CACOON"
-                class="hero-preset-btn cursor-pointer font-mono rounded-lg border border-white/15 bg-white/10 px-2.5 py-1 text-[11px] font-medium text-white transition-colors hover:bg-white/15"
-              >
-                CACOON
-              </button>
-              <button
-                type="button"
-                data-preset-text="LOUNGE"
-                class="hero-preset-btn cursor-pointer font-mono rounded-lg border border-white/[0.07] bg-white/[0.03] px-2.5 py-1 text-[11px] font-medium text-white/65 transition-colors hover:text-white"
-              >
-                LOUNGE
-              </button>
-              <button
-                type="button"
-                data-preset-text="STUDIO"
-                class="hero-preset-btn cursor-pointer font-mono rounded-lg border border-white/[0.07] bg-white/[0.03] px-2.5 py-1 text-[11px] font-medium text-white/65 transition-colors hover:text-white"
-              >
-                STUDIO
-              </button>
-            </div>
+            <a
+              id="hero-stage-edit-link"
+              href="/tasarla#text=C%2FCNEON'S&color=cyan&font=modern&size=md"
+              data-astro-prefetch="viewport"
+              class="cursor-pointer inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/[0.06] px-3 py-1 font-mono text-[11px] font-semibold text-white transition-all duration-200 hover:border-[var(--neon-color)] hover:bg-white/15"
+            >
+              <span>Bu Tasarımı Atölyede Düzenle</span>
+              <span aria-hidden="true">→</span>
+            </a>
           </div>
 
-          <!-- Merkez Tam Sahne: Doğrudan Metin Yazılabilir Neon Önizleme Alanı -->
-          <div class="relative z-10 my-auto flex flex-col items-center justify-center px-4 py-10 sm:px-8 sm:py-14 text-center">
-            <!-- İnce Lazer Kesim Akrilik Kontur Plakası -->
-            <div
+          <!-- Merkez: Akrilik Plaka Üzerinde Nefes Alan Sinematik Neon Enstalasyonu -->
+          <div class="relative z-10 my-auto flex flex-col items-center justify-center px-5 py-10 sm:px-10 text-center">
+            <a
               id="hero-acrylic-plate"
-              class="relative w-full max-w-2xl rounded-xl border border-white/10 bg-black/30 px-4 py-10 sm:px-8 sm:py-12 backdrop-blur-[1.5px] transition-all duration-300"
-              style="box-shadow: 0 24px 64px rgba(0, 0, 0, 0.85), 0 0 42px rgba(var(--neon-rgb), 0.22), inset 0 0 24px rgba(var(--neon-rgb), 0.1);"
+              href="/tasarla#text=C%2FCNEON'S&color=cyan&font=modern&size=md"
+              data-astro-prefetch="viewport"
+              aria-label="Bu neon tasarımını Canlı Neon Atölyesinde aç ve özelleştir"
+              class="group relative flex w-full max-w-lg min-h-[220px] sm:min-h-[250px] flex-col items-center justify-center rounded-xl border border-white/15 bg-black/35 px-6 py-10 sm:px-10 sm:py-12 backdrop-blur-[1.5px] transition-all duration-500 hover:scale-[1.015] hover:border-white/30"
+              style="box-shadow: 0 24px 68px rgba(0, 0, 0, 0.88), 0 0 52px rgba(var(--neon-rgb), 0.34), inset 0 0 26px rgba(var(--neon-rgb), 0.14);"
             >
               <!-- 4 Köşe Minimalist Krom Montaj Pimi -->
-              <span class="absolute top-3 left-3 size-2 rounded-full bg-white/35 ring-1 ring-black"></span>
-              <span class="absolute top-3 right-3 size-2 rounded-full bg-white/35 ring-1 ring-black"></span>
-              <span class="absolute bottom-3 left-3 size-2 rounded-full bg-white/35 ring-1 ring-black"></span>
-              <span class="absolute bottom-3 right-3 size-2 rounded-full bg-white/35 ring-1 ring-black"></span>
+              <span class="absolute top-3.5 left-4 size-2 rounded-full bg-white/40 ring-1 ring-black"></span>
+              <span class="absolute top-3.5 right-4 size-2 rounded-full bg-white/40 ring-1 ring-black"></span>
+              <span class="absolute bottom-3.5 left-4 size-2 rounded-full bg-white/40 ring-1 ring-black"></span>
+              <span class="absolute bottom-3.5 right-4 size-2 rounded-full bg-white/40 ring-1 ring-black"></span>
 
-              <label for="hero-live-input" class="sr-only">
-                Canlı neon tabela metnini yazın
-              </label>
-              <input
-                id="hero-live-input"
-                type="text"
-                maxlength="14"
-                value="CACOON"
-                placeholder="CACOON"
-                spellcheck="false"
-                autocomplete="off"
-                class="animate-neon-ignite w-full bg-transparent text-center font-bold tracking-tight focus:outline-none selection:bg-white/20 transition-all duration-200"
-                style="font-family: 'Tilt Neon', sans-serif; font-size: clamp(3rem, 6.2vw, 5.4rem); line-height: 1.08; color: var(--neon-color); caret-color: #ffffff; text-shadow: 0 0 5px #fff, 0 0 20px currentColor, 0 0 40px currentColor, 0 0 75px var(--neon-color);"
-              />
+              <!-- Sağ Üst Ölçek Etiketi -->
+              <span
+                id="hero-plate-spec"
+                class="font-mono absolute top-3.5 rounded-md border border-white/10 bg-[#050505]/70 px-2 py-0.5 text-[10px] uppercase tracking-widest text-white/55"
+              >
+                5MM ŞEFFAF AKRİLİK · 12V LED
+              </span>
 
-              <div class="mt-3 flex items-center justify-center gap-2 text-white/45">
-                <span class="font-mono text-[11px] uppercase tracking-widest">
-                  [METNİ DEĞİŞTİRMEK İÇİN YAZIYA TIKLAYIN · MAKS 14 KARAKTER]
-                </span>
-              </div>
-            </div>
+              <!-- Ana Neon Yazısı -->
+              <p
+                id="hero-showcase-main"
+                class="animate-neon-ignite mt-2 font-bold tracking-tight select-none transition-all duration-500"
+                style="font-family: 'Tilt Neon', sans-serif; font-size: clamp(2.6rem, 4.8vw, 4.4rem); line-height: 1.06; color: var(--neon-color); text-shadow: 0 0 5px #fff, 0 0 20px currentColor, 0 0 40px currentColor, 0 0 85px var(--neon-color);"
+              >
+                C/CNEON'S
+              </p>
+
+              <!-- Alt Neon İmza Yazısı -->
+              <p
+                id="hero-showcase-sub"
+                class="mt-3 text-base sm:text-xl text-white/90 select-none transition-all duration-500"
+                style="font-family: 'Pacifico', cursive; text-shadow: 0 0 4px #fff, 0 0 14px var(--neon-color), 0 0 28px var(--neon-color);"
+              >
+                Glow Custom Atelier
+              </p>
+
+              <!-- Hover İpucu Kapsülü -->
+              <span class="font-mono mt-5 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-[#050505]/80 px-3 py-1 text-[10px] uppercase tracking-wider text-white/60 transition-colors group-hover:border-white/25 group-hover:text-white">
+                <span>KENDİ METNİNİZİ YAZMAK İÇİN TIKLAYIN</span>
+                <span aria-hidden="true">→</span>
+              </span>
+            </a>
           </div>
 
-          <!-- Alt Kontrol Konsolu: 5 Neon Rengi + 3 Font Seçici + Canlı Telemetri -->
-          <div class="relative z-20 border-t border-white/[0.07] bg-[#050505]/90 p-4 sm:px-6 backdrop-blur-md space-y-4">
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-12 items-center">
-              <!-- 5 Neon Rengi Seçici (Ice Blue, Cyber Pink, Warm Gold, Acid Green, Blood Red) -->
-              <div class="md:col-span-7 space-y-1.5">
-                <div class="flex items-center justify-between">
-                  <span class="font-mono text-[11px] uppercase tracking-wider text-white/45">
-                    01 / NEON TÜP RENGİ (5 RENK)
-                  </span>
-                  <span id="hero-active-color-name" class="font-mono text-[11px] font-semibold text-white">
-                    ICE BLUE · #35E7FF
-                  </span>
-                </div>
-                <div class="flex flex-wrap items-center gap-2" role="group" aria-label="5 Neon Rengi">
-                  <button
-                    type="button"
-                    data-hero-color="cyan"
-                    data-color-label="ICE BLUE"
-                    data-hex="#35E7FF"
-                    data-rgb="53, 231, 255"
-                    class="hero-color-btn cursor-pointer inline-flex items-center gap-2 rounded-lg border border-white/30 bg-white/[0.08] px-2.5 py-1.5 font-mono text-xs text-white transition-all duration-150"
-                  >
-                    <span class="size-3 rounded-full bg-[#35E7FF] shadow-[0_0_10px_#35E7FF]"></span>
-                    <span>Ice Blue</span>
-                  </button>
+          <!-- Alt Sahne Seçici Bar: 3 Küratörlü Galeri Sahnesi (Otomatik + Tek Tıkla Geçiş) -->
+          <div class="relative z-20 border-t border-white/[0.07] bg-[#050505]/85 px-4 py-3 sm:px-6 backdrop-blur-md">
+            <div class="grid grid-cols-3 gap-2" role="tablist" aria-label="Galeri Vitrin Sahneleri">
+              <button
+                type="button"
+                role="tab"
+                aria-selected="true"
+                data-scene-idx="0"
+                class="hero-scene-tab cursor-pointer flex flex-col items-start gap-0.5 rounded-lg border border-white/25 bg-white/[0.08] px-3 py-2 text-left transition-all duration-200"
+              >
+                <span class="font-mono text-[10px] uppercase tracking-wider text-[#35E7FF]">
+                  01 / ATELIER
+                </span>
+                <span class="font-mono text-xs font-semibold text-white truncate w-full">
+                  C/CNEON'S · 1.850 ₺
+                </span>
+              </button>
 
-                  <button
-                    type="button"
-                    data-hero-color="pink"
-                    data-color-label="CYBER PINK"
-                    data-hex="#FF2E88"
-                    data-rgb="255, 46, 136"
-                    class="hero-color-btn cursor-pointer inline-flex items-center gap-2 rounded-lg border border-white/[0.07] bg-white/[0.02] px-2.5 py-1.5 font-mono text-xs text-white/65 transition-all duration-150 hover:border-white/20 hover:text-white"
-                  >
-                    <span class="size-3 rounded-full bg-[#FF2E88] shadow-[0_0_10px_#FF2E88]"></span>
-                    <span>Cyber Pink</span>
-                  </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected="false"
+                data-scene-idx="1"
+                class="hero-scene-tab cursor-pointer flex flex-col items-start gap-0.5 rounded-lg border border-white/[0.07] bg-white/[0.02] px-3 py-2 text-left transition-all duration-200 hover:border-white/20"
+              >
+                <span class="font-mono text-[10px] uppercase tracking-wider text-white/50">
+                  02 / LOUNGE
+                </span>
+                <span class="font-mono text-xs font-semibold text-white/75 truncate w-full">
+                  LOUNGE · 2.650 ₺
+                </span>
+              </button>
 
-                  <button
-                    type="button"
-                    data-hero-color="amber"
-                    data-color-label="WARM GOLD"
-                    data-hex="#FFB020"
-                    data-rgb="255, 176, 32"
-                    class="hero-color-btn cursor-pointer inline-flex items-center gap-2 rounded-lg border border-white/[0.07] bg-white/[0.02] px-2.5 py-1.5 font-mono text-xs text-white/65 transition-all duration-150 hover:border-white/20 hover:text-white"
-                  >
-                    <span class="size-3 rounded-full bg-[#FFB020] shadow-[0_0_10px_#FFB020]"></span>
-                    <span>Warm Gold</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    data-hero-color="green"
-                    data-color-label="ACID GREEN"
-                    data-hex="#1CFF8A"
-                    data-rgb="28, 255, 138"
-                    class="hero-color-btn cursor-pointer inline-flex items-center gap-2 rounded-lg border border-white/[0.07] bg-white/[0.02] px-2.5 py-1.5 font-mono text-xs text-white/65 transition-all duration-150 hover:border-white/20 hover:text-white"
-                  >
-                    <span class="size-3 rounded-full bg-[#1CFF8A] shadow-[0_0_10px_#1CFF8A]"></span>
-                    <span>Acid Green</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    data-hero-color="red"
-                    data-color-label="BLOOD RED"
-                    data-hex="#FF3B3B"
-                    data-rgb="255, 59, 59"
-                    class="hero-color-btn cursor-pointer inline-flex items-center gap-2 rounded-lg border border-white/[0.07] bg-white/[0.02] px-2.5 py-1.5 font-mono text-xs text-white/65 transition-all duration-150 hover:border-white/20 hover:text-white"
-                  >
-                    <span class="size-3 rounded-full bg-[#FF3B3B] shadow-[0_0_10px_#FF3B3B]"></span>
-                    <span>Blood Red</span>
-                  </button>
-                </div>
-              </div>
-
-              <!-- 3 Font Seçici -->
-              <div class="md:col-span-5 space-y-1.5">
-                <div class="flex items-center justify-between">
-                  <span class="font-mono text-[11px] uppercase tracking-wider text-white/45">
-                    02 / KARAKTER FONTU (3 TİP)
-                  </span>
-                  <span id="hero-cad-readout" class="font-mono text-[11px] text-white/65">
-                    60x40 CM · 1.400 ₺
-                  </span>
-                </div>
-                <div class="grid grid-cols-3 gap-2" role="group" aria-label="3 Neon Fontu">
-                  <button
-                    type="button"
-                    data-hero-font="modern"
-                    data-font-css="'Tilt Neon', sans-serif"
-                    class="hero-font-btn cursor-pointer rounded-lg border border-white/30 bg-white/[0.08] px-2.5 py-1.5 font-mono text-xs font-medium text-white transition-all duration-150"
-                  >
-                    Modern Tube
-                  </button>
-                  <button
-                    type="button"
-                    data-hero-font="script"
-                    data-font-css="'Pacifico', cursive"
-                    class="hero-font-btn cursor-pointer rounded-lg border border-white/[0.07] bg-white/[0.02] px-2.5 py-1.5 font-mono text-xs font-medium text-white/65 transition-all duration-150 hover:border-white/20 hover:text-white"
-                  >
-                    El Yazısı
-                  </button>
-                  <button
-                    type="button"
-                    data-hero-font="display"
-                    data-font-css="'Oswald', sans-serif"
-                    class="hero-font-btn cursor-pointer rounded-lg border border-white/[0.07] bg-white/[0.02] px-2.5 py-1.5 font-mono text-xs font-medium text-white/65 transition-all duration-150 hover:border-white/20 hover:text-white"
-                  >
-                    Mimari Bold
-                  </button>
-                </div>
-              </div>
+              <button
+                type="button"
+                role="tab"
+                aria-selected="false"
+                data-scene-idx="2"
+                class="hero-scene-tab cursor-pointer flex flex-col items-start gap-0.5 rounded-lg border border-white/[0.07] bg-white/[0.02] px-3 py-2 text-left transition-all duration-200 hover:border-white/20"
+              >
+                <span class="font-mono text-[10px] uppercase tracking-wider text-white/50">
+                  03 / CYBER
+                </span>
+                <span class="font-mono text-xs font-semibold text-white/75 truncate w-full">
+                  ON AIR · 2.100 ₺
+                </span>
+              </button>
             </div>
           </div>
         </div>
@@ -342,17 +338,17 @@ import { BUSINESS_CONFIG } from "@/shared/config/business";
     aria-label="Atölye Güvenceleri"
   >
     <div class="marquee-track font-mono text-xs uppercase tracking-wider text-white/55">
-      <span class="px-8 whitespace-nowrap">CACOON CUSTOM NEON ATELIER</span>
+      <span class="px-8 whitespace-nowrap">C/CNEON'S GLOW CUSTOM NEON ATELIER</span>
       <span class="text-white/20" aria-hidden="true">/</span>
       <span class="px-8 whitespace-nowrap">EL İŞÇİLİĞİ 1. SINIF SİLİKON LED</span>
       <span class="text-white/20" aria-hidden="true">/</span>
       <span class="px-8 whitespace-nowrap">12V ADAPTÖR VE MONTAJ SETİ DAHİL</span>
       <span class="text-white/20" aria-hidden="true">/</span>
-      <span class="px-8 whitespace-nowrap">KIRILMAZ AHŞap KASALI SİGORTALI KARGO</span>
+      <span class="px-8 whitespace-nowrap">KIRILMAZ AHŞAP KASALI SİGORTALI KARGO</span>
       <span class="text-white/20" aria-hidden="true">/</span>
       <span class="px-8 whitespace-nowrap">SHOPIER GÜVENCESİYLE TAKSİT İMKANI</span>
       <span class="text-white/20" aria-hidden="true">/</span>
-      <span class="px-8 whitespace-nowrap" aria-hidden="true">CACOON CUSTOM NEON ATELIER</span>
+      <span class="px-8 whitespace-nowrap" aria-hidden="true">C/CNEON'S GLOW CUSTOM NEON ATELIER</span>
       <span class="text-white/20" aria-hidden="true">/</span>
       <span class="px-8 whitespace-nowrap" aria-hidden="true">EL İŞÇİLİĞİ 1. SINIF SİLİKON LED</span>
       <span class="text-white/20" aria-hidden="true">/</span>
@@ -367,118 +363,129 @@ import { BUSINESS_CONFIG } from "@/shared/config/business";
 </section>
 
 <script is:inline>
-  function initHeroCustomizer() {
+  function initHeroGalleryShowcase() {
     const heroStage = document.getElementById("hero-stage");
-    const input = document.getElementById("hero-live-input");
-    const colorNameEl = document.getElementById("hero-active-color-name");
-    const cadReadout = document.getElementById("hero-cad-readout");
-    const specSize = document.getElementById("hero-spec-size");
-    const specPower = document.getElementById("hero-spec-power");
-    const specPrice = document.getElementById("hero-spec-price");
+    const scenePhoto = document.getElementById("hero-scene-photo");
+    const mainText = document.getElementById("hero-showcase-main");
+    const subText = document.getElementById("hero-showcase-sub");
+    const badgeEl = document.getElementById("hero-showcase-badge");
+    const plateSpecEl = document.getElementById("hero-plate-spec");
+    const editLink = document.getElementById("hero-stage-edit-link");
+    const acrylicPlate = document.getElementById("hero-acrylic-plate");
     const primaryCta = document.getElementById("hero-to-studio-cta");
-    const colorBtns = document.querySelectorAll(".hero-color-btn");
-    const fontBtns = document.querySelectorAll(".hero-font-btn");
-    const presetBtns = document.querySelectorAll(".hero-preset-btn");
+    const sceneTabs = document.querySelectorAll(".hero-scene-tab");
 
-    if (!heroStage || !input) return;
+    if (!heroStage || !mainText) return;
 
-    let activeColorKey = "cyan";
-    let activeHex = "#35E7FF";
-    let activeRgb = "53, 231, 255";
-    let activeFontKey = "modern";
+    const SCENES = [
+      {
+        badge: "ENSTALASYON 01 / ATELIER · 85x45 CM",
+        plateSpec: "5MM ŞEFFAF AKRİLİK · 12V 2A ADAPTÖR",
+        main: "C/CNEON'S",
+        sub: "Glow Custom Atelier",
+        fontFamily: "'Tilt Neon', sans-serif",
+        hex: "#35E7FF",
+        rgb: "53, 231, 255",
+        photo: "/scenes/hero-brick-cafe.jpg",
+        studioUrl: "/tasarla#text=C%2FCNEON'S&color=cyan&font=modern&size=md",
+      },
+      {
+        badge: "ENSTALASYON 02 / LOUNGE · 120x55 CM",
+        plateSpec: "KONTUR KESİM PLEKSİ · IP67 DIŞ/İÇ MEKAN",
+        main: "LOUNGE",
+        sub: "Cocktails & Late Night",
+        fontFamily: "'Oswald', sans-serif",
+        hex: "#FFB020",
+        rgb: "255, 176, 32",
+        photo: "/scenes/b2b-lounge-scene.jpg",
+        studioUrl: "/tasarla#text=LOUNGE&color=amber&font=display&size=lg",
+      },
+      {
+        badge: "ENSTALASYON 03 / CYBER · 90x45 CM",
+        plateSpec: "SİYAH AKRİLİK TABAN · RGB KUMANDALI",
+        main: "ON AIR",
+        sub: "Cyber Studio Live",
+        fontFamily: "'Tilt Neon', sans-serif",
+        hex: "#FF2E88",
+        rgb: "255, 46, 136",
+        photo: "/scenes/b2b-gaming-room.jpg",
+        studioUrl: "/tasarla#text=ON%20AIR&color=pink&font=modern&size=md",
+      },
+    ];
 
-    function updateTelemetry() {
-      const cleanText = (input.value || "CACOON").trim();
-      const charLen = Math.max(1, cleanText.replace(/\s+/g, "").length);
-      const widthCm = Math.min(120, Math.max(45, charLen * 10));
-      const heightCm = Math.round(widthCm * 0.65);
-      const meters = Math.round((charLen * 0.22 + 0.2) * 10) / 10;
-      const watts = Math.max(9, Math.round(meters * 9));
-      const amps = watts <= 20 ? 2 : watts <= 36 ? 3 : 5;
-      const priceTl = Math.round((650 + charLen * 125) / 50) * 50;
-      const formattedPrice = `${priceTl.toLocaleString("tr-TR")} ₺`;
+    let activeIdx = 0;
+    let timerId = null;
 
-      if (specSize) specSize.textContent = `${widthCm}x${heightCm} CM`;
-      if (specPower) specPower.textContent = `12V · ${amps}A (${watts}W)`;
-      if (specPrice) specPrice.textContent = formattedPrice;
-      if (cadReadout) {
-        cadReadout.textContent = `${widthCm}x${heightCm} CM · ${formattedPrice}`;
-      }
+    function applyScene(idx) {
+      activeIdx = idx;
+      const s = SCENES[idx];
+      if (!s) return;
 
-      const hashUrl = `/tasarla#text=${encodeURIComponent(cleanText)}&color=${activeColorKey}&font=${activeFontKey}`;
-      if (primaryCta) primaryCta.setAttribute("href", hashUrl);
+      heroStage.style.setProperty("--neon-color", s.hex);
+      heroStage.style.setProperty("--neon-rgb", s.rgb);
+      document.documentElement.style.setProperty("--neon-color", s.hex);
+      document.documentElement.style.setProperty("--neon-rgb", s.rgb);
+
+      mainText.textContent = s.main;
+      mainText.style.fontFamily = s.fontFamily;
+      if (subText) subText.textContent = s.sub;
+      if (badgeEl) badgeEl.textContent = s.badge;
+      if (plateSpecEl) plateSpecEl.textContent = s.plateSpec;
+      if (scenePhoto) scenePhoto.setAttribute("src", s.photo);
+      if (editLink) editLink.setAttribute("href", s.studioUrl);
+      if (acrylicPlate) acrylicPlate.setAttribute("href", s.studioUrl);
+      if (primaryCta) primaryCta.setAttribute("href", s.studioUrl);
+
+      sceneTabs.forEach((tab, i) => {
+        const firstSpan = tab.querySelector("span:first-child");
+        const secondSpan = tab.querySelector("span:last-child");
+        if (i === idx) {
+          tab.setAttribute("aria-selected", "true");
+          tab.classList.remove("border-white/[0.07]", "bg-white/[0.02]");
+          tab.classList.add("border-white/25", "bg-white/[0.08]");
+          if (firstSpan) firstSpan.style.color = s.hex;
+          if (secondSpan) {
+            secondSpan.classList.remove("text-white/75");
+            secondSpan.classList.add("text-white");
+          }
+        } else {
+          tab.setAttribute("aria-selected", "false");
+          tab.classList.remove("border-white/25", "bg-white/[0.08]");
+          tab.classList.add("border-white/[0.07]", "bg-white/[0.02]");
+          if (firstSpan) firstSpan.style.color = "rgba(255, 255, 255, 0.5)";
+          if (secondSpan) {
+            secondSpan.classList.remove("text-white");
+            secondSpan.classList.add("text-white/75");
+          }
+        }
+      });
     }
 
-    input.addEventListener("input", () => {
-      const pos = input.selectionStart;
-      if (activeFontKey !== "script") {
-        input.value = input.value.toLocaleUpperCase("tr-TR");
-        if (pos !== null) input.setSelectionRange(pos, pos);
-      }
-      updateTelemetry();
-    });
+    function startAutoCycle() {
+      if (timerId) clearInterval(timerId);
+      timerId = setInterval(() => {
+        const nextIdx = (activeIdx + 1) % SCENES.length;
+        applyScene(nextIdx);
+      }, 4800);
+    }
 
-    presetBtns.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const preset = btn.getAttribute("data-preset-text") || "CACOON";
-        input.value = preset;
-        presetBtns.forEach((b) => {
-          b.classList.remove("border-white/15", "bg-white/10", "text-white");
-          b.classList.add("border-white/[0.07]", "bg-white/[0.03]", "text-white/65");
-        });
-        btn.classList.remove("border-white/[0.07]", "bg-white/[0.03]", "text-white/65");
-        btn.classList.add("border-white/15", "bg-white/10", "text-white");
-        updateTelemetry();
+    sceneTabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        const idx = Number(tab.getAttribute("data-scene-idx") || 0);
+        applyScene(idx);
+        startAutoCycle();
       });
     });
 
-    colorBtns.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        activeColorKey = btn.getAttribute("data-hero-color") || "cyan";
-        activeHex = btn.getAttribute("data-hex") || "#35E7FF";
-        activeRgb = btn.getAttribute("data-rgb") || "53, 231, 255";
-        const label = btn.getAttribute("data-color-label") || "ICE BLUE";
+    if (window.__cacoonHeroTimer) {
+      clearInterval(window.__cacoonHeroTimer);
+    }
 
-        colorBtns.forEach((b) => {
-          b.classList.remove("border-white/30", "bg-white/[0.08]", "text-white");
-          b.classList.add("border-white/[0.07]", "bg-white/[0.02]", "text-white/65");
-        });
-        btn.classList.remove("border-white/[0.07]", "bg-white/[0.02]", "text-white/65");
-        btn.classList.add("border-white/30", "bg-white/[0.08]", "text-white");
-
-        heroStage.style.setProperty("--neon-color", activeHex);
-        heroStage.style.setProperty("--neon-rgb", activeRgb);
-        document.documentElement.style.setProperty("--neon-color", activeHex);
-        document.documentElement.style.setProperty("--neon-rgb", activeRgb);
-
-        if (colorNameEl) {
-          colorNameEl.textContent = `${label} · ${activeHex}`;
-        }
-
-        updateTelemetry();
-      });
-    });
-
-    fontBtns.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        activeFontKey = btn.getAttribute("data-hero-font") || "modern";
-        const fontCss = btn.getAttribute("data-font-css") || "'Tilt Neon', sans-serif";
-
-        fontBtns.forEach((b) => {
-          b.classList.remove("border-white/30", "bg-white/[0.08]", "text-white");
-          b.classList.add("border-white/[0.07]", "bg-white/[0.02]", "text-white/65");
-        });
-        btn.classList.remove("border-white/[0.07]", "bg-white/[0.02]", "text-white/65");
-        btn.classList.add("border-white/30", "bg-white/[0.08]", "text-white");
-
-        input.style.fontFamily = fontCss;
-        updateTelemetry();
-      });
-    });
-
-    updateTelemetry();
+    applyScene(0);
+    startAutoCycle();
+    window.__cacoonHeroTimer = timerId;
   }
 
-  document.addEventListener("DOMContentLoaded", initHeroCustomizer);
-  document.addEventListener("astro:page-load", initHeroCustomizer);
+  document.addEventListener("DOMContentLoaded", initHeroGalleryShowcase);
+  document.addEventListener("astro:page-load", initHeroGalleryShowcase);
 </script>

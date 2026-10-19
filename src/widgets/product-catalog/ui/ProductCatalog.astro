@@ -34,7 +34,7 @@ const tabloCount = products.filter((p) => p.category === "tablo").length;
 const pleksiCount = products.filter((p) => p.category === "pleksi").length;
 
 const customLogoWaText = encodeURIComponent(
-  "Merhaba CACOON (C/CNEON'S), kendi logomu / tasarımımı özel neon tabela olarak yaptırmak ve 30 dakikada fiyatlandırma almak istiyorum.",
+  "Merhaba C/CNEON'S GLOW, kendi logomu / tasarımımı özel neon tabela olarak yaptırmak ve 30 dakikada fiyatlandırma almak istiyorum.",
 );
 ---
 
@@ -66,7 +66,7 @@ const customLogoWaText = encodeURIComponent(
         <p class="max-w-[62ch] text-sm sm:text-base text-white/55 leading-relaxed">
           Her parça 12V adaptörü ve montaj donanımıyla atölyemizden gönderilir.
           Kartların üzerine gelerek eserin gerçek neon yansımasını inceleyebilir,
-          Shopier güvencesiyle veya WhatsApp üzerinden sipariş oluşturabilirsiniz.
+          <strong>"İncele →"</strong> ile duvar ölçeğini ve gece/gündüz modunu test edebilirsiniz.
         </p>
       </div>
 
@@ -150,8 +150,9 @@ const customLogoWaText = encodeURIComponent(
           const sizeBadge = PRODUCT_SIZE_MAP[product.category];
           const hasOwnScene = LIFESTYLE_SCENE_IDS.has(product.id);
           const waQuestionText = encodeURIComponent(
-            `Merhaba CACOON, "${product.title}" (${product.price.toLocaleString("tr-TR")} ₺) ürünü için hızlı sipariş oluşturmak istiyorum: ${product.shopierUrl}`,
+            `Merhaba C/CNEON'S GLOW, "${product.title}" (${product.price.toLocaleString("tr-TR")} ₺) ürünü için hızlı sipariş oluşturmak istiyorum: ${product.shopierUrl}`,
           );
+          const waUrl = `https://wa.me/${whatsappRawPhone}?text=${waQuestionText}`;
 
           return (
             <>
@@ -160,8 +161,21 @@ const customLogoWaText = encodeURIComponent(
                 data-product-id={product.id}
                 data-category={product.category}
                 data-price={product.price}
+                data-formatted-price={`${product.price.toLocaleString("tr-TR")} ₺`}
+                data-old-price={
+                  product.oldPrice
+                    ? `${product.oldPrice.toLocaleString("tr-TR")} ₺`
+                    : ""
+                }
+                data-title={product.title}
+                data-image={product.imageUrl}
+                data-shopier-url={product.shopierUrl}
+                data-wa-url={waUrl}
+                data-size-badge={sizeBadge}
+                data-color-label={neon.label}
                 data-featured-index={index}
                 data-glow-color={neon.hex}
+                data-neon-rgb={neon.rgb}
                 style={`--neon-color: ${neon.hex}; --neon-rgb: ${neon.rgb};`}
                 class="product-card gpu-layer group relative flex flex-col justify-between rounded-xl bg-[#0A0A0E] border border-white/[0.07] p-3.5"
               >
@@ -173,22 +187,20 @@ const customLogoWaText = encodeURIComponent(
                 />
 
                 <!-- Görsel Alanı: aspect-[4/5] + Üst Köşede Buzlu Cam Monospace Kategori/Boyut Rozeti -->
-                <div class="relative aspect-[4/5] w-full overflow-hidden rounded-lg bg-[#050505] border border-white/[0.07] transition-colors duration-300 group-hover:border-[var(--neon-color)]/45">
+                <div
+                  data-quickview-trigger="true"
+                  class="cursor-pointer relative aspect-[4/5] w-full overflow-hidden rounded-lg bg-[#050505] border border-white/[0.07] transition-colors duration-300 group-hover:border-[var(--neon-color)]/45"
+                >
                   {!hasOwnScene && (
                     <>
                       <div
                         aria-hidden="true"
-                        class="pointer-events-none absolute inset-0 bg-cover bg-center opacity-35"
-                        style="background-image: url('/scenes/studio-wall-mockup.jpg'); filter: brightness(0.45) contrast(1.2);"
+                        class="pointer-events-none absolute inset-0 wall-texture-brick opacity-65"
                       />
                       <div
                         aria-hidden="true"
-                        class="pointer-events-none absolute inset-0 wall-texture-brick opacity-70"
-                      />
-                      <div
-                        aria-hidden="true"
-                        class="pointer-events-none absolute inset-0 opacity-65 transition-opacity duration-300 group-hover:opacity-100"
-                        style="background: radial-gradient(circle at 50% 45%, rgba(var(--neon-rgb), 0.34) 0%, rgba(var(--neon-rgb), 0.08) 46%, rgba(5, 5, 5, 0.86) 85%);"
+                        class="pointer-events-none absolute inset-0 opacity-60 transition-opacity duration-300 group-hover:opacity-100"
+                        style="background: radial-gradient(circle at 50% 45%, rgba(var(--neon-rgb), 0.28) 0%, rgba(var(--neon-rgb), 0.06) 46%, rgba(5, 5, 5, 0.9) 85%);"
                       />
                     </>
                   )}
@@ -200,13 +212,8 @@ const customLogoWaText = encodeURIComponent(
                     decoding="async"
                     width="400"
                     height="500"
-                    style={
-                      !hasOwnScene
-                        ? "mix-blend-mode: lighten; filter: contrast(1.12) brightness(1.05);"
-                        : undefined
-                    }
                     class={`size-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04] ${
-                      !hasOwnScene ? "relative z-10 p-2" : ""
+                      !hasOwnScene ? "relative z-10" : ""
                     }`}
                   />
 
@@ -246,17 +253,16 @@ const customLogoWaText = encodeURIComponent(
                   </div>
 
                   <div class="flex shrink-0 items-center gap-1.5">
-                    <a
-                      href={product.shopierUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <button
+                      type="button"
+                      data-quickview-trigger="true"
                       class="cursor-pointer whitespace-nowrap inline-flex h-9 items-center justify-center rounded-full bg-white/5 hover:bg-white/15 border border-white/10 px-3.5 text-xs font-medium text-white transition-all duration-200 group-hover:border-[var(--neon-color)]/50"
                     >
                       İncele →
-                    </a>
+                    </button>
 
                     <a
-                      href={`https://wa.me/${whatsappRawPhone}?text=${waQuestionText}`}
+                      href={waUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={`${product.title} için WhatsApp hızlı sipariş`}
@@ -293,7 +299,6 @@ const customLogoWaText = encodeURIComponent(
                   style="--neon-color: #FF2E88; --neon-rgb: 255, 46, 136;"
                   class="product-card gpu-layer sm:col-span-2 lg:col-span-2 relative flex flex-col justify-between rounded-xl border border-white/[0.07] bg-[#0A0A0E] p-6 sm:p-7 overflow-hidden group"
                 >
-                  <!-- Sadece Kartın İçindeki Koyu Tuğla Dokusuna Düşen Kontrollü Neon Yansıması -->
                   <div
                     aria-hidden="true"
                     class="pointer-events-none absolute inset-0 wall-texture-brick opacity-75"
@@ -320,10 +325,10 @@ const customLogoWaText = encodeURIComponent(
                         Kendi Logonu veya Tasarımını Yükle — 30 Dakikada Fiyatlandırma
                       </h3>
                       <p class="text-sm text-white/60 leading-relaxed">
-                        Marka logonuzu, çiziminizi veya özel ölçülü mekan
-                        tabelanızı WhatsApp'tan iletin; mühendislik ekibimiz 30
-                        dakika içinde CNC kesim paftasını ve net üretim fiyatını
-                        çıkarsın.
+                        Marka logonuzu aşağıda canlı mekan simülatörüne yükleyip
+                        duvarda neon olarak test edin veya doğrudan WhatsApp'tan
+                        iletin; 30 dakika içinde CNC kesim paftasını ve net
+                        fiyatını çıkaralım.
                       </p>
                     </div>
 
@@ -348,19 +353,20 @@ const customLogoWaText = encodeURIComponent(
                   <div class="relative z-10 flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-white/[0.07]">
                     <div class="flex flex-wrap items-center gap-2">
                       <a
-                        href={`https://wa.me/${whatsappRawPhone}?text=${customLogoWaText}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        href="#kurumsal"
+                        data-trigger-logo-upload="true"
                         class="cursor-pointer whitespace-nowrap inline-flex h-10 items-center justify-center gap-2 rounded-full bg-white/5 hover:bg-white/15 border border-white/10 px-4 text-xs font-semibold text-white transition-all duration-200 group-hover:border-[#FF2E88]/60 group-hover:shadow-[0_0_20px_rgba(255,46,136,0.3)]"
                       >
-                        <span>Logonu Gönder (WhatsApp) →</span>
+                        <span>Logonu Sahnede Dene (PNG/SVG) →</span>
                       </a>
 
                       <a
-                        href="/tasarla"
+                        href={`https://wa.me/${whatsappRawPhone}?text=${customLogoWaText}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         class="cursor-pointer whitespace-nowrap inline-flex h-10 items-center justify-center rounded-full bg-white/5 hover:bg-white/15 border border-white/10 px-4 font-mono text-xs font-medium text-white/80 hover:text-white transition-all duration-200"
                       >
-                        Canlı Stüdyo →
+                        WhatsApp Fiyat Al →
                       </a>
                     </div>
 
@@ -376,6 +382,193 @@ const customLogoWaText = encodeURIComponent(
       }
     </div>
   </div>
+
+  <!-- HIZLI İNCELEME (QUICK-VIEW MODAL: Gece/Gündüz Modu + Gerçek Ölçek Cetveli) -->
+  <div
+    id="product-quickview-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="qv-title"
+    aria-hidden="true"
+    style="--neon-color: #1CFF8A; --neon-rgb: 28, 255, 138;"
+    class="fixed inset-0 z-50 hidden items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md"
+  >
+    <div
+      id="qv-dialog-box"
+      data-lenis-prevent
+      class="relative w-full max-w-4xl rounded-xl border border-white/15 bg-[#0A0A0E] shadow-[0_32px_100px_rgba(0,0,0,0.95)] overflow-hidden grid grid-cols-1 md:grid-cols-12"
+    >
+      <!-- Sol: Canlı Gece/Gündüz ve Ölçek Sahnesi (6 Sütun) -->
+      <div class="md:col-span-6 relative min-h-[360px] sm:min-h-[440px] bg-[#050505] border-b md:border-b-0 md:border-r border-white/[0.07] flex flex-col justify-between p-4 overflow-hidden">
+        <div
+          id="qv-wall-bg"
+          aria-hidden="true"
+          class="pointer-events-none absolute inset-0 wall-texture-brick opacity-75 transition-opacity duration-300"
+        />
+        <div
+          id="qv-ambient-glow"
+          aria-hidden="true"
+          class="pointer-events-none absolute inset-0 transition-opacity duration-300"
+          style="background: radial-gradient(circle at 50% 48%, rgba(var(--neon-rgb), 0.45) 0%, rgba(var(--neon-rgb), 0.12) 45%, transparent 75%);"
+        />
+
+        <!-- Üst Bar: Rozet + Gece/Gündüz Anahtarı -->
+        <div class="relative z-20 flex items-center justify-between gap-2">
+          <span
+            id="qv-size-badge"
+            class="font-mono inline-flex items-center gap-1.5 rounded-md backdrop-blur-md bg-black/60 border border-white/10 px-2.5 py-1 text-[11px] font-medium uppercase tracking-wider text-white"
+          >
+            KANVAS · 60x40 CM
+          </span>
+
+          <button
+            id="qv-light-toggle"
+            type="button"
+            aria-pressed="true"
+            class="cursor-pointer inline-flex items-center gap-2 rounded-lg border border-white/15 bg-black/70 px-3 py-1 font-mono text-[11px] font-semibold uppercase tracking-wider text-white transition-colors hover:border-white/30"
+          >
+            <span
+              id="qv-light-dot"
+              class="size-2 rounded-full"
+              style="background-color: var(--neon-color); box-shadow: 0 0 8px var(--neon-color);"
+            />
+            <span id="qv-light-label">GECE MODU (AÇIK)</span>
+          </button>
+        </div>
+
+        <!-- Merkez Ürün Görseli -->
+        <div class="relative z-10 my-auto flex items-center justify-center py-4">
+          <img
+            id="qv-image"
+            src=""
+            alt=""
+            class="max-h-[290px] w-auto rounded-lg object-contain transition-all duration-300"
+            style="box-shadow: 0 20px 50px rgba(0,0,0,0.85), 0 0 36px rgba(var(--neon-rgb), 0.35);"
+          />
+        </div>
+
+        <!-- Alt Ölçek Cetveli -->
+        <div class="relative z-20 flex items-center justify-between gap-2 font-mono text-[11px] text-white/70 pt-2 border-t border-white/[0.07]">
+          <span>←</span>
+          <div class="h-px flex-1 bg-white/20" />
+          <span id="qv-scale-ruler" class="font-semibold text-white">
+            GERÇEK DUVAR ÖLÇEĞİ: 60 × 40 CM
+          </span>
+          <div class="h-px flex-1 bg-white/20" />
+          <span>→</span>
+        </div>
+      </div>
+
+      <!-- Sağ: Mühendislik Detayları & Sipariş Aksiyonları (6 Sütun) -->
+      <div class="md:col-span-6 flex flex-col justify-between p-6 sm:p-7 text-left space-y-6">
+        <div class="space-y-4">
+          <div class="flex items-start justify-between gap-3">
+            <span
+              id="qv-color-label"
+              class="font-mono inline-flex items-center gap-2 rounded border border-white/10 bg-[#050505] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-white/80"
+            >
+              EL İŞÇİLİĞİ NEON
+            </span>
+
+            <button
+              id="qv-close-btn"
+              type="button"
+              aria-label="İnceleme penceresini kapat"
+              class="cursor-pointer rounded-lg border border-white/10 bg-[#050505] px-2.5 py-1 font-mono text-xs text-white/65 hover:border-white/25 hover:text-white"
+            >
+              ✕ ESC
+            </button>
+          </div>
+
+          <div>
+            <h3
+              id="qv-title"
+              class="font-display text-2xl font-bold tracking-tight text-white"
+            >
+              Ürün Adı
+            </h3>
+            <div class="mt-2 flex items-baseline gap-2.5">
+              <span
+                id="qv-price"
+                class="font-mono text-2xl sm:text-3xl font-bold"
+                style="color: var(--neon-color);"
+              >
+                1.400 ₺
+              </span>
+              <span
+                id="qv-old-price"
+                class="font-mono text-sm text-white/40 line-through"
+              />
+            </div>
+          </div>
+
+          <p class="text-sm text-white/55 leading-relaxed">
+            C/CNEON'S GLOW atölyesinde 1. sınıf esnek silikon LED neon ve CNC kesim
+            yüzey üzerine el işçiliğiyle üretilir. Kutusundan çıkan 12V adaptörü
+            ile fişe takıp saniyeler içinde çalıştırabilirsiniz.
+          </p>
+
+          <!-- 4 Hücreli Teknik Mühendislik Tablosu -->
+          <div class="grid grid-cols-2 gap-2.5 pt-1 font-mono">
+            <div class="rounded-lg border border-white/[0.07] bg-[#050505] p-3">
+              <span class="block text-[10px] uppercase tracking-wider text-white/40">
+                TÜP TEKNOLOJİSİ
+              </span>
+              <span class="mt-0.5 block text-xs font-semibold text-white">
+                8MM SİLİKON LED
+              </span>
+            </div>
+            <div class="rounded-lg border border-white/[0.07] bg-[#050505] p-3">
+              <span class="block text-[10px] uppercase tracking-wider text-white/40">
+                GÜÇ & ADAPTÖR
+              </span>
+              <span class="mt-0.5 block text-xs font-semibold text-white">
+                12V 2A TRAFO DAHİL
+              </span>
+            </div>
+            <div class="rounded-lg border border-white/[0.07] bg-[#050505] p-3">
+              <span class="block text-[10px] uppercase tracking-wider text-white/40">
+                MONTAJ DONANIMI
+              </span>
+              <span class="mt-0.5 block text-xs font-semibold text-white">
+                KROM VİDA & ASKI SETİ
+              </span>
+            </div>
+            <div class="rounded-lg border border-white/[0.07] bg-[#050505] p-3">
+              <span class="block text-[10px] uppercase tracking-wider text-white/40">
+                TESLİMAT & GÜVENCE
+              </span>
+              <span class="mt-0.5 block text-xs font-semibold text-white">
+                SİGORTALI KORUMALI KUTU
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-2.5 pt-4 border-t border-white/[0.07]">
+          <a
+            id="qv-shopier-link"
+            href="#"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="cursor-pointer w-full inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/[0.08] px-5 py-3 font-mono text-xs font-semibold uppercase tracking-wider text-white transition-all duration-200 hover:border-[var(--neon-color)] hover:bg-white/[0.15] hover:shadow-[0_0_24px_rgba(var(--neon-rgb),0.35)]"
+          >
+            <span>SHOPIER GÜVENCESİYLE SATIN AL →</span>
+          </a>
+
+          <a
+            id="qv-wa-link"
+            href="#"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="cursor-pointer w-full inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-white/[0.07] bg-[#050505] px-5 py-2.5 font-mono text-xs font-medium text-white/75 transition-all duration-200 hover:border-white/25 hover:text-white"
+          >
+            <span>WHATSAPP'TAN HIZLI SİPARİŞ & SORU SOR</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
 </section>
 
 <script is:inline>
@@ -385,10 +578,139 @@ const customLogoWaText = encodeURIComponent(
     const sortSelect = document.getElementById("product-sort-select");
     const bentoCta = document.getElementById("bento-custom-cta");
 
+    // Quick-View Modal Elemanları
+    const modal = document.getElementById("product-quickview-modal");
+    const closeBtn = document.getElementById("qv-close-btn");
+    const qvImage = document.getElementById("qv-image");
+    const qvTitle = document.getElementById("qv-title");
+    const qvPrice = document.getElementById("qv-price");
+    const qvOldPrice = document.getElementById("qv-old-price");
+    const qvSizeBadge = document.getElementById("qv-size-badge");
+    const qvColorLabel = document.getElementById("qv-color-label");
+    const qvScaleRuler = document.getElementById("qv-scale-ruler");
+    const qvShopierLink = document.getElementById("qv-shopier-link");
+    const qvWaLink = document.getElementById("qv-wa-link");
+    const qvLightToggle = document.getElementById("qv-light-toggle");
+    const qvLightLabel = document.getElementById("qv-light-label");
+    const qvLightDot = document.getElementById("qv-light-dot");
+    const qvAmbientGlow = document.getElementById("qv-ambient-glow");
+    const qvWallBg = document.getElementById("qv-wall-bg");
+
     if (!grid) return;
 
     let activeCategory = "all";
     let activeSort = "featured";
+    let isQvNight = true;
+    let currentQvHex = "#1CFF8A";
+    let currentQvRgb = "28, 255, 138";
+
+    function applyQvLighting() {
+      if (!modal || !qvImage) return;
+      if (isQvNight) {
+        if (qvAmbientGlow) qvAmbientGlow.style.opacity = "1";
+        if (qvWallBg) qvWallBg.style.opacity = "0.75";
+        qvImage.style.filter = "brightness(1.04) contrast(1.08)";
+        qvImage.style.boxShadow = `0 20px 50px rgba(0,0,0,0.85), 0 0 42px rgba(${currentQvRgb}, 0.42)`;
+        if (qvLightLabel) qvLightLabel.textContent = "GECE MODU (AÇIK)";
+        if (qvLightDot) {
+          qvLightDot.style.backgroundColor = currentQvHex;
+          qvLightDot.style.boxShadow = `0 0 8px ${currentQvHex}`;
+        }
+      } else {
+        if (qvAmbientGlow) qvAmbientGlow.style.opacity = "0.18";
+        if (qvWallBg) qvWallBg.style.opacity = "0.35";
+        qvImage.style.filter = "brightness(0.92) contrast(1.0)";
+        qvImage.style.boxShadow = "0 14px 30px rgba(0,0,0,0.6)";
+        if (qvLightLabel) qvLightLabel.textContent = "GÜNDÜZ MODU (ODA IŞIĞI)";
+        if (qvLightDot) {
+          qvLightDot.style.backgroundColor = "rgba(255,255,255,0.4)";
+          qvLightDot.style.boxShadow = "none";
+        }
+      }
+    }
+
+    function openQuickView(card) {
+      if (!modal) return;
+      const title = card.getAttribute("data-title") || "";
+      const price = card.getAttribute("data-formatted-price") || "";
+      const oldPrice = card.getAttribute("data-old-price") || "";
+      const img = card.getAttribute("data-image") || "";
+      const shopier = card.getAttribute("data-shopier-url") || "#";
+      const wa = card.getAttribute("data-wa-url") || "#";
+      const sizeBadge = card.getAttribute("data-size-badge") || "60x40 CM";
+      const colorLabel = card.getAttribute("data-color-label") || "NEON";
+      currentQvHex = card.getAttribute("data-glow-color") || "#1CFF8A";
+      currentQvRgb = card.getAttribute("data-neon-rgb") || "28, 255, 138";
+
+      modal.style.setProperty("--neon-color", currentQvHex);
+      modal.style.setProperty("--neon-rgb", currentQvRgb);
+
+      if (qvTitle) qvTitle.textContent = title;
+      if (qvPrice) qvPrice.textContent = price;
+      if (qvOldPrice) qvOldPrice.textContent = oldPrice;
+      if (qvImage) {
+        qvImage.setAttribute("src", img);
+        qvImage.setAttribute("alt", title);
+      }
+      if (qvSizeBadge) qvSizeBadge.textContent = sizeBadge;
+      if (qvColorLabel) {
+        qvColorLabel.textContent = `${colorLabel} · EL İŞÇİLİĞİ`;
+      }
+      if (qvScaleRuler) {
+        qvScaleRuler.textContent = `GERÇEK DUVAR ÖLÇEĞİ: ${sizeBadge}`;
+      }
+      if (qvShopierLink) qvShopierLink.setAttribute("href", shopier);
+      if (qvWaLink) qvWaLink.setAttribute("href", wa);
+
+      isQvNight = true;
+      applyQvLighting();
+
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+      modal.setAttribute("aria-hidden", "false");
+    }
+
+    function closeQuickView() {
+      if (!modal) return;
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+      modal.setAttribute("aria-hidden", "true");
+    }
+
+    grid.querySelectorAll("[data-quickview-trigger='true']").forEach((el) => {
+      el.addEventListener("click", (e) => {
+        const card = e.currentTarget.closest("[data-product-card='true']");
+        if (card) openQuickView(card);
+      });
+    });
+
+    if (qvLightToggle) {
+      qvLightToggle.addEventListener("click", () => {
+        isQvNight = !isQvNight;
+        applyQvLighting();
+      });
+    }
+
+    if (closeBtn) closeBtn.addEventListener("click", closeQuickView);
+    if (modal) {
+      modal.addEventListener("click", (e) => {
+        if (e.target === modal) closeQuickView();
+      });
+    }
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeQuickView();
+    });
+
+    // Bento CTA "Logonu Sahnede Dene" tıklandığında aşağıdaki simülatörün dosya seçicisini tetikle
+    const logoTrigger = document.querySelector("[data-trigger-logo-upload='true']");
+    if (logoTrigger) {
+      logoTrigger.addEventListener("click", () => {
+        setTimeout(() => {
+          const fileInput = document.getElementById("b2b-logo-file-input");
+          if (fileInput) fileInput.click();
+        }, 650);
+      });
+    }
 
     function updateGrid() {
       const cards = Array.from(
@@ -417,7 +739,6 @@ const customLogoWaText = encodeURIComponent(
       );
       const hiddenCards = sortedCards.filter((c) => c.style.display === "none");
 
-      // Bento CTA Banner'ı her zaman 2. satırda (6. görünür karttan sonra, filtrede az kart varsa sonuna) tut
       const insertPos = Math.min(6, visibleCards.length);
       visibleCards.forEach((c, idx) => {
         if (idx === insertPos && bentoCta) {

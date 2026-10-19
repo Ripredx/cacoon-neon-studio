@@ -1,5 +1,5 @@
 export const BUSINESS_CONFIG = {
-  name: "C/CNEON'S",
+  name: "C/CNEON'S GLOW",
   handle: "neons.glow",
   slogan: "Color your life",
   location: "Antalya / Manavgat",

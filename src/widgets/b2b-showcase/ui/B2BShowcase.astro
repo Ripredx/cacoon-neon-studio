@@ -73,7 +73,7 @@ const waOffice = buildB2BWhatsAppUrl("03 / Kurumsal Ofis");
           aria-selected="true"
           data-b2b-tab="lounge"
           data-b2b-photo="/scenes/b2b-lounge-scene.jpg"
-          data-b2b-title="CACOON LOUNGE"
+          data-b2b-title="C/CNEON'S LOUNGE"
           data-b2b-sub="Cocktails & Late Night"
           data-b2b-spec="120x55 CM · IP67 DIŞ/İÇ CEPHE"
           data-b2b-rgb="255, 176, 32"
@@ -123,7 +123,7 @@ const waOffice = buildB2BWhatsAppUrl("03 / Kurumsal Ofis");
           aria-selected="false"
           data-b2b-tab="office"
           data-b2b-photo="/scenes/b2b-office-wall.jpg"
-          data-b2b-title="CACOON ATELIER"
+          data-b2b-title="C/CNEON'S GLOW"
           data-b2b-sub="Creative Architecture Lab"
           data-b2b-spec="135x50 CM · KURUMSAL LOBİ"
           data-b2b-rgb="28, 255, 138"
@@ -175,9 +175,9 @@ const waOffice = buildB2BWhatsAppUrl("03 / Kurumsal Ofis");
         >
         </div>
 
-        <!-- Üst Sahne Kontrol Barı: Sol Canlı Tabela Girişi | Sağ Üst "Oda Işıklarını Kapat" Anahtarı (Toggle) -->
+        <!-- Üst Sahne Kontrol Barı: Sol Canlı Tabela Girişi & Logo Yükleme | Sağ Üst "Oda Işıklarını Kapat" Anahtarı (Toggle) -->
         <div class="relative z-20 flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.07] bg-[#050505]/80 px-4 py-3 sm:px-6 backdrop-blur-md">
-          <div class="flex items-center gap-2.5">
+          <div class="flex flex-wrap items-center gap-2.5">
             <span
               class="size-2 rounded-full transition-colors duration-300"
               style="background-color: var(--neon-color); box-shadow: 0 0 8px var(--neon-color);"
@@ -189,9 +189,34 @@ const waOffice = buildB2BWhatsAppUrl("03 / Kurumsal Ofis");
               id="b2b-live-title"
               type="text"
               maxlength="20"
-              value="CACOON LOUNGE"
-              class="w-36 sm:w-48 rounded-lg border border-white/10 bg-[#0A0A0E] px-2.5 py-1 font-mono text-xs font-bold text-white focus:border-white/30 focus:outline-none"
+              value="C/CNEON'S LOUNGE"
+              class="w-36 sm:w-44 rounded-lg border border-white/10 bg-[#0A0A0E] px-2.5 py-1 font-mono text-xs font-bold text-white focus:border-white/30 focus:outline-none"
             />
+
+            <!-- İstemci Taraflı Canlı Logo Yükleme (PNG/SVG) -->
+            <input
+              id="b2b-logo-file-input"
+              type="file"
+              accept="image/png,image/svg+xml,image/webp,image/jpeg"
+              class="sr-only"
+            />
+            <button
+              id="b2b-upload-logo-btn"
+              type="button"
+              class="cursor-pointer inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-[#0A0A0E] px-2.5 py-1 font-mono text-xs font-medium text-white transition-all duration-200 hover:border-[var(--neon-color)] hover:bg-white/[0.06]"
+            >
+              <svg class="size-3.5 text-white/75" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+              </svg>
+              <span>LOGONU YÜKLE (PNG/SVG)</span>
+            </button>
+            <button
+              id="b2b-reset-logo-btn"
+              type="button"
+              class="hidden cursor-pointer inline-flex items-center gap-1 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 font-mono text-xs text-white/70 transition-colors hover:bg-white/15 hover:text-white"
+            >
+              <span>YAZIYA DÖN ✕</span>
+            </button>
           </div>
 
           <!-- Sağ Üst: Gece / Gündüz ("Oda Işıklarını Kapat") Sürgüsü (Toggle Switch) -->
@@ -233,12 +258,19 @@ const waOffice = buildB2BWhatsAppUrl("03 / Kurumsal Ofis");
             <span class="absolute bottom-3.5 left-4 size-2 rounded-full bg-white/40 ring-1 ring-black"></span>
             <span class="absolute bottom-3.5 right-4 size-2 rounded-full bg-white/40 ring-1 ring-black"></span>
 
+            <!-- Yüklenen Özel Logo Katmanı (Varsayılan Gizli) -->
+            <img
+              id="b2b-uploaded-logo"
+              alt="Özel yüklenen logo neon simülasyonu"
+              class="hidden max-h-[145px] sm:max-h-[175px] max-w-[82%] object-contain select-none transition-all duration-500"
+            />
+
             <p
               id="b2b-neon-main-text"
               class="animate-neon-ignite font-neon-mono text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight select-none transition-all duration-500"
               style="color: var(--neon-color); mix-blend-mode: screen; text-shadow: 0 0 5px #fff, 0 0 20px currentColor, 0 0 40px currentColor, 0 0 85px var(--neon-color);"
             >
-              CACOON LOUNGE
+              C/CNEON'S LOUNGE
             </p>
 
             <p
@@ -342,6 +374,10 @@ const waOffice = buildB2BWhatsAppUrl("03 / Kurumsal Ofis");
     const neonPlate = document.getElementById("b2b-neon-plate");
     const mainText = document.getElementById("b2b-neon-main-text");
     const subText = document.getElementById("b2b-neon-sub-text");
+    const uploadedLogo = document.getElementById("b2b-uploaded-logo");
+    const logoFileInput = document.getElementById("b2b-logo-file-input");
+    const uploadLogoBtn = document.getElementById("b2b-upload-logo-btn");
+    const resetLogoBtn = document.getElementById("b2b-reset-logo-btn");
     const liveTitleInput = document.getElementById("b2b-live-title");
     const lightsToggle = document.getElementById("b2b-lights-toggle");
     const lightsLabel = document.getElementById("b2b-lights-label");
@@ -355,6 +391,7 @@ const waOffice = buildB2BWhatsAppUrl("03 / Kurumsal Ofis");
     let currentRgb = "255, 176, 32";
     let currentHex = "#FFB020";
     let isLightsOff = true; // true = Oda Işıkları Kapalı (Gece Modu, Maksimum Neon Parlaklığı)
+    let activeLogoObjectUrl = null;
 
     function applyRoomLighting() {
       section.style.setProperty("--neon-color", currentHex);
@@ -374,6 +411,9 @@ const waOffice = buildB2BWhatsAppUrl("03 / Kurumsal Ofis");
         mainText.style.textShadow = `0 0 5px #fff, 0 0 20px currentColor, 0 0 40px currentColor, 0 0 90px ${currentHex}`;
         if (subText) {
           subText.style.textShadow = `0 0 4px #fff, 0 0 18px ${currentHex}, 0 0 36px ${currentHex}`;
+        }
+        if (uploadedLogo) {
+          uploadedLogo.style.filter = `drop-shadow(0 0 3px #ffffff) drop-shadow(0 0 14px ${currentHex}) drop-shadow(0 0 34px ${currentHex})`;
         }
         if (lightsToggle) lightsToggle.setAttribute("aria-checked", "true");
         if (lightsLabel) {
@@ -400,6 +440,9 @@ const waOffice = buildB2BWhatsAppUrl("03 / Kurumsal Ofis");
         if (subText) {
           subText.style.textShadow = `0 0 2px #fff, 0 0 10px ${currentHex}`;
         }
+        if (uploadedLogo) {
+          uploadedLogo.style.filter = `drop-shadow(0 0 2px #ffffff) drop-shadow(0 0 10px ${currentHex})`;
+        }
         if (lightsToggle) lightsToggle.setAttribute("aria-checked", "false");
         if (lightsLabel) {
           lightsLabel.textContent = "ODA IŞIKLARINI KAPAT: KAPALI (GÜNDÜZ)";
@@ -413,6 +456,41 @@ const waOffice = buildB2BWhatsAppUrl("03 / Kurumsal Ofis");
       }
     }
 
+    function switchToTextMode() {
+      if (uploadedLogo) uploadedLogo.classList.add("hidden");
+      mainText.classList.remove("hidden");
+      if (subText) subText.classList.remove("hidden");
+      if (resetLogoBtn) resetLogoBtn.classList.add("hidden");
+    }
+
+    if (uploadLogoBtn && logoFileInput) {
+      uploadLogoBtn.addEventListener("click", () => {
+        logoFileInput.click();
+      });
+
+      logoFileInput.addEventListener("change", () => {
+        const file = logoFileInput.files && logoFileInput.files[0];
+        if (!file || !uploadedLogo) return;
+
+        if (activeLogoObjectUrl) {
+          URL.revokeObjectURL(activeLogoObjectUrl);
+        }
+        activeLogoObjectUrl = URL.createObjectURL(file);
+        uploadedLogo.setAttribute("src", activeLogoObjectUrl);
+        uploadedLogo.classList.remove("hidden");
+        mainText.classList.add("hidden");
+        if (subText) subText.classList.add("hidden");
+        if (resetLogoBtn) resetLogoBtn.classList.remove("hidden");
+        applyRoomLighting();
+      });
+    }
+
+    if (resetLogoBtn) {
+      resetLogoBtn.addEventListener("click", () => {
+        switchToTextMode();
+      });
+    }
+
     if (lightsToggle) {
       lightsToggle.addEventListener("click", () => {
         isLightsOff = !isLightsOff;
@@ -422,8 +500,9 @@ const waOffice = buildB2BWhatsAppUrl("03 / Kurumsal Ofis");
 
     if (liveTitleInput) {
       liveTitleInput.addEventListener("input", () => {
+        switchToTextMode();
         const clean = (
-          liveTitleInput.value || "CACOON LOUNGE"
+          liveTitleInput.value || "C/CNEON'S LOUNGE"
         ).toLocaleUpperCase("tr-TR");
         mainText.textContent = clean;
       });
@@ -433,7 +512,7 @@ const waOffice = buildB2BWhatsAppUrl("03 / Kurumsal Ofis");
       tab.addEventListener("click", () => {
         const photoUrl =
           tab.getAttribute("data-b2b-photo") || "/scenes/b2b-lounge-scene.jpg";
-        const title = tab.getAttribute("data-b2b-title") || "CACOON LOUNGE";
+        const title = tab.getAttribute("data-b2b-title") || "C/CNEON'S LOUNGE";
         const sub =
           tab.getAttribute("data-b2b-sub") || "Cocktails & Late Night";
         const spec =

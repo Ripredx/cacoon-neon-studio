@@ -1,13 +1,69 @@
 ---
 import BaseLayout from "@/app/layouts/BaseLayout.astro";
+import { getVerifiedProducts } from "@/entities/product/api/getProducts";
+import { BUSINESS_CONFIG } from "@/shared/config/business";
 import B2BShowcase from "@/widgets/b2b-showcase/ui/B2BShowcase.astro";
 import Footer from "@/widgets/footer/ui/Footer.astro";
 import Header from "@/widgets/header/ui/Header.astro";
 import HeroShowcase from "@/widgets/hero-showcase/ui/HeroShowcase.astro";
 import ProductCatalog from "@/widgets/product-catalog/ui/ProductCatalog.astro";
+
+const products = getVerifiedProducts();
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "LocalBusiness",
+      name: BUSINESS_CONFIG.name,
+      description:
+        "Antalya / Manavgat merkezli gerçek el işçiliği özel üretim LED neon tabela, pleksi neon ve kanvas neon tablo atölyesi.",
+      image: BUSINESS_CONFIG.logoUrl,
+      telephone: `+${BUSINESS_CONFIG.phones[0].raw}`,
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: "Manavgat",
+        addressRegion: "Antalya",
+        addressCountry: "TR",
+      },
+      sameAs: [BUSINESS_CONFIG.shopierUrl, BUSINESS_CONFIG.instagramUrl],
+    },
+    {
+      "@type": "ItemList",
+      name: "C/CNEON'S GLOW Özel Üretim LED Neon Koleksiyonu",
+      numberOfItems: products.length,
+      itemListElement: products.map((product, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        item: {
+          "@type": "Product",
+          sku: product.id,
+          name: product.title,
+          image: product.imageUrl,
+          brand: {
+            "@type": "Brand",
+            name: "C/CNEON'S GLOW",
+          },
+          offers: {
+            "@type": "Offer",
+            url: product.shopierUrl,
+            priceCurrency: "TRY",
+            price: product.price,
+            availability: "https://schema.org/InStock",
+          },
+        },
+      })),
+    },
+  ],
+};
 ---
 
 <BaseLayout>
+  <script
+    is:inline
+    type="application/ld+json"
+    set:html={JSON.stringify(structuredData)}
+  />
   <Header currentPath="/" />
   <main>
     <HeroShowcase />

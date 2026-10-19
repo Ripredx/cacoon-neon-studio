@@ -1,41 +1,17 @@
 ---
 import BaseLayout from "@/app/layouts/BaseLayout.astro";
 import { BUSINESS_CONFIG } from "@/shared/config/business";
-import Footer from "@/widgets/footer/ui/Footer.astro";
-import Header from "@/widgets/header/ui/Header.astro";
 import NeonStudio from "@/widgets/neon-studio/ui/NeonStudio";
 ---
 
 <BaseLayout
-  title={`Kendin Tasarla | ${BUSINESS_CONFIG.name} Canlı Neon Stüdyosu`}
-  description="Yazınızı girin, font, neon rengi ve boyut seçerek canlı önizleme yapın, PNG olarak indirin ve WhatsApp üzerinden anında fiyat alın."
+  title={`Canlı Neon Atölyesi | ${BUSINESS_CONFIG.name}`}
+  description="Yazınızı girin, font, neon rengi ve boyut seçerek canlı önizleme yapın, PNG paftasını indirin ve WhatsApp üzerinden anında fiyat alın."
 >
-  <Header currentPath="/tasarla" />
-  <main class="relative bg-[#050505] overflow-hidden pt-24 pb-16 sm:pt-28 sm:pb-24">
-    <div class="relative z-10 mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 space-y-6">
-      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 text-left border-b border-white/[0.07] pb-6">
-        <div class="space-y-2">
-          <p class="font-mono text-xs uppercase tracking-wider text-white/60">
-            CACOON ({BUSINESS_CONFIG.name}) · EL İŞÇİLİĞİ CAD ÜRETİM PAFTASI
-          </p>
-          <h1
-            class="font-display font-bold text-white tracking-tight"
-            style="font-size: clamp(2rem, 3.5vw, 3rem);"
-          >
-            Canlı Neon Tasarım Stüdyosu
-          </h1>
-        </div>
-        <p class="max-w-lg text-sm sm:text-base text-white/55 text-pretty">
-          Yazınızı ve sembolünüzü seçin, gece/gündüz tüp görünümünü test edin, milimetrik CAD
-          üretim paftasını PNG indirin veya tek tıkla {BUSINESS_CONFIG.location} atölyemizden
-          sipariş verin.
-        </p>
-      </div>
-
-      <div transition:name="neon-stage">
-        <NeonStudio client:load />
-      </div>
-    </div>
+  <main
+    transition:name="neon-stage"
+    class="min-h-dvh lg:h-dvh w-full bg-[#050505] lg:overflow-hidden flex flex-col"
+  >
+    <NeonStudio client:load />
   </main>
-  <Footer />
 </BaseLayout>

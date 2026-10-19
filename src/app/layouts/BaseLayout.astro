@@ -69,7 +69,7 @@ const {
   </head>
   <body
     data-lenis-lerp={NEON_ENGINE_CONFIG.lenisLerp}
-    class="min-h-dvh bg-[#050505] text-[#F4F4F6] antialiased selection:bg-white/20 selection:text-white overflow-x-hidden"
+    class="min-h-dvh bg-[#050505] text-[#F4F4F6] antialiased selection:bg-white/20 selection:text-white overflow-x-clip"
   >
     <svg class="sr-only" aria-hidden="true" focusable="false">
       <defs>
@@ -91,67 +91,77 @@ const {
 
     <script is:inline>
       function initStudioMotion() {
-        const prefersReduced = window.matchMedia(
-          "(prefers-reduced-motion: reduce)"
-        ).matches;
-        if (prefersReduced) return;
+        if (window.__ccneonsLenis) {
+          window.__ccneonsLenis.destroy();
+          window.__ccneonsLenis = null;
+        }
+        if (window.__ccneonsRafId) {
+          cancelAnimationFrame(window.__ccneonsRafId);
+          window.__ccneonsRafId = null;
+        }
 
-        if (window.gsap && window.ScrollTrigger) {
-          window.gsap.registerPlugin(window.ScrollTrigger);
+        if (window.Lenis) {
+          const lenis = new window.Lenis({
+            lerp: 0.1,
+            orientation: "vertical",
+            gestureOrientation: "vertical",
+            smoothWheel: true,
+            wheelMultiplier: 1,
+            touchMultiplier: 1.5,
+            infinite: false,
+          });
 
-          if (window.Lenis && !window.__ccneonsLenis) {
-            const lerpVal = Number(
-              document.body.getAttribute("data-lenis-lerp") || "0.09"
-            );
-            const lenis = new window.Lenis({
-              lerp: lerpVal,
-              smoothWheel: true,
-              syncTouch: false,
-            });
-            window.__ccneonsLenis = lenis;
+          window.__ccneonsLenis = lenis;
+
+          if (window.gsap && window.ScrollTrigger) {
+            window.gsap.registerPlugin(window.ScrollTrigger);
             lenis.on("scroll", window.ScrollTrigger.update);
-            window.gsap.ticker.add((time) => {
-              lenis.raf(time * 1000);
-            });
-            window.gsap.ticker.lagSmoothing(0);
-          } else if (window.__ccneonsLenis) {
-            window.__ccneonsLenis.resize();
-            window.ScrollTrigger.refresh();
           }
 
-          // Sayfa içi (#koleksiyon, #kurumsal) çapa linklerini Lenis ile yağ gibi kaydır
-          document.querySelectorAll('a[href^="#"], a[href^="/#"]').forEach((anchor) => {
-            if (anchor.hasAttribute("data-lenis-bound")) return;
-            anchor.setAttribute("data-lenis-bound", "true");
-            anchor.addEventListener("click", (e) => {
+          function raf(time) {
+            lenis.raf(time);
+            window.__ccneonsRafId = requestAnimationFrame(raf);
+          }
+          window.__ccneonsRafId = requestAnimationFrame(raf);
+        }
+
+        // Sayfa içi (#hero-stage, #koleksiyon, #kurumsal) çapa linklerini yakala ve yumuşak kaydır
+        document.querySelectorAll('a[href^="#"], a[href^="/#"]').forEach((anchor) => {
+          if (anchor.hasAttribute("data-lenis-bound")) return;
+          anchor.setAttribute("data-lenis-bound", "true");
+          anchor.addEventListener(
+            "click",
+            (e) => {
               const href = anchor.getAttribute("href") || "";
               const hashIdx = href.indexOf("#");
               if (hashIdx === -1) return;
               const targetId = href.slice(hashIdx);
+              if (targetId.length <= 1) return;
               if (href.startsWith("/#") && window.location.pathname !== "/") return;
               const targetEl = document.querySelector(targetId);
-              if (targetEl && window.__ccneonsLenis) {
-                e.preventDefault();
-                window.__ccneonsLenis.scrollTo(targetEl, { offset: -88, duration: 0.9 });
-              }
-            });
-          });
+              if (!targetEl) return;
 
-          const archSign = document.getElementById("archc-neon-sign");
-          if (archSign) {
-            window.ScrollTrigger.create({
-              trigger: archSign,
-              start: "top 92%",
-              once: true,
-              onEnter: () => {
-                archSign.classList.add("animate-neon-ignite");
-              },
-            });
-          }
-        }
+              e.preventDefault();
+              e.stopPropagation();
+
+              if (window.__ccneonsLenis) {
+                window.__ccneonsLenis.scrollTo(targetEl, {
+                  offset: -72,
+                  duration: 1.05,
+                });
+              } else {
+                targetEl.scrollIntoView({ behavior: "smooth", block: "start" });
+              }
+            },
+            { capture: true }
+          );
+        });
       }
 
-      document.addEventListener("DOMContentLoaded", initStudioMotion);
+      window.addEventListener("DOMContentLoaded", initStudioMotion);
+      window.addEventListener("load", () => {
+        if (!window.__ccneonsLenis) initStudioMotion();
+      });
       document.addEventListener("astro:page-load", initStudioMotion);
     </script>
   </body>

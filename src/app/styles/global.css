@@ -209,9 +209,26 @@
   background: rgba(53, 231, 255, 0.75);
 }
 
+/* Lenis Smooth Scroll Resmi Stilleri */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: clip;
+}
+
 /* GPU Katman Hızlandırma */
 .gpu-layer {
-  transform: translateZ(0);
   backface-visibility: hidden;
 }
 
@@ -219,27 +236,4 @@
 ::view-transition-new(root) {
   animation-duration: 220ms;
   animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-  .animate-neon-ignite,
-  .animate-neon-stroke,
-  .animate-badge-pulse,
-  .animate-studio-tab,
-  .marquee-track {
-    animation: none !important;
-    stroke-dashoffset: 0 !important;
-    opacity: 1 !important;
-    transform: none !important;
-  }
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
 }

@@ -22,7 +22,7 @@ const { currentPath = "/" } = Astro.props;
     >
       <img
         src={BUSINESS_CONFIG.logoUrl}
-        alt="CACOON Custom Neon Studio"
+        alt="C/CNEON'S GLOW Custom Neon Studio"
         width="38"
         height="38"
         class="size-9.5 rounded-lg border border-white/[0.07] object-cover grayscale-[20%]"
@@ -30,24 +30,26 @@ const { currentPath = "/" } = Astro.props;
       <div class="flex flex-col">
         <div class="flex items-center gap-2">
           <span class="font-display text-base font-bold tracking-tight text-white leading-none">
-            CACOON
+            C/CNEON'S GLOW
           </span>
           <span class="font-mono rounded border border-white/10 bg-white/[0.04] px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-white/70">
             EL İŞÇİLİĞİ
           </span>
         </div>
         <span class="font-mono mt-1 block text-[11px] text-white/45 tracking-tight">
-          {BUSINESS_CONFIG.name} · {BUSINESS_CONFIG.location}
+          @{BUSINESS_CONFIG.handle} · {BUSINESS_CONFIG.location}
         </span>
       </div>
     </a>
 
     <div class="hidden md:flex items-center gap-8 text-sm font-medium text-white/60">
       <a
-        href="/#hero-stage"
-        class="cursor-pointer py-1.5 transition-colors duration-200 hover:text-white"
+        href="/tasarla"
+        data-astro-prefetch="viewport"
+        class="cursor-pointer py-1.5 transition-colors duration-200 hover:text-white inline-flex items-center gap-1.5"
       >
-        Canlı Atölye
+        <span class="size-1.5 rounded-full bg-[#35E7FF] shadow-[0_0_6px_#35E7FF]"></span>
+        <span>Canlı Neon Atölyesi</span>
       </a>
       <a
         href="/#koleksiyon"
@@ -72,13 +74,13 @@ const { currentPath = "/" } = Astro.props;
       </a>
     </div>
 
-    <div class="flex items-center gap-2.5">
+    <div class="flex items-center gap-2">
       {
         currentPath === "/tasarla" ? (
           <a
             href="/"
             data-astro-prefetch="viewport"
-            class="cursor-pointer inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2 font-mono text-xs font-medium text-white transition-all duration-200 hover:border-white/25 hover:bg-white/10"
+            class="cursor-pointer inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3.5 sm:px-4 py-2 font-mono text-xs font-medium text-white transition-all duration-200 hover:border-white/25 hover:bg-white/10"
           >
             <span>← GALERİYE DÖN</span>
           </a>
@@ -86,24 +88,135 @@ const { currentPath = "/" } = Astro.props;
           <a
             href="/tasarla"
             data-astro-prefetch="viewport"
-            class="cursor-pointer group inline-flex min-h-10 items-center gap-2.5 rounded-xl border border-white/10 bg-white/[0.05] px-4 py-2 font-mono text-xs font-semibold uppercase tracking-wider text-white transition-all duration-300 hover:border-[#35E7FF]/60 hover:bg-white/10 hover:shadow-[0_0_24px_rgba(53,231,255,0.28)]"
+            class="cursor-pointer group inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/10 bg-white/[0.05] px-3.5 sm:px-4 py-2 font-mono text-xs font-semibold uppercase tracking-wider text-white transition-all duration-300 hover:border-[#35E7FF]/60 hover:bg-white/10 hover:shadow-[0_0_24px_rgba(53,231,255,0.28)]"
           >
             <span class="size-1.5 rounded-full bg-white/50 transition-all duration-300 group-hover:bg-[#35E7FF] group-hover:shadow-[0_0_8px_#35E7FF]" />
-            <span>CAD STÜDYO →</span>
+            <span>KENDİN TASARLA →</span>
           </a>
         )
       }
+
+      <button
+        id="mobile-menu-toggle"
+        type="button"
+        aria-expanded="false"
+        aria-controls="mobile-nav-drawer"
+        aria-label="Mobil menüyü aç veya kapat"
+        class="md:hidden cursor-pointer inline-flex size-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-white transition-colors hover:bg-white/10"
+      >
+        <svg
+          id="mobile-menu-icon-open"
+          class="size-5"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          aria-hidden="true"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M4 12h16M4 17h16" />
+        </svg>
+        <svg
+          id="mobile-menu-icon-close"
+          class="hidden size-5"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          aria-hidden="true"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
     </div>
   </nav>
+
+  <!-- Mobil Navigasyon Çekmecesi (Obsidian Gallery) -->
+  <div
+    id="mobile-nav-drawer"
+    class="hidden md:hidden border-t border-white/[0.07] bg-[#050505]/95 px-4 py-4 backdrop-blur-xl"
+  >
+    <div class="flex flex-col gap-1.5 font-mono text-xs">
+      <a
+        href="/tasarla"
+        data-mobile-nav-link="true"
+        class="flex items-center justify-between rounded-xl border border-[#35E7FF]/30 bg-[#0A0A0E] px-4 py-3 text-[#35E7FF] transition-colors hover:border-[#35E7FF]/60"
+      >
+        <span>01 / CANLI NEON ATÖLYESİ</span>
+        <span>KENDİN TASARLA →</span>
+      </a>
+      <a
+        href="/#koleksiyon"
+        data-mobile-nav-link="true"
+        class="flex items-center justify-between rounded-xl border border-white/[0.07] bg-[#0A0A0E] px-4 py-3 text-white/85 transition-colors hover:border-white/20 hover:text-white"
+      >
+        <span>02 / KOLEKSİYON</span>
+        <span class="text-white/45">[16 ÜRÜN]</span>
+      </a>
+      <a
+        href="/#kurumsal"
+        data-mobile-nav-link="true"
+        class="flex items-center justify-between rounded-xl border border-white/[0.07] bg-[#0A0A0E] px-4 py-3 text-white/85 transition-colors hover:border-white/20 hover:text-white"
+      >
+        <span>03 / MEKAN SİMÜLATÖRÜ</span>
+        <span class="text-white/35">→</span>
+      </a>
+      <a
+        href={BUSINESS_CONFIG.shopierUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        data-mobile-nav-link="true"
+        class="flex items-center justify-between rounded-xl border border-white/[0.07] bg-[#0A0A0E] px-4 py-3 text-white/70 transition-colors hover:border-white/20 hover:text-white"
+      >
+        <span>04 / SHOPIER MAĞAZA</span>
+        <span class="text-white/35">↗</span>
+      </a>
+    </div>
+  </div>
 </header>
 
 <script is:inline>
   function initSmartHeader() {
     const header = document.getElementById("site-header");
+    const mobileToggle = document.getElementById("mobile-menu-toggle");
+    const mobileDrawer = document.getElementById("mobile-nav-drawer");
+    const iconOpen = document.getElementById("mobile-menu-icon-open");
+    const iconClose = document.getElementById("mobile-menu-icon-close");
     if (!header) return;
 
     let lastScrollY = window.scrollY;
     let lastClientY = null;
+    let isMobileMenuOpen = false;
+
+    function setMobileMenu(open) {
+      isMobileMenuOpen = open;
+      if (!mobileToggle || !mobileDrawer) return;
+      mobileToggle.setAttribute("aria-expanded", open ? "true" : "false");
+      if (open) {
+        mobileDrawer.classList.remove("hidden");
+        if (iconOpen) iconOpen.classList.add("hidden");
+        if (iconClose) iconClose.classList.remove("hidden");
+        showHeader();
+      } else {
+        mobileDrawer.classList.add("hidden");
+        if (iconOpen) iconOpen.classList.remove("hidden");
+        if (iconClose) iconClose.classList.add("hidden");
+      }
+    }
+
+    if (mobileToggle && !mobileToggle.hasAttribute("data-bound")) {
+      mobileToggle.setAttribute("data-bound", "true");
+      mobileToggle.addEventListener("click", () => {
+        setMobileMenu(!isMobileMenuOpen);
+      });
+    }
+
+    document.querySelectorAll("[data-mobile-nav-link='true']").forEach((link) => {
+      if (link.hasAttribute("data-bound")) return;
+      link.setAttribute("data-bound", "true");
+      link.addEventListener("click", () => {
+        setMobileMenu(false);
+      });
+    });
 
     function showHeader() {
       header.classList.remove("-translate-y-full");
@@ -111,6 +224,7 @@ const { currentPath = "/" } = Astro.props;
     }
 
     function hideHeader() {
+      if (isMobileMenuOpen) return;
       header.classList.remove("translate-y-0");
       header.classList.add("-translate-y-full");
     }
@@ -121,13 +235,14 @@ const { currentPath = "/" } = Astro.props;
 
       if (currentY <= 48) {
         showHeader();
-      } else if (delta > 4) {
+        lastScrollY = currentY;
+      } else if (delta > 10) {
         hideHeader();
-      } else if (delta < -2) {
+        lastScrollY = currentY;
+      } else if (delta < -5) {
         showHeader();
+        lastScrollY = currentY;
       }
-
-      lastScrollY = currentY;
     }
 
     function onMouseMove(e) {
