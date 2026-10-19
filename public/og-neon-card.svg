@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <radialGradient id="wallGlowPink" cx="50%" cy="46%" r="52%">
+      <stop offset="0%" stop-color="#FF2E88" stop-opacity="0.38" />
+      <stop offset="55%" stop-color="#35E7FF" stop-opacity="0.12" />
+      <stop offset="100%" stop-color="#0A0710" stop-opacity="0" />
+    </radialGradient>
+    <filter id="ogNeonGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur1" />
+      <feGaussianBlur in="SourceGraphic" stdDeviation="18" result="blur2" />
+      <feGaussianBlur in="SourceGraphic" stdDeviation="38" result="blur3" />
+      <feMerge>
+        <feMergeNode in="blur3" />
+        <feMergeNode in="blur2" />
+        <feMergeNode in="blur1" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="1200" height="630" fill="#0A0710" />
+  <rect width="1200" height="630" fill="url(#wallGlowPink)" />
+  <rect x="60" y="60" width="1080" height="510" rx="28" fill="#17141F" fill-opacity="0.55" stroke="#FF2E88" stroke-opacity="0.35" stroke-width="2" />
+  <text x="600" y="275" text-anchor="middle" fill="#FFF4F8" font-family="sans-serif" font-weight="800" font-size="108" filter="url(#ogNeonGlow)">C/CNEON'S</text>
+  <text x="600" y="365" text-anchor="middle" fill="#35E7FF" font-family="sans-serif" font-weight="600" font-size="34" letter-spacing="4">ANTALYA / MANAVGAT LED NEON ATÖLYESİ</text>
+  <text x="600" y="455" text-anchor="middle" fill="#FFF4F8" fill-opacity="0.78" font-family="sans-serif" font-size="24">Kişiye Özel Neon Tablo · İşletmeye Özel Tabela · Canlı Tasarım Stüdyosu</text>
+  <text x="600" y="535" text-anchor="middle" fill="#FFB020" font-family="monospace" font-size="18">crafted by archc.studio</text>
+</svg>

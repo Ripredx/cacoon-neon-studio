@@ -1,0 +1,482 @@
+---
+import { getVerifiedProducts } from "@/entities/product/api/getProducts";
+import type { Product } from "@/entities/product/model/schema";
+import { BUSINESS_CONFIG } from "@/shared/config/business";
+
+const products = getVerifiedProducts();
+const whatsappRawPhone = BUSINESS_CONFIG.phones[0].raw;
+
+const PRODUCT_NEON_MAP: Record<
+  Product["glowColor"],
+  { hex: string; rgb: string; label: string }
+> = {
+  green: { hex: "#1CFF8A", rgb: "28, 255, 138", label: "ACID GREEN" },
+  pink: { hex: "#FF2E88", rgb: "255, 46, 136", label: "CYBER PINK" },
+  amber: { hex: "#FFB020", rgb: "255, 176, 32", label: "WARM GOLD" },
+  red: { hex: "#FF3B3B", rgb: "255, 59, 59", label: "BLOOD RED" },
+  cyan: { hex: "#35E7FF", rgb: "53, 231, 255", label: "ICE BLUE" },
+  purple: { hex: "#B538FF", rgb: "181, 56, 255", label: "ULTRA VIOLET" },
+};
+
+const PRODUCT_SIZE_MAP: Record<Product["category"], string> = {
+  tablo: "KANVAS · 60x40 CM",
+  pleksi: "PLEKSİ · 55x40 CM",
+};
+
+const LIFESTYLE_SCENE_IDS = new Set([
+  "40507796",
+  "40504490",
+  "40507882",
+  "40508212",
+]);
+
+const tabloCount = products.filter((p) => p.category === "tablo").length;
+const pleksiCount = products.filter((p) => p.category === "pleksi").length;
+
+const customLogoWaText = encodeURIComponent(
+  "Merhaba CACOON (C/CNEON'S), kendi logomu / tasarımımı özel neon tabela olarak yaptırmak ve 30 dakikada fiyatlandırma almak istiyorum.",
+);
+---
+
+<section
+  id="koleksiyon"
+  class="relative bg-[#050505] py-20 sm:py-28 border-b border-white/[0.07] overflow-hidden"
+>
+  <div class="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-10">
+    <!-- Bölüm Başlığı & Mimari Üst Bilgi -->
+    <div class="flex flex-col gap-5 md:flex-row md:items-end md:justify-between text-left">
+      <div class="space-y-3">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="font-mono inline-flex items-center gap-2 rounded-lg border border-white/10 bg-[#0A0A0E] px-2.5 py-1 text-xs font-medium uppercase tracking-wider text-white/80">
+            <span class="size-1.5 rounded-full bg-[#1CFF8A] shadow-[0_0_8px_#1CFF8A]"></span>
+            OBSIDIAN GALLERY · HAZIR KOLEKSİYON
+          </span>
+          <span class="font-mono rounded-lg border border-white/[0.07] bg-[#0A0A0E] px-2.5 py-1 text-xs text-white/50">
+            EL İŞÇİLİĞİ · 16 PARÇA
+          </span>
+        </div>
+
+        <h2
+          class="font-display font-bold text-white tracking-tight"
+          style="font-size: clamp(1.95rem, 3.3vw, 2.85rem); line-height: 1.06;"
+        >
+          Özel Üretim Neon Tablo & Pleksi Koleksiyonu
+        </h2>
+
+        <p class="max-w-[62ch] text-sm sm:text-base text-white/55 leading-relaxed">
+          Her parça 12V adaptörü ve montaj donanımıyla atölyemizden gönderilir.
+          Kartların üzerine gelerek eserin gerçek neon yansımasını inceleyebilir,
+          Shopier güvencesiyle veya WhatsApp üzerinden sipariş oluşturabilirsiniz.
+        </p>
+      </div>
+
+      <a
+        href={BUSINESS_CONFIG.shopierUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="cursor-pointer whitespace-nowrap self-start md:self-auto inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/10 bg-[#0A0A0E] px-4 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-white/85 transition-all duration-200 hover:border-white/25 hover:bg-white/[0.06] hover:text-white"
+      >
+        <span>SHOPIER MAĞAZASI [16] →</span>
+      </a>
+    </div>
+
+    <!-- Filtre Sekmeleri ve Sıralama (Vanilla JS) -->
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-y border-white/[0.07] bg-[#0A0A0E] p-3 rounded-xl">
+      <div
+        class="flex flex-wrap items-center gap-1.5"
+        role="tablist"
+        aria-label="Ürün Kategorileri"
+      >
+        <button
+          type="button"
+          role="tab"
+          aria-selected="true"
+          data-filter-category="all"
+          class="catalog-filter-btn cursor-pointer whitespace-nowrap inline-flex items-center gap-2 rounded-lg border border-white/20 bg-white/[0.08] px-3.5 py-2 font-mono text-xs font-semibold uppercase tracking-wider text-white transition-all duration-150"
+        >
+          <span>TÜMÜ</span>
+          <span class="text-white/55">[{products.length}]</span>
+        </button>
+
+        <button
+          type="button"
+          role="tab"
+          aria-selected="false"
+          data-filter-category="tablo"
+          class="catalog-filter-btn cursor-pointer whitespace-nowrap inline-flex items-center gap-2 rounded-lg border border-transparent bg-transparent px-3.5 py-2 font-mono text-xs font-medium uppercase tracking-wider text-white/55 transition-all duration-150 hover:text-white"
+        >
+          <span>NEON KANVAS TABLOLAR</span>
+          <span class="text-white/40">[{tabloCount}]</span>
+        </button>
+
+        <button
+          type="button"
+          role="tab"
+          aria-selected="false"
+          data-filter-category="pleksi"
+          class="catalog-filter-btn cursor-pointer whitespace-nowrap inline-flex items-center gap-2 rounded-lg border border-transparent bg-transparent px-3.5 py-2 font-mono text-xs font-medium uppercase tracking-wider text-white/55 transition-all duration-150 hover:text-white"
+        >
+          <span>PLEKSİ NEON TASARIMLAR</span>
+          <span class="text-white/40">[{pleksiCount}]</span>
+        </button>
+      </div>
+
+      <div class="flex items-center gap-2.5">
+        <label
+          for="product-sort-select"
+          class="font-mono text-xs uppercase tracking-wider text-white/45 whitespace-nowrap"
+        >
+          SIRALA:
+        </label>
+        <select
+          id="product-sort-select"
+          class="cursor-pointer rounded-lg bg-[#050505] border border-white/10 px-3 py-2 font-mono text-xs font-medium text-white focus:border-white/30 focus:outline-none"
+        >
+          <option value="featured">ÖNE ÇIKANLAR</option>
+          <option value="price-asc">FİYAT: DÜŞÜKTEN YÜKSEĞE</option>
+          <option value="price-desc">FİYAT: YÜKSEKTEN DÜŞÜĞE</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Bento Grid Düzeni: 4 Sütun + 2. Satırda 2 Sütun Genişliğinde (col-span-2) Özel Tasarım CTA Kartı -->
+    <div
+      id="catalog-bento-grid"
+      class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 items-stretch"
+    >
+      {
+        products.map((product, index) => {
+          const neon = PRODUCT_NEON_MAP[product.glowColor];
+          const sizeBadge = PRODUCT_SIZE_MAP[product.category];
+          const hasOwnScene = LIFESTYLE_SCENE_IDS.has(product.id);
+          const waQuestionText = encodeURIComponent(
+            `Merhaba CACOON, "${product.title}" (${product.price.toLocaleString("tr-TR")} ₺) ürünü için hızlı sipariş oluşturmak istiyorum: ${product.shopierUrl}`,
+          );
+
+          return (
+            <>
+              <article
+                data-product-card="true"
+                data-product-id={product.id}
+                data-category={product.category}
+                data-price={product.price}
+                data-featured-index={index}
+                data-glow-color={neon.hex}
+                style={`--neon-color: ${neon.hex}; --neon-rgb: ${neon.rgb};`}
+                class="product-card gpu-layer group relative flex flex-col justify-between rounded-xl bg-[#0A0A0E] border border-white/[0.07] p-3.5"
+              >
+                <!-- Kartın Altına Düşen Hafif Neon Yansıma Çizgisi (Sadece Hover'da Parlar) -->
+                <div
+                  aria-hidden="true"
+                  class="pointer-events-none absolute -bottom-px left-6 right-6 h-px opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                  style="background: linear-gradient(90deg, transparent, var(--neon-color), transparent); box-shadow: 0 2px 18px var(--neon-color);"
+                />
+
+                <!-- Görsel Alanı: aspect-[4/5] + Üst Köşede Buzlu Cam Monospace Kategori/Boyut Rozeti -->
+                <div class="relative aspect-[4/5] w-full overflow-hidden rounded-lg bg-[#050505] border border-white/[0.07] transition-colors duration-300 group-hover:border-[var(--neon-color)]/45">
+                  {!hasOwnScene && (
+                    <>
+                      <div
+                        aria-hidden="true"
+                        class="pointer-events-none absolute inset-0 bg-cover bg-center opacity-35"
+                        style="background-image: url('/scenes/studio-wall-mockup.jpg'); filter: brightness(0.45) contrast(1.2);"
+                      />
+                      <div
+                        aria-hidden="true"
+                        class="pointer-events-none absolute inset-0 wall-texture-brick opacity-70"
+                      />
+                      <div
+                        aria-hidden="true"
+                        class="pointer-events-none absolute inset-0 opacity-65 transition-opacity duration-300 group-hover:opacity-100"
+                        style="background: radial-gradient(circle at 50% 45%, rgba(var(--neon-rgb), 0.34) 0%, rgba(var(--neon-rgb), 0.08) 46%, rgba(5, 5, 5, 0.86) 85%);"
+                      />
+                    </>
+                  )}
+
+                  <img
+                    src={product.imageUrl}
+                    alt={product.title}
+                    loading="lazy"
+                    decoding="async"
+                    width="400"
+                    height="500"
+                    style={
+                      !hasOwnScene
+                        ? "mix-blend-mode: lighten; filter: contrast(1.12) brightness(1.05);"
+                        : undefined
+                    }
+                    class={`size-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04] ${
+                      !hasOwnScene ? "relative z-10 p-2" : ""
+                    }`}
+                  />
+
+                  <!-- Üst Sol Köşe: Buzlu Cam (backdrop-blur-md bg-black/50 border border-white/10) Monospace Kategori/Boyut Rozeti -->
+                  <span class="font-mono absolute top-2.5 left-2.5 z-20 inline-flex items-center gap-1.5 rounded-md backdrop-blur-md bg-black/50 border border-white/10 px-2.5 py-1 text-[11px] font-medium uppercase tracking-wider text-white/90">
+                    <span
+                      class="size-1.5 rounded-full"
+                      style="background-color: var(--neon-color); box-shadow: 0 0 8px var(--neon-color);"
+                    />
+                    {sizeBadge}
+                  </span>
+
+                  <!-- Üst Sağ Köşe: Varsa Monospace Durum Rozeti -->
+                  {product.badge && (
+                    <span class="font-mono absolute top-2.5 right-2.5 z-20 rounded-md backdrop-blur-md bg-black/50 border border-white/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-white">
+                      {product.badge}
+                    </span>
+                  )}
+                </div>
+
+                <!-- Alt Bilgi Alanı: Sol Ürün Adı + Monospace Fiyat | Sağ Ghost Button ("İncele →") + Minimalist WhatsApp İkonu -->
+                <div class="mt-3.5 flex items-end justify-between gap-3 pt-1">
+                  <div class="min-w-0 flex-1 text-left">
+                    <h3 class="font-display text-[15px] font-bold tracking-tight text-white truncate">
+                      {product.title}
+                    </h3>
+                    <div class="mt-1 flex items-baseline gap-2">
+                      <span class="font-mono text-lg font-bold text-white transition-colors duration-300 group-hover:text-[var(--neon-color)]">
+                        {product.price.toLocaleString("tr-TR")} ₺
+                      </span>
+                      {product.oldPrice && (
+                        <span class="font-mono text-xs text-white/40 line-through">
+                          {product.oldPrice.toLocaleString("tr-TR")} ₺
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div class="flex shrink-0 items-center gap-1.5">
+                    <a
+                      href={product.shopierUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="cursor-pointer whitespace-nowrap inline-flex h-9 items-center justify-center rounded-full bg-white/5 hover:bg-white/15 border border-white/10 px-3.5 text-xs font-medium text-white transition-all duration-200 group-hover:border-[var(--neon-color)]/50"
+                    >
+                      İncele →
+                    </a>
+
+                    <a
+                      href={`https://wa.me/${whatsappRawPhone}?text=${waQuestionText}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`${product.title} için WhatsApp hızlı sipariş`}
+                      title="WhatsApp Hızlı Sipariş"
+                      class="cursor-pointer shrink-0 inline-flex size-9 items-center justify-center rounded-full bg-white/5 hover:bg-white/15 border border-white/10 text-white/80 hover:text-white transition-all duration-200 group-hover:border-[var(--neon-color)]/50"
+                    >
+                      <span class="sr-only">
+                        {product.title} için WhatsApp hızlı sipariş
+                      </span>
+                      <svg
+                        class="size-4"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        aria-hidden="true"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
+                        />
+                      </svg>
+                    </a>
+                  </div>
+                </div>
+              </article>
+
+              {/* 2. Satırda 2 Sütun Genişliğinde (col-span-2) Özel Tasarım Çağrı Kartı (CTA Banner) */}
+              {index === 5 && (
+                <aside
+                  id="bento-custom-cta"
+                  data-glow-color="#FF2E88"
+                  style="--neon-color: #FF2E88; --neon-rgb: 255, 46, 136;"
+                  class="product-card gpu-layer sm:col-span-2 lg:col-span-2 relative flex flex-col justify-between rounded-xl border border-white/[0.07] bg-[#0A0A0E] p-6 sm:p-7 overflow-hidden group"
+                >
+                  <!-- Sadece Kartın İçindeki Koyu Tuğla Dokusuna Düşen Kontrollü Neon Yansıması -->
+                  <div
+                    aria-hidden="true"
+                    class="pointer-events-none absolute inset-0 wall-texture-brick opacity-75"
+                  />
+                  <div
+                    aria-hidden="true"
+                    class="pointer-events-none absolute inset-0 opacity-65 transition-opacity duration-300 group-hover:opacity-100"
+                    style="background: radial-gradient(circle at 80% 40%, rgba(255, 46, 136, 0.22) 0%, rgba(53, 231, 255, 0.08) 45%, transparent 75%);"
+                  />
+
+                  <div class="relative z-10 flex flex-wrap items-center justify-between gap-2">
+                    <span class="font-mono inline-flex items-center gap-2 rounded-md backdrop-blur-md bg-black/50 border border-white/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-white">
+                      <span class="size-1.5 rounded-full bg-[#FF2E88] shadow-[0_0_8px_#FF2E88]" />
+                      CUSTOM STUDIO · ÖZEL ÜRETİM
+                    </span>
+                    <span class="font-mono rounded-md backdrop-blur-md bg-black/50 border border-white/10 px-2.5 py-1 text-[11px] text-white/75">
+                      EL İŞÇİLİĞİ · CNC LAZER PAFTA
+                    </span>
+                  </div>
+
+                  <div class="relative z-10 my-6 grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                    <div class="md:col-span-7 space-y-3 text-left">
+                      <h3 class="font-display text-2xl sm:text-3xl font-bold tracking-tight text-white leading-tight">
+                        Kendi Logonu veya Tasarımını Yükle — 30 Dakikada Fiyatlandırma
+                      </h3>
+                      <p class="text-sm text-white/60 leading-relaxed">
+                        Marka logonuzu, çiziminizi veya özel ölçülü mekan
+                        tabelanızı WhatsApp'tan iletin; mühendislik ekibimiz 30
+                        dakika içinde CNC kesim paftasını ve net üretim fiyatını
+                        çıkarsın.
+                      </p>
+                    </div>
+
+                    <div class="md:col-span-5 flex items-center justify-center">
+                      <div
+                        class="w-full rounded-xl border border-white/10 bg-[#050505]/90 px-4 py-6 text-center backdrop-blur-md transition-all duration-300 group-hover:border-[#FF2E88]/50"
+                        style="box-shadow: 0 18px 40px rgba(0, 0, 0, 0.8), 0 0 28px rgba(255, 46, 136, 0.18), inset 0 0 16px rgba(255, 46, 136, 0.08);"
+                      >
+                        <p
+                          class="font-neon-mono text-2xl sm:text-3xl font-bold tracking-tight text-[#FF2E88]"
+                          style="text-shadow: 0 0 5px #fff, 0 0 20px currentColor, 0 0 40px currentColor;"
+                        >
+                          YOUR LOGO
+                        </p>
+                        <p class="font-mono mt-2 text-[11px] uppercase tracking-wider text-white/60">
+                          30 DK İÇİNDE CAD PAFTA & TEKLİF
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="relative z-10 flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-white/[0.07]">
+                    <div class="flex flex-wrap items-center gap-2">
+                      <a
+                        href={`https://wa.me/${whatsappRawPhone}?text=${customLogoWaText}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="cursor-pointer whitespace-nowrap inline-flex h-10 items-center justify-center gap-2 rounded-full bg-white/5 hover:bg-white/15 border border-white/10 px-4 text-xs font-semibold text-white transition-all duration-200 group-hover:border-[#FF2E88]/60 group-hover:shadow-[0_0_20px_rgba(255,46,136,0.3)]"
+                      >
+                        <span>Logonu Gönder (WhatsApp) →</span>
+                      </a>
+
+                      <a
+                        href="/tasarla"
+                        class="cursor-pointer whitespace-nowrap inline-flex h-10 items-center justify-center rounded-full bg-white/5 hover:bg-white/15 border border-white/10 px-4 font-mono text-xs font-medium text-white/80 hover:text-white transition-all duration-200"
+                      >
+                        Canlı Stüdyo →
+                      </a>
+                    </div>
+
+                    <span class="font-mono text-[11px] text-white/45">
+                      MAX 30 DK DÖNÜŞ SÜRESİ
+                    </span>
+                  </div>
+                </aside>
+              )}
+            </>
+          );
+        })
+      }
+    </div>
+  </div>
+</section>
+
+<script is:inline>
+  function initCatalogInteractions() {
+    const grid = document.getElementById("catalog-bento-grid");
+    const filterBtns = document.querySelectorAll(".catalog-filter-btn");
+    const sortSelect = document.getElementById("product-sort-select");
+    const bentoCta = document.getElementById("bento-custom-cta");
+
+    if (!grid) return;
+
+    let activeCategory = "all";
+    let activeSort = "featured";
+
+    function updateGrid() {
+      const cards = Array.from(
+        grid.querySelectorAll("[data-product-card='true']")
+      );
+
+      cards.forEach((card) => {
+        const cat = card.getAttribute("data-category");
+        const visible = activeCategory === "all" || cat === activeCategory;
+        card.style.display = visible ? "" : "none";
+      });
+
+      const sortedCards = [...cards].sort((a, b) => {
+        const priceA = Number(a.getAttribute("data-price") || 0);
+        const priceB = Number(b.getAttribute("data-price") || 0);
+        const idxA = Number(a.getAttribute("data-featured-index") || 0);
+        const idxB = Number(b.getAttribute("data-featured-index") || 0);
+
+        if (activeSort === "price-asc") return priceA - priceB;
+        if (activeSort === "price-desc") return priceB - priceA;
+        return idxA - idxB;
+      });
+
+      const visibleCards = sortedCards.filter(
+        (c) => c.style.display !== "none"
+      );
+      const hiddenCards = sortedCards.filter((c) => c.style.display === "none");
+
+      // Bento CTA Banner'ı her zaman 2. satırda (6. görünür karttan sonra, filtrede az kart varsa sonuna) tut
+      const insertPos = Math.min(6, visibleCards.length);
+      visibleCards.forEach((c, idx) => {
+        if (idx === insertPos && bentoCta) {
+          grid.appendChild(bentoCta);
+        }
+        grid.appendChild(c);
+      });
+      if (insertPos === visibleCards.length && bentoCta) {
+        grid.appendChild(bentoCta);
+      }
+      hiddenCards.forEach((c) => grid.appendChild(c));
+    }
+
+    filterBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        activeCategory = btn.getAttribute("data-filter-category") || "all";
+
+        filterBtns.forEach((b) => {
+          b.setAttribute("aria-selected", "false");
+          b.classList.remove(
+            "border-white/20",
+            "bg-white/[0.08]",
+            "text-white",
+            "font-semibold"
+          );
+          b.classList.add(
+            "border-transparent",
+            "bg-transparent",
+            "text-white/55",
+            "font-medium"
+          );
+        });
+
+        btn.setAttribute("aria-selected", "true");
+        btn.classList.remove(
+          "border-transparent",
+          "bg-transparent",
+          "text-white/55",
+          "font-medium"
+        );
+        btn.classList.add(
+          "border-white/20",
+          "bg-white/[0.08]",
+          "text-white",
+          "font-semibold"
+        );
+
+        updateGrid();
+      });
+    });
+
+    if (sortSelect) {
+      sortSelect.addEventListener("change", (e) => {
+        activeSort = e.target.value || "featured";
+        updateGrid();
+      });
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", initCatalogInteractions);
+  document.addEventListener("astro:page-load", initCatalogInteractions);
+</script>

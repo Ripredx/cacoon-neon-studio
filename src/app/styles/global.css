@@ -1,0 +1,245 @@
+@import "tailwindcss";
+
+:root {
+  --bg-obsidian: #050505;
+  --bg-surface: #0a0a0e;
+  --border-subtle: rgba(255, 255, 255, 0.07);
+  --tube-core: #ffffff;
+  --neon-color: #35e7ff;
+  --neon-rgb: 53, 231, 255;
+
+  --neon-ice: #35e7ff;
+  --neon-pink: #ff2e88;
+  --neon-gold: #ffb020;
+  --neon-green: #1cff8a;
+  --neon-red: #ff3b3b;
+
+  --glow-intensity: 1;
+  --ignition-duration: 520ms;
+}
+
+@layer base {
+  html {
+    background-color: #050505;
+    color: #f4f4f6;
+    font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  .font-display {
+    font-family: "Space Grotesk", "Plus Jakarta Sans", sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.08;
+  }
+
+  .font-mono {
+    font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+    font-feature-settings: "tnum" on, "zero" on;
+  }
+
+  .font-neon-mono {
+    font-family: "Tilt Neon", sans-serif;
+  }
+}
+
+/* Sadece Aktif Neon Sahnelerinin İçinde Kullanılan Koyu Tuğla ve Beton Dokuları */
+.wall-texture-brick {
+  background-color: #050505;
+  background-image: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.03) 1px,
+      transparent 1px
+    ), linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 100% 34px, 68px 34px;
+}
+
+.wall-texture-concrete {
+  background-color: #07070a;
+  background-image: radial-gradient(
+      rgba(255, 255, 255, 0.028) 1px,
+      transparent 0
+    ),
+    radial-gradient(at 50% 45%, rgba(255, 255, 255, 0.02) 0px, transparent 60%);
+  background-size: 20px 20px, 100% 100%;
+}
+
+/* Ürün Kartları Hover Parlaması (data-glow-color & --neon-color) */
+.product-card {
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background-color: #0a0a0e;
+  transition: border-color 220ms ease, box-shadow 220ms ease, transform 220ms
+    ease;
+}
+
+.product-card:hover,
+.product-card:focus-within {
+  border-color: var(--neon-color);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--neon-color) 35%, transparent),
+    0 18px 40px -12px color-mix(in srgb, var(--neon-color) 28%, transparent), 0
+    0 24px color-mix(in srgb, var(--neon-color) 14%, transparent);
+}
+
+/* 520ms < 600ms Kısa Ateşleme Titremesi */
+@keyframes neon-ignite {
+  0% {
+    opacity: 0.12;
+  }
+  18% {
+    opacity: 0.95;
+  }
+  32% {
+    opacity: 0.25;
+  }
+  48% {
+    opacity: 1;
+  }
+  65% {
+    opacity: 0.55;
+  }
+  82% {
+    opacity: 0.98;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.animate-neon-ignite {
+  animation: neon-ignite var(--ignition-duration) steps(1, end) forwards;
+}
+
+@keyframes draw-neon-stroke {
+  from {
+    stroke-dashoffset: 680;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.animate-neon-stroke {
+  stroke-dasharray: 680;
+  stroke-dashoffset: 680;
+  animation: draw-neon-stroke 900ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes badge-soft-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.72;
+  }
+}
+
+.animate-badge-pulse {
+  animation: badge-soft-pulse 2.6s ease-in-out infinite;
+}
+
+/* Sabit Yüksekliğe Sahip Tek Satır Güven Bandı (Madde 6) */
+@keyframes marquee-scroll {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.marquee-track {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  width: max-content;
+  white-space: nowrap;
+  will-change: transform;
+  animation: marquee-scroll 36s linear infinite;
+}
+
+.marquee-wrapper:hover .marquee-track,
+.marquee-wrapper:focus-within .marquee-track {
+  animation-play-state: paused;
+}
+
+/* Stüdyo Sekme Geçişi (160ms GPU Composite) */
+@keyframes studio-tab-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 6px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.animate-studio-tab {
+  animation: studio-tab-enter 160ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Stüdyo Kontrol Çekmecesi İnce Neon Scrollbar + İzolasyon */
+.studio-drawer-scroll {
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 46, 136, 0.45) rgba(10, 7, 16, 0.6);
+}
+
+.studio-drawer-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.studio-drawer-scroll::-webkit-scrollbar-track {
+  background: rgba(10, 7, 16, 0.6);
+}
+
+.studio-drawer-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 46, 136, 0.45);
+  border-radius: 9999px;
+}
+
+.studio-drawer-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(53, 231, 255, 0.75);
+}
+
+/* GPU Katman Hızlandırma */
+.gpu-layer {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 220ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .animate-neon-ignite,
+  .animate-neon-stroke,
+  .animate-badge-pulse,
+  .animate-studio-tab,
+  .marquee-track {
+    animation: none !important;
+    stroke-dashoffset: 0 !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

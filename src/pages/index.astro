@@ -1,0 +1,18 @@
+---
+import BaseLayout from "@/app/layouts/BaseLayout.astro";
+import B2BShowcase from "@/widgets/b2b-showcase/ui/B2BShowcase.astro";
+import Footer from "@/widgets/footer/ui/Footer.astro";
+import Header from "@/widgets/header/ui/Header.astro";
+import HeroShowcase from "@/widgets/hero-showcase/ui/HeroShowcase.astro";
+import ProductCatalog from "@/widgets/product-catalog/ui/ProductCatalog.astro";
+---
+
+<BaseLayout>
+  <Header currentPath="/" />
+  <main>
+    <HeroShowcase />
+    <ProductCatalog />
+    <B2BShowcase />
+  </main>
+  <Footer />
+</BaseLayout>

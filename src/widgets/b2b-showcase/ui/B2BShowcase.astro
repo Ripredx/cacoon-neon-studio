@@ -1,0 +1,479 @@
+---
+import { buildB2BWhatsAppUrl } from "@/features/whatsapp-order/model/buildWhatsAppUrl";
+import { BUSINESS_CONFIG } from "@/shared/config/business";
+
+const waGeneralB2B = buildB2BWhatsAppUrl();
+const waLounge = buildB2BWhatsAppUrl("01 / Kafe & Bar Cephesi");
+const waGaming = buildB2BWhatsAppUrl("02 / Oyun & Yayın Odası");
+const waOffice = buildB2BWhatsAppUrl("03 / Kurumsal Ofis");
+---
+
+<section
+  id="kurumsal"
+  style="--neon-color: #FFB020; --neon-rgb: 255, 176, 32;"
+  class="relative bg-[#050505] py-20 sm:py-28 border-b border-white/[0.07] overflow-hidden"
+>
+  <div class="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-10">
+    <!-- Bölüm Başlığı & Mimari CTA -->
+    <div class="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:items-end text-left">
+      <div class="lg:col-span-8 space-y-3">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="font-mono inline-flex items-center gap-2 rounded-lg border border-white/10 bg-[#0A0A0E] px-2.5 py-1 text-xs font-medium uppercase tracking-wider text-white/85">
+            <span
+              id="b2b-badge-dot"
+              class="size-1.5 rounded-full transition-colors duration-300"
+              style="background-color: var(--neon-color); box-shadow: 0 0 8px var(--neon-color);"
+            ></span>
+            CANLI MEKAN SİMÜLATÖRÜ
+          </span>
+          <span class="font-mono rounded-lg border border-white/[0.07] bg-[#0A0A0E] px-2.5 py-1 text-xs text-white/50">
+            EL İŞÇİLİĞİ · KURUMSAL PROJE
+          </span>
+        </div>
+
+        <h2
+          class="font-display font-bold text-white tracking-tight"
+          style="font-size: clamp(1.95rem, 3.3vw, 2.85rem); line-height: 1.06;"
+        >
+          Mekanınızın Karanlıktaki İmzası: Canlı Mekan Sahnesi
+        </h2>
+
+        <p class="max-w-[64ch] text-sm sm:text-base text-white/55 leading-relaxed">
+          Marka logonuzu veya mekan isminizi 1. sınıf silikon LED neon ve CNC lazer
+          kesim akrilik plaka üzerine işliyoruz. Aşağıdaki simülatörde mekan tipini
+          seçin ve sağ üstteki <strong>"Oda Işıklarını Kapat"</strong> anahtarıyla
+          gece atmosferini test edin.
+        </p>
+      </div>
+
+      <div class="lg:col-span-4 lg:flex lg:justify-end">
+        <a
+          id="b2b-main-cta"
+          href={waGeneralB2B}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="cursor-pointer whitespace-nowrap inline-flex min-h-11 w-full sm:w-auto items-center justify-center gap-2 rounded-xl border border-white/10 bg-[#0A0A0E] px-5 py-3 font-mono text-xs font-semibold uppercase tracking-wider text-white transition-all duration-300 hover:border-[var(--neon-color)] hover:bg-white/[0.06] hover:shadow-[0_0_24px_rgba(var(--neon-rgb),0.3)]"
+        >
+          <span>KURUMSAL PROJE TEKLİFİ AL →</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Gerçekçi Mekan Simülatörü Konteyneri -->
+    <div class="rounded-xl border border-white/[0.07] bg-[#0A0A0E] p-4 sm:p-6 space-y-5">
+      <!-- Üst Sekmeler: 01 / Kafe & Bar Cephesi, 02 / Oyun & Yayın Odası, 03 / Kurumsal Ofis -->
+      <div
+        class="grid grid-cols-1 sm:grid-cols-3 gap-3"
+        role="tablist"
+        aria-label="Mekan Simülatörü Sekmeleri"
+      >
+        <button
+          type="button"
+          role="tab"
+          aria-selected="true"
+          data-b2b-tab="lounge"
+          data-b2b-photo="/scenes/b2b-lounge-scene.jpg"
+          data-b2b-title="CACOON LOUNGE"
+          data-b2b-sub="Cocktails & Late Night"
+          data-b2b-spec="120x55 CM · IP67 DIŞ/İÇ CEPHE"
+          data-b2b-rgb="255, 176, 32"
+          data-b2b-hex="#FFB020"
+          data-b2b-wa={waLounge}
+          class="b2b-scene-tab cursor-pointer flex flex-col items-start justify-between gap-1.5 rounded-xl border border-[#FFB020]/60 bg-[#050505] p-4 text-left transition-all duration-200"
+        >
+          <span class="font-mono text-xs font-bold uppercase tracking-wider text-[#FFB020]">
+            01 / Kafe & Bar Cephesi
+          </span>
+          <span class="font-display text-sm sm:text-base font-bold text-white">
+            Kafe & Bar Cephesi
+          </span>
+          <span class="font-mono text-[11px] text-white/45">
+            WARM GOLD · 120x55 CM
+          </span>
+        </button>
+
+        <button
+          type="button"
+          role="tab"
+          aria-selected="false"
+          data-b2b-tab="gaming"
+          data-b2b-photo="/scenes/b2b-gaming-room.jpg"
+          data-b2b-title="CYBER STUDIO"
+          data-b2b-sub="On Air · Live Stream"
+          data-b2b-spec="90x40 CM · AKRİLİK KONTUR KESİM"
+          data-b2b-rgb="53, 231, 255"
+          data-b2b-hex="#35E7FF"
+          data-b2b-wa={waGaming}
+          class="b2b-scene-tab cursor-pointer flex flex-col items-start justify-between gap-1.5 rounded-xl border border-white/[0.07] bg-[#050505]/50 p-4 text-left transition-all duration-200 hover:border-white/20"
+        >
+          <span class="font-mono text-xs font-bold uppercase tracking-wider text-white/55">
+            02 / Oyun & Yayın Odası
+          </span>
+          <span class="font-display text-sm sm:text-base font-bold text-white">
+            Oyun & Yayın Odası
+          </span>
+          <span class="font-mono text-[11px] text-white/45">
+            ICE BLUE · 90x40 CM
+          </span>
+        </button>
+
+        <button
+          type="button"
+          role="tab"
+          aria-selected="false"
+          data-b2b-tab="office"
+          data-b2b-photo="/scenes/b2b-office-wall.jpg"
+          data-b2b-title="CACOON ATELIER"
+          data-b2b-sub="Creative Architecture Lab"
+          data-b2b-spec="135x50 CM · KURUMSAL LOBİ"
+          data-b2b-rgb="28, 255, 138"
+          data-b2b-hex="#1CFF8A"
+          data-b2b-wa={waOffice}
+          class="b2b-scene-tab cursor-pointer flex flex-col items-start justify-between gap-1.5 rounded-xl border border-white/[0.07] bg-[#050505]/50 p-4 text-left transition-all duration-200 hover:border-white/20"
+        >
+          <span class="font-mono text-xs font-bold uppercase tracking-wider text-white/55">
+            03 / Kurumsal Ofis
+          </span>
+          <span class="font-display text-sm sm:text-base font-bold text-white">
+            Kurumsal Ofis
+          </span>
+          <span class="font-mono text-[11px] text-white/45">
+            ACID GREEN · 135x50 CM
+          </span>
+        </button>
+      </div>
+
+      <!-- ANA GERÇEK MEKAN SİMÜLATÖRÜ SAHNESİ -->
+      <div class="relative h-[480px] sm:h-[520px] w-full rounded-xl border border-white/[0.07] bg-[#050505] overflow-hidden">
+        <!-- Katman 1: Gerçek Yüksek Çözünürlüklü Mekan Fotoğrafı -->
+        <img
+          id="b2b-real-photo"
+          src="/scenes/b2b-lounge-scene.jpg"
+          alt="Gerçek mekan neon tabela simülasyonu"
+          width="1400"
+          height="800"
+          decoding="async"
+          class="pointer-events-none absolute inset-0 size-full object-cover object-center transition-[filter,transform] duration-500"
+          style="filter: brightness(0.24) contrast(1.18) saturate(0.88);"
+        />
+
+        <!-- Katman 2: Oda Işıkları Kapatıldığında Devreye Giren Karanlık Atmosfer Katmanı -->
+        <div
+          id="b2b-night-vignette"
+          aria-hidden="true"
+          class="pointer-events-none absolute inset-0 transition-opacity duration-500"
+          style="background: radial-gradient(circle at 50% 46%, rgba(5, 5, 5, 0.12) 0%, rgba(5, 5, 5, 0.88) 88%); opacity: 0.92;"
+        >
+        </div>
+
+        <!-- Katman 3: Yalnızca Ortadaki Neon Tabeladan Mekana Yayılan Işık (--neon-color) -->
+        <div
+          id="b2b-ambient-spill"
+          aria-hidden="true"
+          class="pointer-events-none absolute inset-0 transition-all duration-500"
+          style="background: radial-gradient(circle at 50% 46%, rgba(var(--neon-rgb), 0.58) 0%, rgba(var(--neon-rgb), 0.2) 38%, transparent 70%); mix-blend-mode: screen;"
+        >
+        </div>
+
+        <!-- Üst Sahne Kontrol Barı: Sol Canlı Tabela Girişi | Sağ Üst "Oda Işıklarını Kapat" Anahtarı (Toggle) -->
+        <div class="relative z-20 flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.07] bg-[#050505]/80 px-4 py-3 sm:px-6 backdrop-blur-md">
+          <div class="flex items-center gap-2.5">
+            <span
+              class="size-2 rounded-full transition-colors duration-300"
+              style="background-color: var(--neon-color); box-shadow: 0 0 8px var(--neon-color);"
+            ></span>
+            <label for="b2b-live-title" class="font-mono text-xs uppercase tracking-wider text-white/60">
+              TABELA METNİ:
+            </label>
+            <input
+              id="b2b-live-title"
+              type="text"
+              maxlength="20"
+              value="CACOON LOUNGE"
+              class="w-36 sm:w-48 rounded-lg border border-white/10 bg-[#0A0A0E] px-2.5 py-1 font-mono text-xs font-bold text-white focus:border-white/30 focus:outline-none"
+            />
+          </div>
+
+          <!-- Sağ Üst: Gece / Gündüz ("Oda Işıklarını Kapat") Sürgüsü (Toggle Switch) -->
+          <div class="flex items-center gap-3">
+            <button
+              id="b2b-lights-toggle"
+              type="button"
+              role="switch"
+              aria-checked="true"
+              class="cursor-pointer group inline-flex items-center gap-3 rounded-lg border border-white/15 bg-[#0A0A0E] px-3.5 py-1.5 font-mono text-xs font-medium text-white transition-all duration-200 hover:border-white/30"
+            >
+              <span id="b2b-lights-label" class="uppercase tracking-wider">
+                ODA IŞIKLARINI KAPAT: AKTİF (GECE)
+              </span>
+              <span
+                id="b2b-switch-track"
+                class="relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border border-white/20 bg-white/15 p-0.5 transition-colors duration-200"
+              >
+                <span
+                  id="b2b-switch-thumb"
+                  class="size-3.5 translate-x-4 rounded-full transition-transform duration-200"
+                  style="background-color: var(--neon-color); box-shadow: 0 0 10px var(--neon-color);"
+                ></span>
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Merkez: Sahneyi Aydınlatan Gerçekçi Neon Tabela -->
+        <div class="relative z-10 flex h-[340px] sm:h-[370px] w-full flex-col items-center justify-center px-4 text-center">
+          <div
+            id="b2b-neon-plate"
+            class="relative flex w-[92%] sm:w-[68%] min-h-[200px] flex-col items-center justify-center rounded-xl border border-white/15 bg-black/30 px-6 py-8 backdrop-blur-[1.5px] transition-all duration-500"
+            style="box-shadow: 0 24px 70px rgba(0, 0, 0, 0.85), 0 0 54px rgba(var(--neon-rgb), 0.38), inset 0 0 28px rgba(var(--neon-rgb), 0.16);"
+          >
+            <!-- 4 Köşe Minimalist Krom Montaj Pimi -->
+            <span class="absolute top-3.5 left-4 size-2 rounded-full bg-white/40 ring-1 ring-black"></span>
+            <span class="absolute top-3.5 right-4 size-2 rounded-full bg-white/40 ring-1 ring-black"></span>
+            <span class="absolute bottom-3.5 left-4 size-2 rounded-full bg-white/40 ring-1 ring-black"></span>
+            <span class="absolute bottom-3.5 right-4 size-2 rounded-full bg-white/40 ring-1 ring-black"></span>
+
+            <p
+              id="b2b-neon-main-text"
+              class="animate-neon-ignite font-neon-mono text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight select-none transition-all duration-500"
+              style="color: var(--neon-color); mix-blend-mode: screen; text-shadow: 0 0 5px #fff, 0 0 20px currentColor, 0 0 40px currentColor, 0 0 85px var(--neon-color);"
+            >
+              CACOON LOUNGE
+            </p>
+
+            <p
+              id="b2b-neon-sub-text"
+              class="mt-3 text-lg sm:text-2xl text-white select-none transition-all duration-500"
+              style="font-family: 'Pacifico', cursive; mix-blend-mode: screen; text-shadow: 0 0 4px #fff, 0 0 16px var(--neon-color), 0 0 32px var(--neon-color);"
+            >
+              Cocktails & Late Night
+            </p>
+          </div>
+        </div>
+
+        <!-- Sahne Alt Teknik Şeridi -->
+        <div class="absolute bottom-0 inset-x-0 z-20 flex flex-col sm:flex-row items-center justify-between gap-2 border-t border-white/[0.07] bg-[#050505]/85 px-5 py-3 backdrop-blur-md">
+          <div class="flex flex-wrap items-center gap-2 font-mono text-xs text-white/60">
+            <span id="b2b-spec-readout" class="text-white font-semibold">
+              120x55 CM · IP67 DIŞ/İÇ CEPHE
+            </span>
+            <span class="text-white/25">·</span>
+            <span>EL İŞÇİLİĞİ SİLİKON NEON</span>
+          </div>
+
+          <a
+            id="b2b-scene-wa-link"
+            href={waLounge}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="cursor-pointer whitespace-nowrap font-mono text-xs font-semibold uppercase tracking-wider text-white hover:underline"
+          >
+            BU MEKAN KONSEPTİ İÇİN FİYAT AL →
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Atölye Doğrudan İletişim Barı -->
+    <div class="rounded-xl border border-white/[0.07] bg-[#0A0A0E] p-6 sm:p-8 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+      <div class="space-y-1.5 text-left">
+        <span class="font-mono text-xs uppercase tracking-wider text-white/45">
+          DOĞRUDAN ATÖLYE HATTI · {BUSINESS_CONFIG.location.toUpperCase()}
+        </span>
+        <h3 class="font-display text-xl sm:text-2xl font-bold tracking-tight text-white">
+          Özel Ölçü Mekan Tabelası ve Kurumsal Sipariş
+        </h3>
+        <p class="text-sm text-white/55">
+          Mimari projeler, özel logo kesimleri ve toptan üretim talepleriniz için
+          doğrudan üretim atölyemizle iletişime geçin.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full lg:w-auto">
+        {
+          BUSINESS_CONFIG.phones.map((phone) => (
+            <div class="flex items-center gap-2 rounded-xl border border-white/[0.07] bg-[#050505] p-2">
+              <a
+                href={`tel:+${phone.raw}`}
+                class="cursor-pointer whitespace-nowrap flex-1 inline-flex min-h-10 items-center gap-2.5 rounded-lg px-3 py-1.5 font-mono text-sm font-bold text-white transition-colors duration-150 hover:bg-white/5"
+              >
+                <span>{phone.display}</span>
+              </a>
+
+              <a
+                href={`https://wa.me/${phone.raw}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`${phone.display} numarasından WhatsApp mesajı gönder`}
+                title="WhatsApp Hızlı Sipariş"
+                class="cursor-pointer shrink-0 inline-flex size-10 items-center justify-center rounded-lg bg-white/5 hover:bg-white/15 border border-white/10 text-white transition-colors duration-150"
+              >
+                <span class="sr-only">{phone.display} WhatsApp</span>
+                <svg
+                  class="size-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
+                  />
+                </svg>
+              </a>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</section>
+
+<script is:inline>
+  function initVenueSimulator() {
+    const section = document.getElementById("kurumsal");
+    const tabs = document.querySelectorAll(".b2b-scene-tab");
+    const realPhoto = document.getElementById("b2b-real-photo");
+    const ambientSpill = document.getElementById("b2b-ambient-spill");
+    const nightVignette = document.getElementById("b2b-night-vignette");
+    const neonPlate = document.getElementById("b2b-neon-plate");
+    const mainText = document.getElementById("b2b-neon-main-text");
+    const subText = document.getElementById("b2b-neon-sub-text");
+    const liveTitleInput = document.getElementById("b2b-live-title");
+    const lightsToggle = document.getElementById("b2b-lights-toggle");
+    const lightsLabel = document.getElementById("b2b-lights-label");
+    const switchThumb = document.getElementById("b2b-switch-thumb");
+    const specReadout = document.getElementById("b2b-spec-readout");
+    const waLink = document.getElementById("b2b-scene-wa-link");
+    const mainCta = document.getElementById("b2b-main-cta");
+
+    if (!section || !realPhoto || !mainText) return;
+
+    let currentRgb = "255, 176, 32";
+    let currentHex = "#FFB020";
+    let isLightsOff = true; // true = Oda Işıkları Kapalı (Gece Modu, Maksimum Neon Parlaklığı)
+
+    function applyRoomLighting() {
+      section.style.setProperty("--neon-color", currentHex);
+      section.style.setProperty("--neon-rgb", currentRgb);
+
+      if (isLightsOff) {
+        // Oda ışıkları kapalı: arka plan kararır, neon tabela maksimum parlaklıkla sahneyi aydınlatır
+        realPhoto.style.filter =
+          "brightness(0.22) contrast(1.2) saturate(0.86)";
+        if (nightVignette) nightVignette.style.opacity = "0.94";
+        if (ambientSpill) {
+          ambientSpill.style.background = `radial-gradient(circle at 50% 46%, rgba(${currentRgb}, 0.64) 0%, rgba(${currentRgb}, 0.24) 38%, transparent 72%)`;
+        }
+        if (neonPlate) {
+          neonPlate.style.boxShadow = `0 24px 70px rgba(0, 0, 0, 0.9), 0 0 60px rgba(${currentRgb}, 0.45), inset 0 0 32px rgba(${currentRgb}, 0.22)`;
+        }
+        mainText.style.textShadow = `0 0 5px #fff, 0 0 20px currentColor, 0 0 40px currentColor, 0 0 90px ${currentHex}`;
+        if (subText) {
+          subText.style.textShadow = `0 0 4px #fff, 0 0 18px ${currentHex}, 0 0 36px ${currentHex}`;
+        }
+        if (lightsToggle) lightsToggle.setAttribute("aria-checked", "true");
+        if (lightsLabel) {
+          lightsLabel.textContent = "ODA IŞIKLARINI KAPAT: AKTİF (GECE)";
+        }
+        if (switchThumb) {
+          switchThumb.classList.remove("translate-x-0");
+          switchThumb.classList.add("translate-x-4");
+          switchThumb.style.backgroundColor = currentHex;
+          switchThumb.style.boxShadow = `0 0 10px ${currentHex}`;
+        }
+      } else {
+        // Oda ışıkları açık (Gündüz / Aydınlık Mekan)
+        realPhoto.style.filter =
+          "brightness(0.76) contrast(1.04) saturate(1.0)";
+        if (nightVignette) nightVignette.style.opacity = "0.28";
+        if (ambientSpill) {
+          ambientSpill.style.background = `radial-gradient(circle at 50% 46%, rgba(${currentRgb}, 0.22) 0%, rgba(${currentRgb}, 0.08) 38%, transparent 65%)`;
+        }
+        if (neonPlate) {
+          neonPlate.style.boxShadow = `0 18px 45px rgba(0, 0, 0, 0.55), 0 0 22px rgba(${currentRgb}, 0.18), inset 0 0 14px rgba(${currentRgb}, 0.08)`;
+        }
+        mainText.style.textShadow = `0 0 3px #fff, 0 0 12px currentColor, 0 0 22px currentColor`;
+        if (subText) {
+          subText.style.textShadow = `0 0 2px #fff, 0 0 10px ${currentHex}`;
+        }
+        if (lightsToggle) lightsToggle.setAttribute("aria-checked", "false");
+        if (lightsLabel) {
+          lightsLabel.textContent = "ODA IŞIKLARINI KAPAT: KAPALI (GÜNDÜZ)";
+        }
+        if (switchThumb) {
+          switchThumb.classList.remove("translate-x-4");
+          switchThumb.classList.add("translate-x-0");
+          switchThumb.style.backgroundColor = "#ffffff";
+          switchThumb.style.boxShadow = "none";
+        }
+      }
+    }
+
+    if (lightsToggle) {
+      lightsToggle.addEventListener("click", () => {
+        isLightsOff = !isLightsOff;
+        applyRoomLighting();
+      });
+    }
+
+    if (liveTitleInput) {
+      liveTitleInput.addEventListener("input", () => {
+        const clean = (
+          liveTitleInput.value || "CACOON LOUNGE"
+        ).toLocaleUpperCase("tr-TR");
+        mainText.textContent = clean;
+      });
+    }
+
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        const photoUrl =
+          tab.getAttribute("data-b2b-photo") || "/scenes/b2b-lounge-scene.jpg";
+        const title = tab.getAttribute("data-b2b-title") || "CACOON LOUNGE";
+        const sub =
+          tab.getAttribute("data-b2b-sub") || "Cocktails & Late Night";
+        const spec =
+          tab.getAttribute("data-b2b-spec") || "120x55 CM · IP67 DIŞ/İÇ CEPHE";
+        currentRgb = tab.getAttribute("data-b2b-rgb") || "255, 176, 32";
+        currentHex = tab.getAttribute("data-b2b-hex") || "#FFB020";
+        const targetWa = tab.getAttribute("data-b2b-wa") || "";
+
+        tabs.forEach((t) => {
+          t.setAttribute("aria-selected", "false");
+          t.style.borderColor = "rgba(255, 255, 255, 0.07)";
+          t.classList.remove("bg-[#050505]");
+          t.classList.add("bg-[#050505]/50");
+          const firstSpan = t.querySelector("span");
+          if (firstSpan) firstSpan.style.color = "rgba(255, 255, 255, 0.55)";
+        });
+
+        tab.setAttribute("aria-selected", "true");
+        tab.style.borderColor = currentHex;
+        tab.classList.remove("bg-[#050505]/50");
+        tab.classList.add("bg-[#050505]");
+        const activeFirstSpan = tab.querySelector("span");
+        if (activeFirstSpan) activeFirstSpan.style.color = currentHex;
+
+        realPhoto.setAttribute("src", photoUrl);
+        mainText.textContent = title;
+        if (liveTitleInput) liveTitleInput.value = title;
+        if (subText) subText.textContent = sub;
+        if (specReadout) specReadout.textContent = spec;
+
+        applyRoomLighting();
+
+        if (waLink && targetWa) waLink.setAttribute("href", targetWa);
+        if (mainCta && targetWa) mainCta.setAttribute("href", targetWa);
+      });
+    });
+
+    applyRoomLighting();
+  }
+
+  document.addEventListener("DOMContentLoaded", initVenueSimulator);
+  document.addEventListener("astro:page-load", initVenueSimulator);
+</script>

@@ -1,0 +1,26 @@
+{
+  "name": "ccneons-glow",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "biome check .",
+    "test": "node --experimental-strip-types --test src/entities/custom-neon/model/pricing.test.ts"
+  },
+  "dependencies": {
+    "@astrojs/preact": "^4.1.0",
+    "@tailwindcss/vite": "^4.1.4",
+    "astro": "^5.7.5",
+    "preact": "^10.26.5",
+    "tailwindcss": "^4.1.4",
+    "zod": "^3.24.3"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/node": "^22.14.1",
+    "typescript": "^5.8.3"
+  }
+}

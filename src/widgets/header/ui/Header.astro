@@ -1,0 +1,158 @@
+---
+import { BUSINESS_CONFIG } from "@/shared/config/business";
+
+interface Props {
+  currentPath?: string;
+}
+
+const { currentPath = "/" } = Astro.props;
+---
+
+<header
+  id="site-header"
+  class="fixed top-0 inset-x-0 z-50 w-full border-b border-white/[0.07] bg-[#050505]/90 backdrop-blur-md transition-transform duration-300 ease-out will-change-transform translate-y-0"
+>
+  <nav
+    aria-label="Ana Menü"
+    class="flex w-full items-center justify-between px-4 sm:px-8 lg:px-12 py-3.5"
+  >
+    <a
+      href="/"
+      class="cursor-pointer flex items-center gap-3 rounded-lg focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/40"
+    >
+      <img
+        src={BUSINESS_CONFIG.logoUrl}
+        alt="CACOON Custom Neon Studio"
+        width="38"
+        height="38"
+        class="size-9.5 rounded-lg border border-white/[0.07] object-cover grayscale-[20%]"
+      />
+      <div class="flex flex-col">
+        <div class="flex items-center gap-2">
+          <span class="font-display text-base font-bold tracking-tight text-white leading-none">
+            CACOON
+          </span>
+          <span class="font-mono rounded border border-white/10 bg-white/[0.04] px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-white/70">
+            EL İŞÇİLİĞİ
+          </span>
+        </div>
+        <span class="font-mono mt-1 block text-[11px] text-white/45 tracking-tight">
+          {BUSINESS_CONFIG.name} · {BUSINESS_CONFIG.location}
+        </span>
+      </div>
+    </a>
+
+    <div class="hidden md:flex items-center gap-8 text-sm font-medium text-white/60">
+      <a
+        href="/#hero-stage"
+        class="cursor-pointer py-1.5 transition-colors duration-200 hover:text-white"
+      >
+        Canlı Atölye
+      </a>
+      <a
+        href="/#koleksiyon"
+        class="cursor-pointer py-1.5 transition-colors duration-200 hover:text-white inline-flex items-center gap-1.5"
+      >
+        <span>Koleksiyon</span>
+        <span class="font-mono text-xs text-white/40">[16]</span>
+      </a>
+      <a
+        href="/#kurumsal"
+        class="cursor-pointer py-1.5 transition-colors duration-200 hover:text-white"
+      >
+        Mekan Simülatörü
+      </a>
+      <a
+        href={BUSINESS_CONFIG.shopierUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="cursor-pointer py-1.5 transition-colors duration-200 hover:text-white"
+      >
+        Shopier Mağaza
+      </a>
+    </div>
+
+    <div class="flex items-center gap-2.5">
+      {
+        currentPath === "/tasarla" ? (
+          <a
+            href="/"
+            data-astro-prefetch="viewport"
+            class="cursor-pointer inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2 font-mono text-xs font-medium text-white transition-all duration-200 hover:border-white/25 hover:bg-white/10"
+          >
+            <span>← GALERİYE DÖN</span>
+          </a>
+        ) : (
+          <a
+            href="/tasarla"
+            data-astro-prefetch="viewport"
+            class="cursor-pointer group inline-flex min-h-10 items-center gap-2.5 rounded-xl border border-white/10 bg-white/[0.05] px-4 py-2 font-mono text-xs font-semibold uppercase tracking-wider text-white transition-all duration-300 hover:border-[#35E7FF]/60 hover:bg-white/10 hover:shadow-[0_0_24px_rgba(53,231,255,0.28)]"
+          >
+            <span class="size-1.5 rounded-full bg-white/50 transition-all duration-300 group-hover:bg-[#35E7FF] group-hover:shadow-[0_0_8px_#35E7FF]" />
+            <span>CAD STÜDYO →</span>
+          </a>
+        )
+      }
+    </div>
+  </nav>
+</header>
+
+<script is:inline>
+  function initSmartHeader() {
+    const header = document.getElementById("site-header");
+    if (!header) return;
+
+    let lastScrollY = window.scrollY;
+    let lastClientY = null;
+
+    function showHeader() {
+      header.classList.remove("-translate-y-full");
+      header.classList.add("translate-y-0");
+    }
+
+    function hideHeader() {
+      header.classList.remove("translate-y-0");
+      header.classList.add("-translate-y-full");
+    }
+
+    function onScroll() {
+      const currentY = window.scrollY;
+      const delta = currentY - lastScrollY;
+
+      if (currentY <= 48) {
+        showHeader();
+      } else if (delta > 4) {
+        hideHeader();
+      } else if (delta < -2) {
+        showHeader();
+      }
+
+      lastScrollY = currentY;
+    }
+
+    function onMouseMove(e) {
+      if (window.scrollY <= 48) return;
+      if (e.clientY <= 72) {
+        showHeader();
+      } else if (lastClientY !== null && e.clientY - lastClientY < -14) {
+        showHeader();
+      }
+      lastClientY = e.clientY;
+    }
+
+    if (window.__cacoonHeaderCleanup) {
+      window.__cacoonHeaderCleanup();
+    }
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("mousemove", onMouseMove, { passive: true });
+
+    window.__cacoonHeaderCleanup = () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("mousemove", onMouseMove);
+    };
+  }
+
+  document.addEventListener("DOMContentLoaded", initSmartHeader);
+  document.addEventListener("astro:page-load", initSmartHeader);
+</script>
