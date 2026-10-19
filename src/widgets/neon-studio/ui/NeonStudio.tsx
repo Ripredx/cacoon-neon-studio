@@ -300,15 +300,18 @@ export default function NeonStudio() {
     if (activeBorderId !== "none") {
       ctx.save();
       ctx.beginPath();
-      const padX = 260;
-      const padY = 130;
-      const rx = 800 - padX;
-      const ry = 430 - padY;
-      const rw = padX * 2;
-      const rh = padY * 2;
-      const radius =
-        activeBorderId === "pill" || activeBorderId === "circle" ? 60 : 16;
-      ctx.roundRect(rx, ry, rw, rh, radius);
+      if (activeBorderId === "circle") {
+        ctx.arc(800, 430, 220, 0, Math.PI * 2);
+      } else {
+        const padX = 270;
+        const padY = 130;
+        const rx = 800 - padX;
+        const ry = 430 - padY;
+        const rw = padX * 2;
+        const rh = padY * 2;
+        const radius = activeBorderId === "pill" ? rh / 2 : 16;
+        ctx.roundRect(rx, ry, rw, rh, radius);
+      }
       ctx.lineWidth = 4;
       if (activeBorderId === "ticket") {
         ctx.setLineDash([12, 10]);
@@ -467,20 +470,26 @@ export default function NeonStudio() {
     spec.backboardId !== "contour" || activeBorderId !== "none";
 
   const backboardShapeClass =
-    spec.backboardId === "rectangle"
-      ? "rounded-xl border border-white/20 bg-[#0A0A0E]/65 px-8 sm:px-14 py-8"
-      : spec.backboardId === "canvas"
-        ? "rounded-xl border border-white/30 bg-[#050505]/95 px-8 sm:px-14 py-8 shadow-[inset_0_0_30px_rgba(0,0,0,0.9)]"
-        : activeBorderId !== "none"
-          ? "rounded-xl px-8 sm:px-14 py-8"
-          : "px-4 sm:px-8 py-4";
+    activeBorderId === "circle"
+      ? "aspect-square rounded-full flex flex-col items-center justify-center p-8 sm:p-14"
+      : activeBorderId === "pill"
+        ? "rounded-full px-10 sm:px-16 py-6 sm:py-8"
+        : activeBorderId === "ticket"
+          ? "rounded-3xl border-dashed px-8 sm:px-14 py-8"
+          : spec.backboardId === "rectangle"
+            ? "rounded-xl border border-white/20 bg-[#0A0A0E]/65 px-8 sm:px-14 py-8"
+            : spec.backboardId === "canvas"
+              ? "rounded-xl border border-white/30 bg-[#050505]/95 px-8 sm:px-14 py-8 shadow-[inset_0_0_30px_rgba(0,0,0,0.9)]"
+              : activeBorderId !== "none"
+                ? "rounded-xl px-8 sm:px-14 py-8"
+                : "px-4 sm:px-8 py-4";
 
   const neonBorderStyle =
     activeBorderId !== "none"
       ? {
           borderColor: isLit ? "#FFFFFF" : activeColor.unlitHex,
           boxShadow: isLit
-            ? `0 0 12px rgba(${activeColor.glowRgb}, 0.9), inset 0 0 12px rgba(${activeColor.glowRgb}, 0.65), 0 0 36px rgba(${activeColor.glowRgb}, 0.45)`
+            ? `0 0 14px rgba(${activeColor.glowRgb}, 0.95), inset 0 0 14px rgba(${activeColor.glowRgb}, 0.6), 0 0 38px rgba(${activeColor.glowRgb}, 0.5)`
             : "none",
         }
       : {};
