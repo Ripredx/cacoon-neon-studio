@@ -44,7 +44,13 @@ export default function LazyColorBends(props: ColorBendsProps) {
       class={`transition-opacity duration-1000 ease-out ${
         isVisible ? "opacity-100" : "opacity-0"
       }`}
-      style={{ width: "100%", height: "100%" }}
+      style={{
+        position: "absolute",
+        inset: 0,
+        width: "100%",
+        height: "100%",
+        pointerEvents: "none",
+      }}
     >
       <LoadedComponent {...props} />
     </div>
