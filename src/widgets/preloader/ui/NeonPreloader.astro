@@ -155,17 +155,22 @@
     const preloader = document.getElementById("ccneons-preloader");
     if (!preloader) return;
 
-    // PageSpeed & Lighthouse test botlarında puanı korumak için preloader'ı atla
+    // 1. PageSpeed & Lighthouse test botlarında puanı korumak için preloader'ı atla
     const isAuditBot =
       navigator.userAgent.includes("Chrome-Lighthouse") ||
       navigator.userAgent.includes("PageSpeed") ||
       navigator.userAgent.includes("Googlebot");
 
-    if (isAuditBot) {
+    // 2. Sayfa geçişlerinde (veya aynı sekmede) tekrar gösterme: Sadece ilk ziyarette 1 kez göster
+    const alreadyShown = sessionStorage.getItem("ccneons_preloaded_once") === "true";
+
+    if (isAuditBot || alreadyShown) {
       preloader.style.display = "none";
       preloader.remove();
       return;
     }
+
+    sessionStorage.setItem("ccneons_preloaded_once", "true");
 
     const glyph = document.getElementById("preloader-neon-glyph");
     const card = document.getElementById("preloader-card");

@@ -1,6 +1,16 @@
 .color-bends-container {
-  position: relative;
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   overflow: hidden;
+}
+
+#global-page-colorbends,
+#global-page-colorbends astro-island {
+  display: block !important;
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
 }

@@ -215,8 +215,8 @@ export default function ColorBends({
 
     const handleResize = () => {
       if (!container || !renderer || !material) return;
-      const w = container.clientWidth || 1;
-      const h = container.clientHeight || 1;
+      const w = container.clientWidth || window.innerWidth || 1;
+      const h = container.clientHeight || window.innerHeight || 1;
       renderer.setSize(w, h, false);
       material.uniforms.uCanvas.value.set(w, h);
     };
