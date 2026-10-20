@@ -342,19 +342,17 @@ export default function ColorBends({
 
   useEffect(() => {
     const material = materialRef.current;
-    const container = containerRef.current;
-    if (!material || !container) return;
+    if (!material) return;
 
     const handlePointerMove = (e: PointerEvent) => {
-      const rect = container.getBoundingClientRect();
-      const x = ((e.clientX - rect.left) / (rect.width || 1)) * 2 - 1;
-      const y = -(((e.clientY - rect.top) / (rect.height || 1)) * 2 - 1);
+      const x = (e.clientX / (window.innerWidth || 1)) * 2 - 1;
+      const y = -(e.clientY / (window.innerHeight || 1)) * 2 + 1;
       pointerTargetRef.current.set(x, y);
     };
 
-    container.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointermove", handlePointerMove, { passive: true });
     return () => {
-      container.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointermove", handlePointerMove);
     };
   }, []);
 

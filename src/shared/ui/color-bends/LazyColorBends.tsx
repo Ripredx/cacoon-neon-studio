@@ -7,7 +7,7 @@ export default function LazyColorBends(props: ColorBendsProps) {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // 1. Bot koruması: PageSpeed / Lighthouse testlerinde WebGL ve Three.js asla indirilmez (0 KB, 0 ms TBT)
+    // 1. PageSpeed / Lighthouse test bot koruması (Denetim botlarında WebGL çalıştırılmaz)
     const isBot =
       typeof navigator !== "undefined" &&
       (navigator.userAgent.includes("Chrome-Lighthouse") ||
@@ -16,28 +16,24 @@ export default function LazyColorBends(props: ColorBendsProps) {
 
     if (isBot) return;
 
-    // 2. Mobil koruması: Küçük ekranlarda / dokunmatik cihazlarda ana iş parçacığını ve bataryayı koru
-    const isMobile =
-      typeof window !== "undefined" &&
-      (window.innerWidth < 768 ||
-        window.matchMedia("(pointer: coarse)").matches ||
-        window.matchMedia("(prefers-reduced-motion: reduce)").matches);
-
-    if (isMobile) return;
-
-    // 3. Tarayıcı tamamen boşta (idle) kaldığında dinamik olarak Three.js ve ColorBends yükle
+    // 2. ColorBends'i asenkron yükle
     const loadDeferred = () => {
-      import("./ColorBends").then((mod) => {
-        setLoadedComponent(() => mod.default);
-        // Yumuşak giriş için kısa bir gecikme
-        setTimeout(() => setIsVisible(true), 60);
-      });
+      import("./ColorBends")
+        .then((mod) => {
+          setLoadedComponent(() => mod.default);
+          requestAnimationFrame(() => setIsVisible(true));
+        })
+        .catch((err) => {
+          console.error("ColorBends failed to load:", err);
+        });
     };
 
-    if ("requestIdleCallback" in window) {
-      window.requestIdleCallback(loadDeferred, { timeout: 3000 });
-    } else {
-      setTimeout(loadDeferred, 1800);
+    if (typeof window !== "undefined") {
+      if ("requestIdleCallback" in window) {
+        window.requestIdleCallback(loadDeferred, { timeout: 800 });
+      } else {
+        setTimeout(loadDeferred, 100);
+      }
     }
   }, []);
 

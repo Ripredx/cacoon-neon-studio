@@ -83,22 +83,22 @@ const {
           <div
             id="global-page-colorbends"
             aria-hidden="true"
-            class="fixed inset-0 z-0 pointer-events-none overflow-hidden opacity-25 mix-blend-screen"
+            class="fixed inset-0 z-0 pointer-events-none overflow-hidden opacity-60"
           >
             <LazyColorBends
               client:only="preact"
               colors={["#35E7FF", "#FF2E88", "#FFB020"]}
               rotation={90}
-              speed={0.15}
-              scale={1.2}
-              frequency={0.8}
+              speed={0.2}
+              scale={1}
+              frequency={1}
               warpStrength={1}
-              mouseInfluence={0.4}
-              noise={0.1}
-              parallax={0.3}
+              mouseInfluence={0.6}
+              noise={0.12}
+              parallax={0.5}
               iterations={1}
-              intensity={1.2}
-              bandWidth={7}
+              intensity={1.6}
+              bandWidth={6}
               transparent
             />
           </div>
