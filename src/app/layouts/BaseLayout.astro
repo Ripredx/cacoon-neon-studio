@@ -2,7 +2,6 @@
 import { ClientRouter } from "astro:transitions";
 import "@/app/styles/global.css";
 import { BUSINESS_CONFIG, NEON_ENGINE_CONFIG } from "@/shared/config/business";
-import GridScan from "@/shared/ui/grid-scan/GridScan";
 
 interface Props {
   title?: string;
@@ -77,31 +76,14 @@ const {
     data-lenis-lerp={NEON_ENGINE_CONFIG.lenisLerp}
     class="min-h-dvh bg-[#050505] text-[#F4F4F6] antialiased selection:bg-white/20 selection:text-white overflow-x-clip"
   >
-    <!-- Mobil için hafif ve performanslı CSS ızgara arka planı (0 KB JS, 0 ms TBT) -->
-    <div
-      aria-hidden="true"
-      class="lg:hidden fixed inset-0 z-0 pointer-events-none opacity-25 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0a_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_35%,#000_60%,transparent_100%)]"
-    />
-
-    <!-- Masaüstü için React Bits <GridScan /> 3D Cyber Izgara (Sadece lg+ ekranlarda client:media ile yüklenir) -->
+    <!-- Sayfa Geneli Donanım Hızlandırmalı Siber Neon Izgara Arka Planı (0 KB JS, 0 ms TBT) -->
     {
       showGridScan && (
         <div
           id="global-page-gridscan"
           aria-hidden="true"
-          class="hidden lg:block fixed inset-0 z-0 pointer-events-none overflow-hidden opacity-40"
-        >
-          <GridScan
-            client:media="(min-width: 1024px)"
-            linesColor="#4d4757"
-            scanColor="#7dd3fc"
-            cells={7}
-            depth={3.3}
-            scanDuration={2.4}
-            scanDelay={1.6}
-            clickEffect="ping"
-          />
-        </div>
+          class="fixed inset-0 z-0 pointer-events-none overflow-hidden opacity-30 bg-[linear-gradient(to_right,#ffffff0c_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0c_1px,transparent_1px)] bg-[size:36px_36px] [mask-image:radial-gradient(ellipse_80%_60%_at_50%_35%,#000_50%,transparent_100%)]"
+        />
       )
     }
 

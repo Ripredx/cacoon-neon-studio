@@ -4,8 +4,7 @@ export const BUSINESS_CONFIG = {
   slogan: "Color your life",
   location: "Antalya / Manavgat",
   siteUrl: "https://ccneons.com",
-  logoUrl:
-    "https://cdn.shopier.app/logo_468/ccneonsglow_71d8ac3e4e7e07e06ae696efd6901290.jpeg",
+  logoUrl: "/logo-96.webp",
   phones: [
     {
       label: "Test WhatsApp & Sipariş Hattı",
