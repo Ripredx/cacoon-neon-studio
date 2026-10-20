@@ -87,7 +87,7 @@ const waOffice = buildB2BWhatsAppUrl("03 / Kurumsal Ofis");
           <span class="font-display text-sm sm:text-base font-bold text-white">
             Kafe & Bar Cephesi
           </span>
-          <span class="font-mono text-[11px] text-white/45">
+          <span class="font-mono text-[11px] text-white/70">
             WARM GOLD · 120x55 CM
           </span>
         </button>
@@ -106,13 +106,13 @@ const waOffice = buildB2BWhatsAppUrl("03 / Kurumsal Ofis");
           data-b2b-wa={waGaming}
           class="b2b-scene-tab cursor-pointer flex flex-col items-start justify-between gap-1.5 rounded-xl border border-white/[0.07] bg-[#050505]/50 p-4 text-left transition-all duration-200 hover:border-white/20"
         >
-          <span class="font-mono text-xs font-bold uppercase tracking-wider text-white/55">
+          <span class="font-mono text-xs font-bold uppercase tracking-wider text-white/70">
             02 / Oyun & Yayın Odası
           </span>
           <span class="font-display text-sm sm:text-base font-bold text-white">
             Oyun & Yayın Odası
           </span>
-          <span class="font-mono text-[11px] text-white/45">
+          <span class="font-mono text-[11px] text-white/70">
             ICE BLUE · 90x40 CM
           </span>
         </button>
@@ -131,13 +131,13 @@ const waOffice = buildB2BWhatsAppUrl("03 / Kurumsal Ofis");
           data-b2b-wa={waOffice}
           class="b2b-scene-tab cursor-pointer flex flex-col items-start justify-between gap-1.5 rounded-xl border border-white/[0.07] bg-[#050505]/50 p-4 text-left transition-all duration-200 hover:border-white/20"
         >
-          <span class="font-mono text-xs font-bold uppercase tracking-wider text-white/55">
+          <span class="font-mono text-xs font-bold uppercase tracking-wider text-white/70">
             03 / Kurumsal Ofis
           </span>
           <span class="font-display text-sm sm:text-base font-bold text-white">
             Kurumsal Ofis
           </span>
-          <span class="font-mono text-[11px] text-white/45">
+          <span class="font-mono text-[11px] text-white/70">
             ACID GREEN · 135x50 CM
           </span>
         </button>
@@ -198,6 +198,7 @@ const waOffice = buildB2BWhatsAppUrl("03 / Kurumsal Ofis");
               id="b2b-logo-file-input"
               type="file"
               accept="image/png,image/svg+xml,image/webp,image/jpeg"
+              aria-label="Kurumsal neon tasarımı için logo veya görsel yükleyin"
               class="sr-only"
             />
             <button
@@ -249,7 +250,7 @@ const waOffice = buildB2BWhatsAppUrl("03 / Kurumsal Ofis");
         <div class="relative z-10 flex h-[340px] sm:h-[370px] w-full flex-col items-center justify-center px-4 text-center">
           <div
             id="b2b-neon-plate"
-            class="relative flex w-[92%] sm:w-[68%] min-h-[200px] flex-col items-center justify-center rounded-xl border border-white/15 bg-black/30 px-6 py-8 backdrop-blur-[1.5px] transition-all duration-500"
+            class="relative flex w-[92%] sm:w-[68%] min-h-[200px] flex-col items-center justify-center rounded-xl border border-white/15 bg-black/30 px-6 py-8 backdrop-blur-[1.5px] transition-transform duration-300"
             style="box-shadow: 0 24px 70px rgba(0, 0, 0, 0.85), 0 0 54px rgba(var(--neon-rgb), 0.38), inset 0 0 28px rgba(var(--neon-rgb), 0.16);"
           >
             <!-- 4 Köşe Minimalist Krom Montaj Pimi -->
@@ -262,12 +263,12 @@ const waOffice = buildB2BWhatsAppUrl("03 / Kurumsal Ofis");
             <img
               id="b2b-uploaded-logo"
               alt="Özel yüklenen logo neon simülasyonu"
-              class="hidden max-h-[145px] sm:max-h-[175px] max-w-[82%] object-contain select-none transition-all duration-500"
+              class="hidden max-h-[145px] sm:max-h-[175px] max-w-[82%] object-contain select-none transition-opacity duration-300"
             />
 
             <p
               id="b2b-neon-main-text"
-              class="animate-neon-ignite font-neon-mono text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight select-none transition-all duration-500"
+              class="animate-neon-ignite font-neon-mono text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight select-none transition-opacity duration-300"
               style="color: var(--neon-color); mix-blend-mode: screen; text-shadow: 0 0 5px #fff, 0 0 20px currentColor, 0 0 40px currentColor, 0 0 85px var(--neon-color);"
             >
               CC NEON'S LOUNGE
@@ -275,7 +276,7 @@ const waOffice = buildB2BWhatsAppUrl("03 / Kurumsal Ofis");
 
             <p
               id="b2b-neon-sub-text"
-              class="mt-3 text-lg sm:text-2xl text-white select-none transition-all duration-500"
+              class="mt-3 text-lg sm:text-2xl text-white select-none transition-opacity duration-300"
               style="font-family: 'Pacifico', cursive; mix-blend-mode: screen; text-shadow: 0 0 4px #fff, 0 0 16px var(--neon-color), 0 0 32px var(--neon-color);"
             >
               Cocktails & Late Night

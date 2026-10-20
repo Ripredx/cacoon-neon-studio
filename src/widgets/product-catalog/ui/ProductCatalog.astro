@@ -95,7 +95,7 @@ const customLogoWaText = encodeURIComponent(
           class="catalog-filter-btn cursor-pointer whitespace-nowrap inline-flex items-center gap-2 rounded-lg border border-white/20 bg-white/[0.08] px-3.5 py-2 font-mono text-xs font-semibold uppercase tracking-wider text-white transition-all duration-150"
         >
           <span>TÜMÜ</span>
-          <span class="text-white/55">[{products.length}]</span>
+          <span class="text-white/70">[{products.length}]</span>
         </button>
 
         <button
@@ -103,10 +103,10 @@ const customLogoWaText = encodeURIComponent(
           role="tab"
           aria-selected="false"
           data-filter-category="tablo"
-          class="catalog-filter-btn cursor-pointer whitespace-nowrap inline-flex items-center gap-2 rounded-lg border border-transparent bg-transparent px-3.5 py-2 font-mono text-xs font-medium uppercase tracking-wider text-white/55 transition-all duration-150 hover:text-white"
+          class="catalog-filter-btn cursor-pointer whitespace-nowrap inline-flex items-center gap-2 rounded-lg border border-transparent bg-transparent px-3.5 py-2 font-mono text-xs font-medium uppercase tracking-wider text-white/70 transition-all duration-150 hover:text-white"
         >
           <span>NEON KANVAS TABLOLAR</span>
-          <span class="text-white/40">[{tabloCount}]</span>
+          <span class="text-white/70">[{tabloCount}]</span>
         </button>
 
         <button
@@ -114,17 +114,17 @@ const customLogoWaText = encodeURIComponent(
           role="tab"
           aria-selected="false"
           data-filter-category="pleksi"
-          class="catalog-filter-btn cursor-pointer whitespace-nowrap inline-flex items-center gap-2 rounded-lg border border-transparent bg-transparent px-3.5 py-2 font-mono text-xs font-medium uppercase tracking-wider text-white/55 transition-all duration-150 hover:text-white"
+          class="catalog-filter-btn cursor-pointer whitespace-nowrap inline-flex items-center gap-2 rounded-lg border border-transparent bg-transparent px-3.5 py-2 font-mono text-xs font-medium uppercase tracking-wider text-white/70 transition-all duration-150 hover:text-white"
         >
           <span>PLEKSİ NEON TASARIMLAR</span>
-          <span class="text-white/40">[{pleksiCount}]</span>
+          <span class="text-white/70">[{pleksiCount}]</span>
         </button>
       </div>
 
       <div class="flex items-center gap-2.5">
         <label
           for="product-sort-select"
-          class="font-mono text-xs uppercase tracking-wider text-white/45 whitespace-nowrap"
+          class="font-mono text-xs uppercase tracking-wider text-white/70 whitespace-nowrap"
         >
           SIRALA:
         </label>
@@ -206,12 +206,12 @@ const customLogoWaText = encodeURIComponent(
                   )}
 
                   <img
-                    src={product.imageUrl.replace('/pictures_large/', '/pictures_mid/')}
+                    src={product.imageUrl.replace('/pictures_large/', '/pictures_small/')}
                     srcset={`${product.imageUrl.replace('/pictures_large/', '/pictures_small/')} 330w, ${product.imageUrl.replace('/pictures_large/', '/pictures_mid/')} 458w, ${product.imageUrl} 916w`}
-                    sizes="(max-width: 640px) 46vw, (max-width: 1024px) 31vw, 280px"
+                    sizes="(max-width: 640px) 44vw, (max-width: 1024px) 30vw, 280px"
                     alt={product.title}
                     loading={index < 2 ? "eager" : "lazy"}
-                    decoding={index < 2 ? "sync" : "async"}
+                    decoding="async"
                     fetchpriority={index < 2 ? "high" : "auto"}
                     width="400"
                     height="500"
@@ -248,7 +248,7 @@ const customLogoWaText = encodeURIComponent(
                         {product.price.toLocaleString("tr-TR")} ₺
                       </span>
                       {product.oldPrice && (
-                        <span class="font-mono text-xs text-white/40 line-through">
+                        <span class="font-mono text-xs text-white/60 line-through">
                           {product.oldPrice.toLocaleString("tr-TR")} ₺
                         </span>
                       )}
