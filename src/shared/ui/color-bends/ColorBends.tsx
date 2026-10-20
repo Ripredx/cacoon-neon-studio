@@ -211,7 +211,8 @@ export default function ColorBends({
     renderer.domElement.style.display = "block";
     container.appendChild(renderer.domElement);
 
-    const clock = new THREE.Clock();
+    let lastTime = performance.now();
+    const startTime = performance.now();
 
     const handleResize = () => {
       if (!container || !renderer || !material) return;
@@ -231,9 +232,11 @@ export default function ColorBends({
       window.addEventListener("resize", handleResize);
     }
 
-    const loop = () => {
-      const dt = clock.getDelta();
-      const elapsed = clock.elapsedTime;
+    const loop = (time: number) => {
+      const now = time || performance.now();
+      const dt = Math.min((now - lastTime) / 1000, 0.1);
+      lastTime = now;
+      const elapsed = (now - startTime) / 1000;
       material.uniforms.uTime.value = elapsed;
 
       const deg = (rotationRef.current % 360) + autoRotateRef.current * elapsed;

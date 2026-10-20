@@ -150,7 +150,7 @@
   }
 </style>
 
-<script is:inline>
+<script is:inline data-astro-rerun>
   (function () {
     const preloader = document.getElementById("ccneons-preloader");
     if (!preloader) return;
@@ -163,7 +163,10 @@
       (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
 
     // 2. Sayfa geçişlerinde (veya aynı sekmede) tekrar gösterme: Sadece ilk ziyarette 1 kez göster
-    const alreadyShown = sessionStorage.getItem("ccneons_preloaded_once") === "true";
+    let alreadyShown = false;
+    try {
+      alreadyShown = sessionStorage.getItem("ccneons_preloaded_once") === "true";
+    } catch (e) {}
 
     if (isAuditBot || alreadyShown) {
       preloader.style.display = "none";
@@ -171,7 +174,9 @@
       return;
     }
 
-    sessionStorage.setItem("ccneons_preloaded_once", "true");
+    try {
+      sessionStorage.setItem("ccneons_preloaded_once", "true");
+    } catch (e) {}
 
     const glyph = document.getElementById("preloader-neon-glyph");
     const card = document.getElementById("preloader-card");
@@ -188,8 +193,11 @@
     const isMobile = window.innerWidth < 768;
     const duration = isMobile ? 650 : 950; // ms: Mobilde akıcı hızlı (650ms), masaüstünde 950ms
 
+    // Emniyet Koruması: Herhangi bir takılma durumunda maksimum sürede zorla kapat
+    const safetyTimer = setTimeout(dismissPreloader, isMobile ? 850 : 1200);
+
     function updateFrame(now) {
-      const elapsed = now - startTime;
+      const elapsed = (now || performance.now()) - startTime;
       const t = Math.min(1, elapsed / duration);
       progress = Math.round(t * 100);
 
@@ -243,6 +251,7 @@
     }
 
     function dismissPreloader() {
+      clearTimeout(safetyTimer);
       preloader.style.opacity = "0";
       preloader.style.pointerEvents = "none";
       setTimeout(function () {
@@ -250,8 +259,23 @@
       }, 350);
     }
 
+    // Astro sayfa geçişleri dinleyicisi
+    document.addEventListener("astro:page-load", function () {
+      const p = document.getElementById("ccneons-preloader");
+      if (p) {
+        try {
+          if (sessionStorage.getItem("ccneons_preloaded_once") === "true") {
+            p.remove();
+          }
+        } catch (e) {}
+      }
+    });
+
     // Konsoldan istediğin an yeniden izlemek için: __replayPreloader()
     window.__replayPreloader = function () {
+      try {
+        sessionStorage.removeItem("ccneons_preloaded_once");
+      } catch (e) {}
       location.reload();
     };
 

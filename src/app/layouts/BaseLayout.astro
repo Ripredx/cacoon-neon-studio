@@ -67,6 +67,20 @@ const {
     <slot name="head" />
 
     <ClientRouter fallback="swap" />
+
+    <!-- Anında Session Kontrolü: Tekrar ziyaret ve sayfa geçişlerinde preloader'ı anında gizle -->
+    <script is:inline>
+      try {
+        if (sessionStorage.getItem("ccneons_preloaded_once") === "true") {
+          document.documentElement.classList.add("preloaded");
+        }
+      } catch (e) {}
+    </script>
+    <style is:inline>
+      html.preloaded #ccneons-preloader {
+        display: none !important;
+      }
+    </style>
   </head>
   <body
     data-lenis-lerp={NEON_ENGINE_CONFIG.lenisLerp}
