@@ -59,6 +59,15 @@ const structuredData = {
 ---
 
 <BaseLayout>
+  <link
+    slot="head"
+    rel="preload"
+    as="image"
+    type="image/webp"
+    href="/scenes/hero-brick-cafe-mobile.webp"
+    media="(max-width: 640px)"
+    fetchpriority="high"
+  />
   <script
     is:inline
     type="application/ld+json"

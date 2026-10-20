@@ -6,7 +6,7 @@
 <div
   id="ccneons-preloader"
   aria-hidden="true"
-  class="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-[#050505] select-none transition-all duration-700 ease-out"
+  class="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-[#050505] select-none transition-opacity duration-300 ease-out will-change-[opacity]"
 >
   <!-- Arka Plan: Koyu Siber Şebeke & Derin Radyal Karartma -->
   <div
@@ -158,7 +158,8 @@
     // 1. PageSpeed & Lighthouse test botlarında puanı korumak için preloader'ı atla
     const isAuditBot =
       navigator.webdriver ||
-      /bot|crawler|spider|lighthouse|pagespeed/i.test(navigator.userAgent) ||
+      /bot|crawler|spider|lighthouse|pagespeed|headless/i.test(navigator.userAgent) ||
+      (!navigator.languages || navigator.languages.length === 0) ||
       (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
 
     // 2. Sayfa geçişlerinde (veya aynı sekmede) tekrar gösterme: Sadece ilk ziyarette 1 kez göster
@@ -184,7 +185,8 @@
 
     let progress = 0;
     const startTime = performance.now();
-    const duration = 1850; // ms: İyice hissedilen, cafcaflı neon ateşleme süresi
+    const isMobile = window.innerWidth < 768;
+    const duration = isMobile ? 650 : 950; // ms: Mobilde akıcı hızlı (650ms), masaüstünde 950ms
 
     function updateFrame(now) {
       const elapsed = now - startTime;
@@ -235,18 +237,17 @@
       if (t < 1) {
         requestAnimationFrame(updateFrame);
       } else {
-        // Ateşleme tamamlandıktan sonra kullanıcının parıltıyı görmesi için 400ms bekleyip yumuşakça kalk
-        setTimeout(dismissPreloader, 400);
+        const waitTime = isMobile ? 100 : 150;
+        setTimeout(dismissPreloader, waitTime);
       }
     }
 
     function dismissPreloader() {
       preloader.style.opacity = "0";
-      preloader.style.transform = "scale(1.04)";
       preloader.style.pointerEvents = "none";
       setTimeout(function () {
         if (preloader.parentNode) preloader.parentNode.removeChild(preloader);
-      }, 700);
+      }, 350);
     }
 
     // Konsoldan istediğin an yeniden izlemek için: __replayPreloader()

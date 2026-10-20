@@ -45,7 +45,10 @@ const {
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content="/og-neon-card.svg" />
 
-    <!-- Google Fonts: Preconnect + Non-blocking Async Stylesheet (Pacifico, Plus Jakarta Sans, Space Grotesk, Tilt Neon) -->
+    <!-- Google Fonts & CDN: Dns-prefetch + Preconnect + Non-blocking Async Stylesheet -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+    <link rel="dns-prefetch" href="https://cdn.shopier.app" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
