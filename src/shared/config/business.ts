@@ -7,17 +7,12 @@ export const BUSINESS_CONFIG = {
   logoUrl: "/logo-96.webp",
   phones: [
     {
-      label: "Test WhatsApp & Sipariş Hattı",
-      raw: "905530460610",
-      display: "+90 553 046 06 10",
-    },
-    {
-      label: "Atölye Hattı 2",
+      label: "WhatsApp & Sipariş Hattı",
       raw: "905394682412",
       display: "+90 539 468 24 12",
     },
     {
-      label: "Atölye Hattı 3",
+      label: "Atölye Hattı 2",
       raw: "905378664207",
       display: "+90 537 866 42 07",
     },

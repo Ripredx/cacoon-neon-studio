@@ -206,7 +206,7 @@ describe("Turkish Locale & WhatsApp URL Encoding", () => {
       liveUrl: "http://localhost:4321/tasarla#preview",
     });
     const decoded = decodeURIComponent(url);
-    assert.ok(url.startsWith("https://wa.me/905530460610?text="));
+    assert.ok(url.startsWith("https://wa.me/905394682412?text="));
     assert.ok(decoded.includes("IŞIK & İZ"));
     assert.ok(
       decoded.includes(

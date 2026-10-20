@@ -15,17 +15,26 @@ const structuredData = {
   "@graph": [
     {
       "@type": "LocalBusiness",
+      "@id": `${BUSINESS_CONFIG.siteUrl}/#business`,
       name: BUSINESS_CONFIG.name,
+      url: BUSINESS_CONFIG.siteUrl,
       description:
         "Antalya / Manavgat merkezli gerçek el işçiliği özel üretim LED neon tabela, pleksi neon ve kanvas neon tablo atölyesi.",
-      image: BUSINESS_CONFIG.logoUrl,
+      image: `${BUSINESS_CONFIG.siteUrl}/og-neon-card.png`,
+      logo: `${BUSINESS_CONFIG.siteUrl}${BUSINESS_CONFIG.logoUrl}`,
       telephone: `+${BUSINESS_CONFIG.phones[0].raw}`,
+      // Ev atölyesi: sokak adresi yok, yalnızca hizmet bölgesi bildirilir.
       address: {
         "@type": "PostalAddress",
         addressLocality: "Manavgat",
         addressRegion: "Antalya",
         addressCountry: "TR",
       },
+      areaServed: [
+        { "@type": "City", name: "Manavgat" },
+        { "@type": "AdministrativeArea", name: "Antalya" },
+        { "@type": "Country", name: "Türkiye" },
+      ],
       sameAs: [BUSINESS_CONFIG.shopierUrl, BUSINESS_CONFIG.instagramUrl],
     },
     {
