@@ -392,6 +392,7 @@ const customLogoWaText = encodeURIComponent(
     aria-modal="true"
     aria-labelledby="qv-title"
     aria-hidden="true"
+    data-lenis-prevent
     style="--neon-color: #1CFF8A; --neon-rgb: 28, 255, 138;"
     class="fixed inset-0 z-50 hidden items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md"
   >
@@ -670,6 +671,17 @@ const customLogoWaText = encodeURIComponent(
       modal.classList.remove("hidden");
       modal.classList.add("flex");
       modal.setAttribute("aria-hidden", "false");
+
+      // Sayfa kaydırmasını (scroll) kilitle & Lenis'i durdur
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+      if (scrollbarWidth > 0) {
+        document.body.style.paddingRight = `${scrollbarWidth}px`;
+      }
+      document.documentElement.style.overflow = "hidden";
+      document.body.style.overflow = "hidden";
+      if (window.__ccneonsLenis) {
+        window.__ccneonsLenis.stop();
+      }
     }
 
     function closeQuickView() {
@@ -677,6 +689,14 @@ const customLogoWaText = encodeURIComponent(
       modal.classList.add("hidden");
       modal.classList.remove("flex");
       modal.setAttribute("aria-hidden", "true");
+
+      // Sayfa kaydırmasını (scroll) serbest bırak & Lenis'i başlat
+      document.documentElement.style.overflow = "";
+      document.body.style.overflow = "";
+      document.body.style.paddingRight = "";
+      if (window.__ccneonsLenis) {
+        window.__ccneonsLenis.start();
+      }
     }
 
     grid.querySelectorAll("[data-quickview-trigger='true']").forEach((el) => {
@@ -701,6 +721,9 @@ const customLogoWaText = encodeURIComponent(
     }
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") closeQuickView();
+    });
+    document.addEventListener("astro:before-swap", () => {
+      closeQuickView();
     });
 
     // Bento CTA "Logonu Sahnede Dene" tıklandığında aşağıdaki simülatörün dosya seçicisini tetikle
