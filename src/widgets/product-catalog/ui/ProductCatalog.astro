@@ -139,10 +139,10 @@ const customLogoWaText = encodeURIComponent(
       </div>
     </div>
 
-    <!-- Bento Grid Düzeni: 4 Sütun + 2. Satırda 2 Sütun Genişliğinde (col-span-2) Özel Tasarım CTA Kartı -->
+    <!-- Bento Grid Düzeni: Mobilde 2 Sütun, Tablette 2 Sütun, Masaüstünde 4 Sütun -->
     <div
       id="catalog-bento-grid"
-      class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 items-stretch"
+      class="grid grid-cols-2 gap-3 sm:gap-5 sm:grid-cols-2 lg:grid-cols-4 items-stretch"
     >
       {
         products.map((product, index) => {
@@ -177,7 +177,7 @@ const customLogoWaText = encodeURIComponent(
                 data-glow-color={neon.hex}
                 data-neon-rgb={neon.rgb}
                 style={`--neon-color: ${neon.hex}; --neon-rgb: ${neon.rgb};`}
-                class="product-card gpu-layer group relative flex flex-col justify-between rounded-xl bg-[#0A0A0E] border border-white/[0.07] p-3.5"
+                class="product-card gpu-layer group relative flex flex-col justify-between rounded-xl bg-[#0A0A0E] border border-white/[0.07] p-2.5 sm:p-3.5"
               >
                 <!-- Kartın Altına Düşen Hafif Neon Yansıma Çizgisi (Sadece Hover'da Parlar) -->
                 <div
@@ -208,7 +208,7 @@ const customLogoWaText = encodeURIComponent(
                   <img
                     src={product.imageUrl.replace('/pictures_large/', '/pictures_small/')}
                     srcset={`${product.imageUrl.replace('/pictures_large/', '/pictures_small/')} 330w, ${product.imageUrl.replace('/pictures_large/', '/pictures_mid/')} 458w, ${product.imageUrl} 916w`}
-                    sizes="(max-width: 640px) 330px, (max-width: 1024px) 30vw, 280px"
+                    sizes="(max-width: 640px) 46vw, (max-width: 1024px) 30vw, 280px"
                     alt={product.title}
                     loading="lazy"
                     decoding="async"
@@ -219,10 +219,10 @@ const customLogoWaText = encodeURIComponent(
                     }`}
                   />
 
-                  <!-- Üst Sol Köşe: Buzlu Cam (backdrop-blur-md bg-black/50 border border-white/10) Monospace Kategori/Boyut Rozeti -->
-                  <span class="font-mono absolute top-2.5 left-2.5 z-20 inline-flex items-center gap-1.5 rounded-md backdrop-blur-md bg-black/50 border border-white/10 px-2.5 py-1 text-[11px] font-medium uppercase tracking-wider text-white/90">
+                  <!-- Üst Sol Köşe: Buzlu Cam Monospace Kategori/Boyut Rozeti -->
+                  <span class="font-mono absolute top-2 left-2 sm:top-2.5 sm:left-2.5 z-20 inline-flex items-center gap-1 sm:gap-1.5 rounded-md backdrop-blur-md bg-black/50 border border-white/10 px-1.5 sm:px-2.5 py-0.5 sm:py-1 text-[9px] sm:text-[11px] font-medium uppercase tracking-wider text-white/90">
                     <span
-                      class="size-1.5 rounded-full"
+                      class="size-1 sm:size-1.5 rounded-full"
                       style="background-color: var(--neon-color); box-shadow: 0 0 8px var(--neon-color);"
                     />
                     {sizeBadge}
@@ -230,35 +230,35 @@ const customLogoWaText = encodeURIComponent(
 
                   <!-- Üst Sağ Köşe: Varsa Monospace Durum Rozeti -->
                   {product.badge && (
-                    <span class="font-mono absolute top-2.5 right-2.5 z-20 rounded-md backdrop-blur-md bg-black/50 border border-white/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-white">
+                    <span class="font-mono absolute top-2 right-2 sm:top-2.5 sm:right-2.5 z-20 rounded-md backdrop-blur-md bg-black/50 border border-white/10 px-1.5 sm:px-2 py-0.5 sm:py-1 text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-white">
                       {product.badge}
                     </span>
                   )}
                 </div>
 
                 <!-- Alt Bilgi Alanı: Sol Ürün Adı + Monospace Fiyat | Sağ Ghost Button ("İncele →") + Minimalist WhatsApp İkonu -->
-                <div class="mt-3.5 flex items-end justify-between gap-3 pt-1">
+                <div class="mt-2.5 sm:mt-3.5 flex flex-col sm:flex-row sm:items-end justify-between gap-2 sm:gap-3 pt-1">
                   <div class="min-w-0 flex-1 text-left">
-                    <h3 class="font-display text-[15px] font-bold tracking-tight text-white truncate">
+                    <h3 class="font-display text-xs sm:text-[15px] font-bold tracking-tight text-white truncate">
                       {product.title}
                     </h3>
-                    <div class="mt-1 flex items-baseline gap-2">
-                      <span class="font-mono text-lg font-bold text-white transition-colors duration-300 group-hover:text-[var(--neon-color)]">
+                    <div class="mt-0.5 sm:mt-1 flex items-baseline gap-1.5 sm:gap-2">
+                      <span class="font-mono text-sm sm:text-lg font-bold text-white transition-colors duration-300 group-hover:text-[var(--neon-color)]">
                         {product.price.toLocaleString("tr-TR")} ₺
                       </span>
                       {product.oldPrice && (
-                        <span class="font-mono text-xs text-white/60 line-through">
+                        <span class="font-mono text-[10px] sm:text-xs text-white/60 line-through">
                           {product.oldPrice.toLocaleString("tr-TR")} ₺
                         </span>
                       )}
                     </div>
                   </div>
 
-                  <div class="flex shrink-0 items-center gap-1.5">
+                  <div class="flex items-center gap-1.5 w-full sm:w-auto justify-between sm:justify-end">
                     <button
                       type="button"
                       data-quickview-trigger="true"
-                      class="cursor-pointer whitespace-nowrap inline-flex h-9 items-center justify-center rounded-full bg-white/5 hover:bg-white/15 border border-white/10 px-3.5 text-xs font-medium text-white transition-all duration-200 group-hover:border-[var(--neon-color)]/50"
+                      class="cursor-pointer flex-1 sm:flex-none whitespace-nowrap inline-flex h-7.5 sm:h-9 items-center justify-center rounded-full bg-white/5 hover:bg-white/15 border border-white/10 px-2.5 sm:px-3.5 text-[10px] sm:text-xs font-medium text-white transition-all duration-200 group-hover:border-[var(--neon-color)]/50"
                     >
                       İncele →
                     </button>
@@ -269,13 +269,13 @@ const customLogoWaText = encodeURIComponent(
                       rel="noopener noreferrer"
                       aria-label={`${product.title} için WhatsApp hızlı sipariş`}
                       title="WhatsApp Hızlı Sipariş"
-                      class="cursor-pointer shrink-0 inline-flex size-9 items-center justify-center rounded-full bg-white/5 hover:bg-white/15 border border-white/10 text-white/80 hover:text-white transition-all duration-200 group-hover:border-[var(--neon-color)]/50"
+                      class="cursor-pointer shrink-0 inline-flex size-7.5 sm:size-9 items-center justify-center rounded-full bg-white/5 hover:bg-white/15 border border-white/10 text-white/80 hover:text-white transition-all duration-200 group-hover:border-[var(--neon-color)]/50"
                     >
                       <span class="sr-only">
                         {product.title} için WhatsApp hızlı sipariş
                       </span>
                       <svg
-                        class="size-4"
+                        class="size-3.5 sm:size-4"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
@@ -299,7 +299,7 @@ const customLogoWaText = encodeURIComponent(
                   id="bento-custom-cta"
                   data-glow-color="#FF2E88"
                   style="--neon-color: #FF2E88; --neon-rgb: 255, 46, 136;"
-                  class="product-card gpu-layer sm:col-span-2 lg:col-span-2 relative flex flex-col justify-between rounded-xl border border-white/[0.07] bg-[#0A0A0E] p-6 sm:p-7 overflow-hidden group"
+                  class="product-card gpu-layer col-span-2 sm:col-span-2 lg:col-span-2 relative flex flex-col justify-between rounded-xl border border-white/[0.07] bg-[#0A0A0E] p-4 sm:p-7 overflow-hidden group"
                 >
                   <div
                     aria-hidden="true"
