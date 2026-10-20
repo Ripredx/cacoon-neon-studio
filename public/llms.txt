@@ -1,14 +1,17 @@
 # CC NEON'S LED Neon Atölyesi
 
-> Antalya / Manavgat merkezli özel tasarım LED neon tabela, pleksi neon ve kanvas neon tablo üretim atölyesi.
+> Antalya ve Manavgat merkezli özel üretim LED neon tabela, pleksi kontur neon ve kanvas neon tablo atölyesi.
 
-## Genel Bilgiler
-- **Marka:** CC NEON'S (@neons.glow)
-- **Konum:** Manavgat / Antalya, Türkiye
-- **Faaliyet Alanı:** 1. sınıf silikon LED neon, CNC lazer pleksi kontur kesim tabela, UV baskılı kanvas neon tablo üretimi.
+CC NEON'S (@neons.glow), 1. sınıf silikon LED neon şeritler, şeffaf dökme akrilik pleksi ve 12V güvenli trafo donanımıyla kişiye ve işletmelere özel el işçiliği ışıklı tabelalar üretir.
 
-## Temel Bağlantılar ve Kaynaklar
-- **Canlı Neon Atölyesi (Özelleştirme ve Anında Fiyat):** /tasarla
-- **Hazır Shopier Koleksiyonu:** https://www.shopier.com/ccneonsglow
-- **WhatsApp Destek ve Sipariş:** +90 553 046 06 10
-- **Instagram:** https://instagram.com/neons.glow
+## Ana Sayfalar ve Araçlar
+
+- [Canlı Neon Tasarım Stüdyosu](https://ccneons-neon-studio.vercel.app/tasarla): Yazınızı yazıp font, renk ve boyut seçerek canlı 2D CAD önizlemesi ve anında fiyat hesaplayabileceğiniz interaktif atölye.
+- [Ana Sayfa ve Vitrin](https://ccneons-neon-studio.vercel.app/): En son özel tasarım neon projeleri, kurumsal mekan tabelası simülatörü ve atölye bilgileri.
+- [Hazır Shopier Neon Koleksiyonu](https://www.shopier.com/ccneonsglow): Doğrudan satın alınabilir 16 parçalık pleksi neon ve kanvas neon tablo kataloğu.
+- [Instagram Portfolyosu](https://instagram.com/neons.glow): Tamamlanan müşteri ve mekan neon tabela montaj fotoğrafları.
+
+## İletişim ve Sipariş
+
+- [WhatsApp Hızlı Sipariş Hattı](https://wa.me/905530460610): Atölye ustaları ile doğrudan özel ölçü ve logo tasarım danışmanlığı.
+- [Resmi Web Sitesi](https://ccneons.com): CC NEON'S resmi marka web sitesi.

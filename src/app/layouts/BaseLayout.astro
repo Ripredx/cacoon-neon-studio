@@ -43,9 +43,16 @@ const {
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content="/og-neon-card.svg" />
 
-    <!-- Google Fonts: Preconnect + Non-blocking Asynchronous Stylesheet -->
+    <!-- Google Fonts: Preconnect + Preload Primary Heading Font + Non-blocking Async Stylesheet -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="preload"
+      href="https://fonts.gstatic.com/s/spacegrotesk/v22/V8mDoQDjQSkFtoMM3T6r8E7mPbF4C_k3HqU.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
     <link
       rel="preload"
       as="style"
