@@ -385,7 +385,7 @@ const customLogoWaText = encodeURIComponent(
     </div>
   </div>
 
-  <!-- HIZLI İNCELEME (QUICK-VIEW MODAL: Gece/Gündüz Modu + Gerçek Ölçek Cetveli) -->
+  <!-- HIZLI İNCELEME (QUICK-VIEW MODAL: Sabit Ebatlı, Hem Mobil Hem PC Uyumlu Sinematik Kapsül) -->
   <div
     id="product-quickview-modal"
     role="dialog"
@@ -394,85 +394,82 @@ const customLogoWaText = encodeURIComponent(
     aria-hidden="true"
     data-lenis-prevent
     style="--neon-color: #1CFF8A; --neon-rgb: 28, 255, 138;"
-    class="fixed inset-0 z-50 hidden overflow-y-auto overscroll-contain p-2 sm:p-6 bg-black/80 backdrop-blur-md"
+    class="fixed inset-0 z-[100] hidden items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-md"
   >
     <div
-      id="qv-modal-backdrop-wrap"
-      class="min-h-full flex items-center justify-center py-2 sm:py-6 w-full"
+      id="qv-dialog-box"
+      data-lenis-prevent
+      class="relative w-full max-w-lg md:max-w-3xl max-h-[92vh] sm:max-h-[86vh] rounded-2xl border border-white/15 bg-[#0A0A0E] shadow-[0_24px_80px_rgba(0,0,0,0.95)] overflow-hidden flex flex-col md:grid md:grid-cols-12"
     >
-      <div
-        id="qv-dialog-box"
-        data-lenis-prevent
-        class="relative w-full max-w-4xl rounded-xl border border-white/15 bg-[#0A0A0E] shadow-[0_32px_100px_rgba(0,0,0,0.95)] overflow-hidden grid grid-cols-1 md:grid-cols-12"
-      >
-        <!-- Sol: Canlı Gece/Gündüz ve Ölçek Sahnesi (6 Sütun) -->
-        <div class="md:col-span-6 relative min-h-[250px] sm:min-h-[440px] bg-[#050505] border-b md:border-b-0 md:border-r border-white/[0.07] flex flex-col justify-between p-3.5 sm:p-4 overflow-hidden">
-          <div
-            id="qv-wall-bg"
-            aria-hidden="true"
-            class="pointer-events-none absolute inset-0 wall-texture-brick opacity-75 transition-opacity duration-300"
-          />
-          <div
-            id="qv-ambient-glow"
-            aria-hidden="true"
-            class="pointer-events-none absolute inset-0 transition-opacity duration-300"
-            style="background: radial-gradient(circle at 50% 48%, rgba(var(--neon-rgb), 0.45) 0%, rgba(var(--neon-rgb), 0.12) 45%, transparent 75%);"
-          />
+      <!-- Sol / Üst Kolon: Canlı Gece/Gündüz ve Ölçek Sahnesi -->
+      <div class="md:col-span-5 relative h-52 sm:h-64 md:h-auto min-h-0 bg-[#050505] border-b md:border-b-0 md:border-r border-white/[0.07] flex flex-col justify-between p-3 sm:p-4 overflow-hidden shrink-0">
+        <div
+          id="qv-wall-bg"
+          aria-hidden="true"
+          class="pointer-events-none absolute inset-0 wall-texture-brick opacity-75 transition-opacity duration-300"
+        />
+        <div
+          id="qv-ambient-glow"
+          aria-hidden="true"
+          class="pointer-events-none absolute inset-0 transition-opacity duration-300"
+          style="background: radial-gradient(circle at 50% 48%, rgba(var(--neon-rgb), 0.45) 0%, rgba(var(--neon-rgb), 0.12) 45%, transparent 75%);"
+        />
 
-          <!-- Üst Bar: Rozet + Gece/Gündüz Anahtarı -->
-          <div class="relative z-20 flex items-center justify-between gap-2">
+        <!-- Üst Bar: Boyut Rozeti + Gece/Gündüz Anahtarı -->
+        <div class="relative z-20 flex items-center justify-between gap-2">
+          <span
+            id="qv-size-badge"
+            class="font-mono inline-flex items-center gap-1.5 rounded-md backdrop-blur-md bg-black/60 border border-white/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-white"
+          >
+            KANVAS · 60x40 CM
+          </span>
+
+          <button
+            id="qv-light-toggle"
+            type="button"
+            aria-pressed="true"
+            class="cursor-pointer inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-black/70 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-wider text-white transition-colors hover:border-white/30"
+          >
             <span
-              id="qv-size-badge"
-              class="font-mono inline-flex items-center gap-1.5 rounded-md backdrop-blur-md bg-black/60 border border-white/10 px-2 sm:px-2.5 py-0.5 sm:py-1 text-[10px] sm:text-[11px] font-medium uppercase tracking-wider text-white"
-            >
-              KANVAS · 60x40 CM
-            </span>
-
-            <button
-              id="qv-light-toggle"
-              type="button"
-              aria-pressed="true"
-              class="cursor-pointer inline-flex items-center gap-1.5 sm:gap-2 rounded-lg border border-white/15 bg-black/70 px-2.5 sm:px-3 py-1 font-mono text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-white transition-colors hover:border-white/30"
-            >
-              <span
-                id="qv-light-dot"
-                class="size-2 rounded-full"
-                style="background-color: var(--neon-color); box-shadow: 0 0 8px var(--neon-color);"
-              />
-              <span id="qv-light-label">GECE MODU (AÇIK)</span>
-            </button>
-          </div>
-
-          <!-- Merkez Ürün Görseli -->
-          <div class="relative z-10 my-auto flex items-center justify-center py-2 sm:py-4">
-            <img
-              id="qv-image"
-              src=""
-              alt=""
-              class="max-h-[190px] sm:max-h-[290px] w-auto rounded-lg object-contain transition-all duration-300"
-              style="box-shadow: 0 20px 50px rgba(0,0,0,0.85), 0 0 36px rgba(var(--neon-rgb), 0.35);"
+              id="qv-light-dot"
+              class="size-1.5 rounded-full"
+              style="background-color: var(--neon-color); box-shadow: 0 0 8px var(--neon-color);"
             />
-          </div>
-
-          <!-- Alt Ölçek Cetveli -->
-          <div class="relative z-20 flex items-center justify-between gap-2 font-mono text-[10px] sm:text-[11px] text-white/70 pt-1.5 sm:pt-2 border-t border-white/[0.07]">
-            <span>←</span>
-            <div class="h-px flex-1 bg-white/20" />
-            <span id="qv-scale-ruler" class="font-semibold text-white">
-              GERÇEK DUVAR ÖLÇEĞİ: 60 × 40 CM
-            </span>
-            <div class="h-px flex-1 bg-white/20" />
-            <span>→</span>
-          </div>
+            <span id="qv-light-label">GECE MODU</span>
+          </button>
         </div>
 
-        <!-- Sağ: Mühendislik Detayları & Sipariş Aksiyonları (6 Sütun) -->
-        <div class="md:col-span-6 flex flex-col justify-between p-4 sm:p-7 text-left space-y-4 sm:space-y-6">
-        <div class="space-y-4">
-          <div class="flex items-start justify-between gap-3">
+        <!-- Merkez Ürün Görseli -->
+        <div class="relative z-10 my-auto flex items-center justify-center p-2">
+          <img
+            id="qv-image"
+            src=""
+            alt=""
+            class="max-h-36 sm:max-h-48 md:max-h-60 w-auto rounded-lg object-contain transition-all duration-300"
+            style="box-shadow: 0 16px 40px rgba(0,0,0,0.85), 0 0 28px rgba(var(--neon-rgb), 0.35);"
+          />
+        </div>
+
+        <!-- Alt Ölçek Cetveli -->
+        <div class="relative z-20 flex items-center justify-between gap-1.5 font-mono text-[9px] sm:text-[10px] text-white/60 pt-1.5 border-t border-white/[0.07]">
+          <span>←</span>
+          <div class="h-px flex-1 bg-white/20" />
+          <span id="qv-scale-ruler" class="font-semibold text-white/80 truncate px-1">
+            GERÇEK ÖLÇEK
+          </span>
+          <div class="h-px flex-1 bg-white/20" />
+          <span>→</span>
+        </div>
+      </div>
+
+      <!-- Sağ / Alt Kolon: Mühendislik Detayları & Sipariş Aksiyonları -->
+      <div class="md:col-span-7 flex flex-col justify-between p-4 sm:p-6 text-left overflow-y-auto">
+        <div class="space-y-3 sm:space-y-4">
+          <!-- Üst Bar: Renk Etiketi + Çarpı Kapat Butonu -->
+          <div class="flex items-center justify-between gap-2">
             <span
               id="qv-color-label"
-              class="font-mono inline-flex items-center gap-2 rounded border border-white/10 bg-[#050505] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-white/80"
+              class="font-mono inline-flex items-center gap-1.5 rounded border border-white/10 bg-[#050505] px-2 py-0.5 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-white/80"
             >
               EL İŞÇİLİĞİ NEON
             </span>
@@ -480,87 +477,63 @@ const customLogoWaText = encodeURIComponent(
             <button
               id="qv-close-btn"
               type="button"
-              aria-label="İnceleme penceresini kapat"
-              class="cursor-pointer rounded-lg border border-white/10 bg-[#050505] px-2.5 py-1 font-mono text-xs text-white/65 hover:border-white/25 hover:text-white"
+              aria-label="Kapat"
+              class="cursor-pointer size-7 sm:size-8 rounded-full border border-white/15 bg-white/[0.05] flex items-center justify-center font-mono text-xs text-white/70 hover:bg-white/15 hover:text-white transition-colors"
             >
-              ✕ ESC
+              ✕
             </button>
           </div>
 
+          <!-- Başlık & Fiyat -->
           <div>
             <h3
               id="qv-title"
-              class="font-display text-2xl font-bold tracking-tight text-white"
+              class="font-display text-lg sm:text-xl md:text-2xl font-bold tracking-tight text-white leading-tight"
             >
               Ürün Adı
             </h3>
-            <div class="mt-2 flex items-baseline gap-2.5">
+            <div class="mt-1 flex items-baseline gap-2">
               <span
                 id="qv-price"
-                class="font-mono text-2xl sm:text-3xl font-bold"
+                class="font-mono text-xl sm:text-2xl font-bold"
                 style="color: var(--neon-color);"
               >
                 1.400 ₺
               </span>
               <span
                 id="qv-old-price"
-                class="font-mono text-sm text-white/40 line-through"
+                class="font-mono text-xs text-white/40 line-through"
               />
             </div>
           </div>
 
-          <p class="text-sm text-white/55 leading-relaxed">
-            CC NEON'S atölyesinde 1. sınıf esnek silikon LED neon ve CNC kesim
-            yüzey üzerine el işçiliğiyle üretilir. Kutusundan çıkan 12V adaptörü
-            ile fişe takıp saniyeler içinde çalıştırabilirsiniz.
+          <p class="text-xs text-white/60 leading-relaxed line-clamp-2 sm:line-clamp-none">
+            CC NEON'S atölyesinde 1. sınıf esnek silikon LED neon ve CNC pleksi üzerine el işçiliğiyle üretilir. 12V adaptörüyle kutusunda gelir.
           </p>
 
-          <!-- 4 Hücreli Teknik Mühendislik Tablosu -->
-          <div class="grid grid-cols-2 gap-2.5 pt-1 font-mono">
-            <div class="rounded-lg border border-white/[0.07] bg-[#050505] p-3">
-              <span class="block text-[10px] uppercase tracking-wider text-white/40">
-                TÜP TEKNOLOJİSİ
-              </span>
-              <span class="mt-0.5 block text-xs font-semibold text-white">
-                8MM SİLİKON LED
-              </span>
+          <!-- 2x2 Kompakt Teknik Tablo -->
+          <div class="grid grid-cols-2 gap-2 font-mono text-[10px]">
+            <div class="rounded-lg border border-white/[0.07] bg-[#050505] p-2">
+              <span class="block text-white/40">TÜP TEKNOLOJİSİ</span>
+              <span class="font-semibold text-white">8MM SİLİKON LED</span>
             </div>
-            <div class="rounded-lg border border-white/[0.07] bg-[#050505] p-3">
-              <span class="block text-[10px] uppercase tracking-wider text-white/40">
-                GÜÇ & ADAPTÖR
-              </span>
-              <span class="mt-0.5 block text-xs font-semibold text-white">
-                12V 2A TRAFO DAHİL
-              </span>
-            </div>
-            <div class="rounded-lg border border-white/[0.07] bg-[#050505] p-3">
-              <span class="block text-[10px] uppercase tracking-wider text-white/40">
-                MONTAJ DONANIMI
-              </span>
-              <span class="mt-0.5 block text-xs font-semibold text-white">
-                KROM VİDA & ASKI SETİ
-              </span>
-            </div>
-            <div class="rounded-lg border border-white/[0.07] bg-[#050505] p-3">
-              <span class="block text-[10px] uppercase tracking-wider text-white/40">
-                TESLİMAT & GÜVENCE
-              </span>
-              <span class="mt-0.5 block text-xs font-semibold text-white">
-                SİGORTALI KORUMALI KUTU
-              </span>
+            <div class="rounded-lg border border-white/[0.07] bg-[#050505] p-2">
+              <span class="block text-white/40">GÜÇ & TRAFO</span>
+              <span class="font-semibold text-white">12V ADAPTÖR DAHİL</span>
             </div>
           </div>
         </div>
 
-        <div class="space-y-2.5 pt-4 border-t border-white/[0.07]">
+        <!-- Alt Aksiyon Butonları -->
+        <div class="space-y-2 pt-3 sm:pt-4 border-t border-white/[0.07] mt-3">
           <a
             id="qv-shopier-link"
             href="#"
             target="_blank"
             rel="noopener noreferrer"
-            class="cursor-pointer w-full inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/[0.08] px-5 py-3 font-mono text-xs font-semibold uppercase tracking-wider text-white transition-all duration-200 hover:border-[var(--neon-color)] hover:bg-white/[0.15] hover:shadow-[0_0_24px_rgba(var(--neon-rgb),0.35)]"
+            class="cursor-pointer w-full inline-flex min-h-10 sm:min-h-11 items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/[0.08] px-4 py-2.5 font-mono text-xs font-bold uppercase tracking-wider text-white transition-all hover:border-[var(--neon-color)] hover:bg-white/[0.15]"
           >
-            <span>SHOPIER GÜVENCESİYLE SATIN AL →</span>
+            <span>SHOPIER İLE SATIN AL →</span>
           </a>
 
           <a
@@ -568,13 +541,12 @@ const customLogoWaText = encodeURIComponent(
             href="#"
             target="_blank"
             rel="noopener noreferrer"
-            class="cursor-pointer w-full inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-white/[0.07] bg-[#050505] px-5 py-2.5 font-mono text-xs font-medium text-white/75 transition-all duration-200 hover:border-white/25 hover:text-white"
+            class="cursor-pointer w-full inline-flex min-h-9 sm:min-h-10 items-center justify-center gap-2 rounded-xl border border-white/[0.07] bg-[#050505] px-4 py-2 font-mono text-xs text-white/70 hover:border-white/25 hover:text-white"
           >
-            <span>WHATSAPP'TAN HIZLI SİPARİŞ & SORU SOR</span>
+            <span>WHATSAPP'TAN SORU SOR / SİPARİŞ</span>
           </a>
         </div>
       </div>
-    </div>
     </div>
   </div>
 </section>
@@ -676,21 +648,6 @@ const customLogoWaText = encodeURIComponent(
       modal.classList.remove("hidden");
       modal.classList.add("flex");
       modal.setAttribute("aria-hidden", "false");
-
-      // Sayfa kaydırmasını (scroll) hem masaüstü hem mobilde kesin kilitle & Lenis'i durdur
-      const scrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop;
-      document.body.dataset.scrollY = scrollY.toString();
-      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-      if (scrollbarWidth > 0) {
-        document.body.style.paddingRight = `${scrollbarWidth}px`;
-      }
-      document.body.style.position = "fixed";
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.left = "0";
-      document.body.style.right = "0";
-      document.body.style.width = "100%";
-      document.body.style.overflow = "hidden";
-      document.documentElement.style.overflow = "hidden";
       if (window.__ccneonsLenis) {
         window.__ccneonsLenis.stop();
       }
@@ -701,19 +658,6 @@ const customLogoWaText = encodeURIComponent(
       modal.classList.add("hidden");
       modal.classList.remove("flex");
       modal.setAttribute("aria-hidden", "true");
-
-      // Sayfa kaydırmasını (scroll) serbest bırak & konumu geri yükle
-      const savedScroll = parseInt(document.body.dataset.scrollY || "0", 10);
-      document.body.style.position = "";
-      document.body.style.top = "";
-      document.body.style.left = "";
-      document.body.style.right = "";
-      document.body.style.width = "";
-      document.body.style.overflow = "";
-      document.documentElement.style.overflow = "";
-      document.body.style.paddingRight = "";
-      delete document.body.dataset.scrollY;
-      window.scrollTo(0, savedScroll);
       if (window.__ccneonsLenis) {
         window.__ccneonsLenis.start();
       }
@@ -736,7 +680,7 @@ const customLogoWaText = encodeURIComponent(
     if (closeBtn) closeBtn.addEventListener("click", closeQuickView);
     if (modal) {
       modal.addEventListener("click", (e) => {
-        if (e.target === modal || e.target.id === "qv-modal-backdrop-wrap") closeQuickView();
+        if (e.target === modal) closeQuickView();
       });
     }
     document.addEventListener("keydown", (e) => {
