@@ -67,7 +67,7 @@ import { BUSINESS_CONFIG } from "@/shared/config/business";
               <a
                 id="hero-to-studio-cta"
                 href="/tasarla#text=C%2FCNEON'S&color=cyan&font=modern&size=md"
-                data-astro-prefetch="viewport"
+                data-astro-prefetch="hover"
                 class="cursor-pointer group flex-1 whitespace-nowrap inline-flex min-h-13 items-center justify-center gap-3 rounded-xl border border-white/20 bg-white/[0.07] px-6 py-3.5 font-mono text-xs sm:text-sm font-semibold uppercase tracking-wider text-white transition-all duration-300 hover:border-[var(--neon-color)] hover:bg-white/[0.12] hover:shadow-[0_0_32px_rgba(var(--neon-rgb),0.4)]"
               >
                 <span
@@ -100,7 +100,7 @@ import { BUSINESS_CONFIG } from "@/shared/config/business";
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <a
                 href="/tasarla#text=LOUNGE&color=amber&font=script&size=lg&board=contour"
-                data-astro-prefetch="viewport"
+                data-astro-prefetch="hover"
                 class="cursor-pointer group flex items-center justify-between rounded-xl border border-white/[0.07] bg-[#050505] px-3.5 py-2.5 transition-all duration-200 hover:border-[#FFB020]/50 hover:bg-white/[0.03]"
               >
                 <div class="flex items-center gap-2.5">
@@ -116,7 +116,7 @@ import { BUSINESS_CONFIG } from "@/shared/config/business";
 
               <a
                 href="/tasarla#text=CYBER&color=pink&font=display&size=md&board=rectangle"
-                data-astro-prefetch="viewport"
+                data-astro-prefetch="hover"
                 class="cursor-pointer group flex items-center justify-between rounded-xl border border-white/[0.07] bg-[#050505] px-3.5 py-2.5 transition-all duration-200 hover:border-[#FF2E88]/50 hover:bg-white/[0.03]"
               >
                 <div class="flex items-center gap-2.5">
@@ -132,7 +132,7 @@ import { BUSINESS_CONFIG } from "@/shared/config/business";
 
               <a
                 href="/tasarla#text=STUDIO&color=cyan&font=modern&size=lg&board=contour"
-                data-astro-prefetch="viewport"
+                data-astro-prefetch="hover"
                 class="cursor-pointer group flex items-center justify-between rounded-xl border border-white/[0.07] bg-[#050505] px-3.5 py-2.5 transition-all duration-200 hover:border-[#35E7FF]/50 hover:bg-white/[0.03]"
               >
                 <div class="flex items-center gap-2.5">
@@ -148,7 +148,7 @@ import { BUSINESS_CONFIG } from "@/shared/config/business";
 
               <a
                 href="/tasarla#text=GOOD%20VIBES&color=green&font=script&size=sm&board=contour"
-                data-astro-prefetch="viewport"
+                data-astro-prefetch="hover"
                 class="cursor-pointer group flex items-center justify-between rounded-xl border border-white/[0.07] bg-[#050505] px-3.5 py-2.5 transition-all duration-200 hover:border-[#1CFF8A]/50 hover:bg-white/[0.03]"
               >
                 <div class="flex items-center gap-2.5">
@@ -171,14 +171,17 @@ import { BUSINESS_CONFIG } from "@/shared/config/business";
           transition:name="neon-stage"
           class="relative lg:col-span-6 flex min-h-[460px] sm:min-h-[540px] flex-col justify-between bg-[#050505] overflow-hidden"
         >
-          <!-- Katman 1: Gerçek Mimari Duvar Dokusu -->
+          <!-- Katman 1: Gerçek Mimari Duvar Dokusu (Mobilde hafif 640w WebP) -->
           <img
             id="hero-scene-photo"
-            src="/scenes/hero-brick-cafe.webp"
+            srcset="/scenes/hero-brick-cafe-mobile.webp 640w, /scenes/hero-brick-cafe.webp 1200w"
+            sizes="(max-width: 640px) 100vw, 600px"
+            src="/scenes/hero-brick-cafe-mobile.webp"
             alt="CC NEON'S özel üretim neon enstalasyon sahnesi"
             width="1200"
             height="800"
-            fetchpriority="high"
+            loading="eager"
+            decoding="async"
             class="pointer-events-none absolute inset-0 size-full object-cover object-center transition-all duration-700"
             style="filter: brightness(0.24) contrast(1.22) saturate(0.85);"
           />
@@ -221,7 +224,7 @@ import { BUSINESS_CONFIG } from "@/shared/config/business";
             <a
               id="hero-stage-edit-link"
               href="/tasarla#text=C%2FCNEON'S&color=cyan&font=modern&size=md"
-              data-astro-prefetch="viewport"
+              data-astro-prefetch="hover"
               class="cursor-pointer inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/[0.06] px-3 py-1 font-mono text-[11px] font-semibold text-white transition-all duration-200 hover:border-[var(--neon-color)] hover:bg-white/15"
             >
               <span>Bu Tasarımı Atölyede Düzenle</span>
@@ -234,7 +237,7 @@ import { BUSINESS_CONFIG } from "@/shared/config/business";
             <a
               id="hero-acrylic-plate"
               href="/tasarla#text=C%2FCNEON'S&color=cyan&font=modern&size=md"
-              data-astro-prefetch="viewport"
+              data-astro-prefetch="hover"
               aria-label="Bu neon tasarımını Canlı Neon Atölyesinde aç ve özelleştir"
               class="group relative flex w-full max-w-lg min-h-[220px] sm:min-h-[250px] flex-col items-center justify-center rounded-xl border border-white/15 bg-black/35 px-6 py-10 sm:px-10 sm:py-12 backdrop-blur-[1.5px] transition-transform duration-300 hover:scale-[1.015]"
               style="box-shadow: 0 24px 68px rgba(0, 0, 0, 0.88), 0 0 52px rgba(var(--neon-rgb), 0.34), inset 0 0 26px rgba(var(--neon-rgb), 0.14);"

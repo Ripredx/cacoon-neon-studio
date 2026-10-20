@@ -43,41 +43,25 @@ const {
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content="/og-neon-card.svg" />
 
-    <!-- Google Fonts: Preconnect + Preload Primary Heading Font + Non-blocking Async Stylesheet -->
+    <!-- Google Fonts: Preconnect + Non-blocking Async Stylesheet (Pacifico, Plus Jakarta Sans, Space Grotesk, Tilt Neon) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      rel="preload"
-      href="https://fonts.gstatic.com/s/spacegrotesk/v22/V8mDoQDjQSkFtoMM3T6r8E7mPbF4C_k3HqU.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
-    <link
-      rel="preload"
-      as="style"
-      href="https://fonts.googleapis.com/css2?family=Bungee+Inline&family=JetBrains+Mono:wght@400;500;600;700&family=Oswald:wght@600;700&family=Pacifico&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&family=Tilt+Neon&display=swap"
-    />
-    <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Bungee+Inline&family=JetBrains+Mono:wght@400;500;600;700&family=Oswald:wght@600;700&family=Pacifico&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&family=Tilt+Neon&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Pacifico&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&family=Tilt+Neon&display=swap"
       media="print"
       onload="this.media='all'"
     />
     <noscript>
       <link
         rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Bungee+Inline&family=JetBrains+Mono:wght@400;500;600;700&family=Oswald:wght@600;700&family=Pacifico&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&family=Tilt+Neon&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Pacifico&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&family=Tilt+Neon&display=swap"
       />
     </noscript>
 
-    <ClientRouter fallback="swap" />
+    <slot name="head" />
 
-    <script
-      is:inline
-      defer
-      src="https://cdn.jsdelivr.net/npm/lenis@1.2.3/dist/lenis.min.js"
-    ></script>
+    <ClientRouter fallback="swap" />
   </head>
   <body
     data-lenis-lerp={NEON_ENGINE_CONFIG.lenisLerp}
@@ -125,26 +109,44 @@ const {
           window.__ccneonsRafId = null;
         }
 
-        // Yalnızca dokunmatik olmayan masaüstü ekranlarda Lenis çalıştır
+        // Yalnızca dokunmatik olmayan masaüstü ekranlarda Lenis dinamik yükle ve çalıştır (Mobilde 0 KB / 0 ms)
         const isTouch = window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 1024;
-        if (!isTouch && window.Lenis) {
-          const lenis = new window.Lenis({
-            lerp: 0.1,
-            orientation: "vertical",
-            gestureOrientation: "vertical",
-            smoothWheel: true,
-            wheelMultiplier: 1,
-            touchMultiplier: 1.5,
-            infinite: false,
-          });
+        if (!isTouch) {
+          const startLenis = () => {
+            if (!window.Lenis || window.__ccneonsLenis) return;
+            try {
+              const lenis = new window.Lenis({
+                lerp: 0.1,
+                orientation: "vertical",
+                gestureOrientation: "vertical",
+                smoothWheel: true,
+                wheelMultiplier: 1,
+                touchMultiplier: 1.5,
+                infinite: false,
+              });
 
-          window.__ccneonsLenis = lenis;
+              window.__ccneonsLenis = lenis;
 
-          function raf(time) {
-            lenis.raf(time);
-            window.__ccneonsRafId = requestAnimationFrame(raf);
+              function raf(time) {
+                lenis.raf(time);
+                window.__ccneonsRafId = requestAnimationFrame(raf);
+              }
+              window.__ccneonsRafId = requestAnimationFrame(raf);
+            } catch (e) {
+              console.warn("Lenis init skipped:", e);
+            }
+          };
+
+          if (window.Lenis) {
+            startLenis();
+          } else if (!window.__ccneonsLenisScriptLoading) {
+            window.__ccneonsLenisScriptLoading = true;
+            const s = document.createElement("script");
+            s.src = "https://cdn.jsdelivr.net/npm/lenis@1.2.3/dist/lenis.min.js";
+            s.defer = true;
+            s.onload = startLenis;
+            document.head.appendChild(s);
           }
-          window.__ccneonsRafId = requestAnimationFrame(raf);
         }
 
         // Sayfa içi (#hero-stage, #koleksiyon, #kurumsal) çapa linklerini yakala ve yumuşak kaydır

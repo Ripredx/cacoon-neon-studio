@@ -9,6 +9,12 @@ import NeonStudio from "@/widgets/neon-studio/ui/NeonStudio";
   description="Yazınızı girin, font, neon rengi ve boyut seçerek canlı önizleme yapın, PNG paftasını indirin ve WhatsApp üzerinden anında fiyat alın."
   showGridScan={false}
 >
+  <Fragment slot="head">
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Bungee+Inline&family=JetBrains+Mono:wght@400;500;600;700&family=Oswald:wght@600;700&display=swap"
+    />
+  </Fragment>
   <main
     transition:name="neon-stage"
     class="min-h-dvh lg:h-dvh w-full bg-[#050505] lg:overflow-hidden flex flex-col"
