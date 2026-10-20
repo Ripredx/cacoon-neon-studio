@@ -3,6 +3,7 @@ import { ClientRouter } from "astro:transitions";
 import "@/app/styles/global.css";
 import { BUSINESS_CONFIG, NEON_ENGINE_CONFIG } from "@/shared/config/business";
 import NeonPreloader from "@/widgets/preloader/ui/NeonPreloader.astro";
+import LazyColorBends from "@/shared/ui/color-bends/LazyColorBends";
 
 interface Props {
   title?: string;
@@ -73,11 +74,35 @@ const {
     <!-- Sayfa Geneli Donanım Hızlandırmalı Siber Neon Izgara Arka Planı (0 KB JS, 0 ms TBT) -->
     {
       showGridScan && (
-        <div
-          id="global-page-gridscan"
-          aria-hidden="true"
-          class="fixed inset-0 z-0 pointer-events-none overflow-hidden opacity-30 bg-[linear-gradient(to_right,#ffffff0c_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0c_1px,transparent_1px)] bg-[size:36px_36px] [mask-image:radial-gradient(ellipse_80%_60%_at_50%_35%,#000_50%,transparent_100%)]"
-        />
+        <>
+          <div
+            id="global-page-gridscan"
+            aria-hidden="true"
+            class="fixed inset-0 z-0 pointer-events-none overflow-hidden opacity-30 bg-[linear-gradient(to_right,#ffffff0c_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0c_1px,transparent_1px)] bg-[size:36px_36px] [mask-image:radial-gradient(ellipse_80%_60%_at_50%_35%,#000_50%,transparent_100%)]"
+          />
+          <div
+            id="global-page-colorbends"
+            aria-hidden="true"
+            class="fixed inset-0 z-0 pointer-events-none overflow-hidden opacity-25 mix-blend-screen"
+          >
+            <LazyColorBends
+              client:only="preact"
+              colors={["#35E7FF", "#FF2E88", "#FFB020"]}
+              rotation={90}
+              speed={0.15}
+              scale={1.2}
+              frequency={0.8}
+              warpStrength={1}
+              mouseInfluence={0.4}
+              noise={0.1}
+              parallax={0.3}
+              iterations={1}
+              intensity={1.2}
+              bandWidth={7}
+              transparent
+            />
+          </div>
+        </>
       )
     }
 
