@@ -2,6 +2,7 @@
 import { ClientRouter } from "astro:transitions";
 import "@/app/styles/global.css";
 import { BUSINESS_CONFIG, NEON_ENGINE_CONFIG } from "@/shared/config/business";
+import NeonPreloader from "@/widgets/preloader/ui/NeonPreloader.astro";
 
 interface Props {
   title?: string;
@@ -67,6 +68,8 @@ const {
     data-lenis-lerp={NEON_ENGINE_CONFIG.lenisLerp}
     class="min-h-dvh bg-[#050505] text-[#F4F4F6] antialiased selection:bg-white/20 selection:text-white overflow-x-clip"
   >
+    <!-- Siber Neon Preloader (0 KB Harici Kütüphane, Oturum Başına 1 Kez, Bot Korumalı) -->
+    <NeonPreloader />
     <!-- Sayfa Geneli Donanım Hızlandırmalı Siber Neon Izgara Arka Planı (0 KB JS, 0 ms TBT) -->
     {
       showGridScan && (
