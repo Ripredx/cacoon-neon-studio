@@ -846,7 +846,7 @@ export default function NeonStudio() {
             data-lenis-prevent
             class={`shrink-0 border-white/[0.07] bg-[#0A0A0E] flex flex-col z-40 transition-all duration-300 ${
               isMobileSheetOpen
-                ? "fixed inset-x-0 bottom-0 max-h-[75vh] rounded-t-3xl border-t shadow-[0_-12px_40px_rgba(0,0,0,0.9)] lg:static lg:rounded-none lg:border-t-0 lg:border-r lg:shadow-none lg:w-[380px] xl:w-[400px] lg:max-h-none"
+                ? "fixed inset-x-0 bottom-0 max-h-[82vh] rounded-t-3xl border-t shadow-[0_-12px_40px_rgba(0,0,0,0.9)] lg:static lg:rounded-none lg:border-t-0 lg:border-r lg:shadow-none lg:w-[380px] xl:w-[400px] lg:max-h-none"
                 : "hidden lg:flex lg:w-[380px] xl:w-[400px] lg:border-r lg:max-h-none"
             }`}
           >
@@ -938,10 +938,10 @@ export default function NeonStudio() {
               </div>
             </div>
 
-            {/* Çekmece Kaydırılabilir İçerik Gövdesi */}
+            {/* Çekmece Kaydırılabilir İçerik Gövdesi (Mobilde alt navigasyon barını aşması için pb-32 eklendi) */}
             <div
               key={activeTab}
-              class="studio-drawer-scroll flex-1 overflow-y-auto p-4 sm:p-5 space-y-4"
+              class="studio-drawer-scroll flex-1 overflow-y-auto p-4 sm:p-5 pb-32 lg:pb-6 space-y-4"
             >
               {/* SEKME 1: METİN & HIZLI SEMBOLLER (Görsel 2 Düzeni) */}
               {activeTab === "text" && (
@@ -2219,6 +2219,7 @@ export default function NeonStudio() {
       <nav
         aria-label="Mobil Tasarım Adımları"
         class="lg:hidden fixed bottom-0 inset-x-0 z-50 bg-[#0A0A0E] border-t border-white/[0.08] py-2 px-1 shadow-[0_-8px_30px_rgba(0,0,0,0.95)] flex items-center justify-around"
+        style={{ paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))" }}
       >
         {TABS.map((tab) => {
           const isCurrentActive = activeTab === tab.id;
