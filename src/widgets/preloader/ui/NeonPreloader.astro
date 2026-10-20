@@ -1,59 +1,76 @@
 ---
 // Feature-Sliced Design: widgets/preloader
-// CC NEON'S Cyber Neon Preloader (0 KB Harici Kütüphane, 0 ms TBT, GPU Hızlandırmalı)
+// CC NEON'S Sinematik Siber Neon Preloader (0 KB Harici Kütüphane, 0 ms TBT, GPU Hızlandırmalı)
 ---
 
 <div
   id="ccneons-preloader"
   aria-hidden="true"
-  class="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-[#050505] select-none transition-all duration-500 ease-out"
+  class="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-[#050505] select-none transition-all duration-700 ease-out"
 >
-  <!-- Arka Plan: Koyu Siber Izgara & Derin Radyal Vignette -->
+  <!-- Arka Plan: Koyu Siber Şebeke & Derin Radyal Karartma -->
   <div
-    class="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(circle_at_50%_50%,#000_35%,transparent_90%)] opacity-50"
+    class="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(circle_at_50%_50%,#000_30%,transparent_85%)] opacity-60"
   >
   </div>
 
-  <!-- Ambiyans Arka Işığı (Trafo Ateşlendiğinde Parlar) -->
+  <!-- Ambiyans Duvar Işığı (Trafo Ateşlendiğinde Odayı Aydınlatır) -->
   <div
     id="preloader-ambient-glow"
-    class="pointer-events-none absolute size-[380px] rounded-full opacity-0 transition-opacity duration-700 blur-[80px]"
-    style="background: radial-gradient(circle, rgba(53, 231, 255, 0.45) 0%, rgba(255, 46, 136, 0.2) 60%, transparent 80%);"
+    class="pointer-events-none absolute size-[460px] rounded-full opacity-0 transition-opacity duration-1000 blur-[90px]"
+    style="background: radial-gradient(circle, rgba(53, 231, 255, 0.5) 0%, rgba(255, 46, 136, 0.25) 50%, transparent 80%);"
   >
   </div>
 
   <div class="relative z-10 flex flex-col items-center px-6 text-center max-w-sm">
-    <!-- Neon Akrilik Plaka: CNC Kesim & Montaj Pimleri -->
+    <!-- CNC Lazer Kesim Akrilik Plaka Enstalasyonu -->
     <div
       id="preloader-card"
-      class="relative mb-6 flex size-24 items-center justify-center rounded-2xl border border-white/15 bg-[#0A0A0E]/90 backdrop-blur-md transition-all duration-500 shadow-[0_20px_50px_rgba(0,0,0,0.9)]"
+      class="relative mb-6 flex flex-col items-center justify-center rounded-2xl border border-white/15 bg-[#0A0A0E]/95 p-6 backdrop-blur-md transition-all duration-700 shadow-[0_24px_60px_rgba(0,0,0,0.95)]"
+      style="min-width: 190px; min-height: 150px;"
     >
       <!-- 4 Köşe Minimalist Krom Montaj Pimi -->
-      <span class="absolute top-2 left-2 size-1.5 rounded-full bg-white/50 ring-1 ring-black"></span>
-      <span class="absolute top-2 right-2 size-1.5 rounded-full bg-white/50 ring-1 ring-black"></span>
-      <span class="absolute bottom-2 left-2 size-1.5 rounded-full bg-white/50 ring-1 ring-black"></span>
-      <span class="absolute bottom-2 right-2 size-1.5 rounded-full bg-white/50 ring-1 ring-black"></span>
+      <span class="absolute top-2.5 left-2.5 size-1.5 rounded-full bg-white/60 ring-1 ring-black"></span>
+      <span class="absolute top-2.5 right-2.5 size-1.5 rounded-full bg-white/60 ring-1 ring-black"></span>
+      <span class="absolute bottom-2.5 left-2.5 size-1.5 rounded-full bg-white/60 ring-1 ring-black"></span>
+      <span class="absolute bottom-2.5 right-2.5 size-1.5 rounded-full bg-white/60 ring-1 ring-black"></span>
 
-      <!-- Neon Tüp Amblemi (Şimşek & Cam Tüp) -->
-      <svg
-        id="preloader-neon-glyph"
-        class="size-11 transition-all duration-300"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2.2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        style="color: rgba(255, 255, 255, 0.25);"
-      >
-        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
-      </svg>
+      <!-- Üst Plaka Spek Etiketi -->
+      <span class="font-mono text-[9px] uppercase tracking-widest text-white/40 mb-3">
+        5MM AKRİLİK · 12V LED
+      </span>
+
+      <!-- Neon Tüp Logosu & Şimşek -->
+      <div class="relative flex items-center justify-center my-1">
+        <svg
+          id="preloader-neon-glyph"
+          class="size-12 transition-all duration-300"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          style="color: rgba(255, 255, 255, 0.25);"
+        >
+          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+        </svg>
+      </div>
+
+      <!-- Alt Elektrot Klemens İndikatörü -->
+      <div class="mt-3 flex items-center gap-1.5 font-mono text-[9px] tracking-wider text-white/40">
+        <span
+          id="preloader-led-dot"
+          class="size-1.5 rounded-full bg-white/20 transition-all duration-300"
+        ></span>
+        <span id="preloader-circuit">DEVRE: BEKLEMEDE</span>
+      </div>
     </div>
 
     <!-- Marka Başlığı & Atölye Rozeti -->
     <div class="space-y-1.5">
       <div class="flex items-center justify-center gap-2">
-        <span class="font-display text-lg font-bold tracking-tight text-white">
+        <span class="font-display text-xl font-bold tracking-tight text-white">
           CC NEON'S
         </span>
         <span class="font-mono rounded border border-[#35E7FF]/35 bg-[#35E7FF]/10 px-2 py-0.5 text-[9px] font-semibold text-[#35E7FF] uppercase tracking-wider">
@@ -64,23 +81,23 @@
         id="preloader-status-text"
         class="font-mono text-xs text-white/60 tracking-wider uppercase"
       >
-        TRAFO ATEŞLENİYOR...
+        12V ŞEBEKE BAŞLATILIYOR...
       </p>
     </div>
 
-    <!-- Telemetri İlerleme Barı -->
-    <div class="mt-6 w-56 space-y-2">
-      <div class="relative h-1.5 w-full overflow-hidden rounded-full bg-white/10 p-0.5">
+    <!-- Siber Telemetri İlerleme Barı -->
+    <div class="mt-6 w-60 space-y-2">
+      <div class="relative h-2 w-full overflow-hidden rounded-full bg-white/10 p-0.5">
         <div
           id="preloader-progress-bar"
-          class="h-full w-0 rounded-full bg-gradient-to-r from-[#35E7FF] via-[#FF2E88] to-[#FFB020] transition-all duration-150 ease-out shadow-[0_0_12px_#35E7FF]"
+          class="h-full w-0 rounded-full bg-gradient-to-r from-[#35E7FF] via-[#FF2E88] to-[#FFB020] transition-all duration-100 ease-out shadow-[0_0_14px_#35E7FF]"
         >
         </div>
       </div>
 
-      <div class="flex items-center justify-between font-mono text-[10px] text-white/45">
-        <span id="preloader-voltage" class="text-[#35E7FF]">0.0V</span>
-        <span id="preloader-percent">0%</span>
+      <div class="flex items-center justify-between font-mono text-[10px] text-white/50">
+        <span id="preloader-voltage" class="text-[#35E7FF] font-semibold">0.0V</span>
+        <span id="preloader-percent" class="font-semibold text-white/80">0%</span>
         <span id="preloader-gas" class="text-white/40">ARGON/NEON</span>
       </div>
     </div>
@@ -88,40 +105,48 @@
 </div>
 
 <style>
-  /* Gerçekçi 12V Yüksek Voltaj Trafo Ateşleme ve Sıçrama Titremesi */
+  /* Gerçekçi 12V Yüksek Voltaj Trafo Ateşlemesi (Kıvılcım & Gaz İyonizasyonu Titremesi) */
   @keyframes neon-ignition-flicker {
     0% {
       color: rgba(255, 255, 255, 0.3);
       filter: none;
     }
-    12% {
+    10% {
       color: #35e7ff;
       filter: drop-shadow(0 0 2px #fff) drop-shadow(0 0 8px #35e7ff);
     }
-    18% {
-      color: rgba(53, 231, 255, 0.2);
+    16% {
+      color: rgba(53, 231, 255, 0.25);
       filter: none;
     }
-    32% {
+    28% {
       color: #35e7ff;
       filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 12px #35e7ff) drop-shadow(0 0 24px #35e7ff);
     }
-    40% {
-      color: rgba(53, 231, 255, 0.5);
+    36% {
+      color: rgba(53, 231, 255, 0.4);
       filter: drop-shadow(0 0 4px #35e7ff);
     }
-    55% {
-      color: #fff;
-      filter: drop-shadow(0 0 4px #fff) drop-shadow(0 0 18px #35e7ff) drop-shadow(0 0 38px #35e7ff);
+    50% {
+      color: #ffffff;
+      filter: drop-shadow(0 0 5px #fff) drop-shadow(0 0 20px #35e7ff) drop-shadow(0 0 40px #35e7ff);
+    }
+    65% {
+      color: #35e7ff;
+      filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 14px #35e7ff) drop-shadow(0 0 28px #35e7ff);
+    }
+    80% {
+      color: #ffffff;
+      filter: drop-shadow(0 0 6px #fff) drop-shadow(0 0 24px #35e7ff) drop-shadow(0 0 48px #35e7ff);
     }
     100% {
       color: #35e7ff;
-      filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 16px #35e7ff) drop-shadow(0 0 32px #35e7ff);
+      filter: drop-shadow(0 0 4px #fff) drop-shadow(0 0 18px #35e7ff) drop-shadow(0 0 36px #35e7ff);
     }
   }
 
   .neon-ignited {
-    animation: neon-ignition-flicker 520ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards !important;
+    animation: neon-ignition-flicker 750ms cubic-bezier(0.25, 0.9, 0.2, 1) forwards !important;
   }
 </style>
 
@@ -149,10 +174,12 @@
     const statusText = document.getElementById("preloader-status-text");
     const voltageText = document.getElementById("preloader-voltage");
     const percentText = document.getElementById("preloader-percent");
+    const ledDot = document.getElementById("preloader-led-dot");
+    const circuitText = document.getElementById("preloader-circuit");
 
     let progress = 0;
     const startTime = performance.now();
-    const duration = 950; // ms: Dolu dolu elektriklenme ve ateşleme süresi
+    const duration = 1850; // ms: İyice hissedilen, cafcaflı neon ateşleme süresi
 
     function updateFrame(now) {
       const elapsed = now - startTime;
@@ -163,27 +190,48 @@
       if (percentText) percentText.textContent = progress + "%";
       if (voltageText) voltageText.textContent = (t * 12.4).toFixed(1) + "V";
 
-      // %35: Voltaj tırmanışı
-      if (t >= 0.35 && t < 0.65 && statusText) {
-        statusText.textContent = "VOLTAJ YÜKSELİYOR...";
+      // 0 - %35: Şebeke kontrolü
+      if (t < 0.35 && statusText) {
+        statusText.textContent = "12V ŞEBEKE BAŞLATILIYOR...";
       }
 
-      // %60: 12V Trafo Ateşlemesi (Neon Kıvılcımı & Işık Dalgası)
+      // %35 - %60: Trafo Yüklemesi
+      if (t >= 0.35 && t < 0.6 && statusText) {
+        statusText.textContent = "YÜKSEK GERİLİM YÜKLENİYOR...";
+        if (circuitText) circuitText.textContent = "DEVRE: YÜKLENİYOR";
+        if (ledDot) {
+          ledDot.style.backgroundColor = "#FFB020";
+          ledDot.style.boxShadow = "0 0 8px #FFB020";
+        }
+      }
+
+      // %60: 12V Trafo Ateşlemesi (Kıvılcımlar ve Neon Parlaması)
       if (t >= 0.6 && glyph && !glyph.classList.contains("neon-ignited")) {
         glyph.classList.add("neon-ignited");
         if (ambient) ambient.style.opacity = "1";
         if (card) {
-          card.style.borderColor = "rgba(53, 231, 255, 0.4)";
+          card.style.borderColor = "rgba(53, 231, 255, 0.45)";
           card.style.boxShadow =
-            "0 20px 50px rgba(0,0,0,0.9), 0 0 35px rgba(53, 231, 255, 0.3)";
+            "0 24px 60px rgba(0,0,0,0.95), 0 0 45px rgba(53, 231, 255, 0.35), inset 0 0 20px rgba(53, 231, 255, 0.15)";
         }
-        if (statusText) statusText.textContent = "12V ENERJİ VERİLDİ · AKTİF";
+        if (ledDot) {
+          ledDot.style.backgroundColor = "#35E7FF";
+          ledDot.style.boxShadow = "0 0 10px #35E7FF";
+        }
+        if (circuitText) circuitText.textContent = "DEVRE: 12.4V AKTİF";
+        if (statusText) statusText.textContent = "TRAFO ATEŞLENDİ · 12V";
+      }
+
+      // %85 - %100: Tam stabilizasyon
+      if (t >= 0.85 && statusText) {
+        statusText.textContent = "12.4V ENERJİ VERİLDİ · ATÖLYE HAZIR";
       }
 
       if (t < 1) {
         requestAnimationFrame(updateFrame);
       } else {
-        setTimeout(dismissPreloader, 180);
+        // Ateşleme tamamlandıktan sonra kullanıcının parıltıyı görmesi için 400ms bekleyip yumuşakça kalk
+        setTimeout(dismissPreloader, 400);
       }
     }
 
@@ -193,10 +241,10 @@
       preloader.style.pointerEvents = "none";
       setTimeout(function () {
         if (preloader.parentNode) preloader.parentNode.removeChild(preloader);
-      }, 500);
+      }, 700);
     }
 
-    // Konsoldan test etmek isteyen geliştirici için genel tetikleyici
+    // Konsoldan istediğin an yeniden izlemek için: __replayPreloader()
     window.__replayPreloader = function () {
       location.reload();
     };
