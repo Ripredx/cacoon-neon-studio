@@ -1755,8 +1755,8 @@ export default function NeonStudio() {
                 </div>
               )}
 
-              {/* Alt Bilgi / İpucu Kutusu (Görsel 2'deki Alt İpucu Kartı) */}
-              <div class="rounded-xl border border-[#35E7FF]/20 bg-[#35E7FF]/[0.05] p-3.5 flex items-start gap-2.5 text-left">
+              {/* Alt Bilgi / İpucu Kutusu (Masaüstünde Gösterilir, Mobilde Yer Tasarrufu İçin Gizlenir) */}
+              <div class="hidden sm:flex rounded-xl border border-[#35E7FF]/20 bg-[#35E7FF]/[0.05] p-3.5 items-start gap-2.5 text-left">
                 <span class="font-mono text-sm leading-none text-[#35E7FF] mt-0.5">
                   💡
                 </span>
