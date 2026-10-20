@@ -578,6 +578,9 @@ const customLogoWaText = encodeURIComponent(
 
     if (!grid) return;
 
+    // Section'daki backdrop-filter fixed çocuklar için containing block oluşturur; modal viewport'a sabitlensin diye body'ye taşınır.
+    if (modal && modal.parentElement !== document.body) document.body.appendChild(modal);
+
     let activeCategory = "all";
     let activeSort = "featured";
     let isQvNight = true;
