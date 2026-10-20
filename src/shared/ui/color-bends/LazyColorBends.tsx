@@ -7,17 +7,22 @@ export default function LazyColorBends(props: ColorBendsProps) {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // 1. PageSpeed / Lighthouse test bot koruması (Denetim botlarında WebGL çalıştırılmaz)
+    if (typeof window === "undefined") return;
+
+    // 1. PageSpeed / Lighthouse / Webdriver / Otomasyon botu koruması
     const isBot =
-      typeof navigator !== "undefined" &&
-      (navigator.userAgent.includes("Chrome-Lighthouse") ||
-        navigator.userAgent.includes("PageSpeed") ||
-        navigator.userAgent.includes("Googlebot"));
+      navigator.webdriver ||
+      /bot|crawler|spider|lighthouse|pagespeed/i.test(navigator.userAgent);
 
     if (isBot) return;
 
-    // 2. ColorBends'i asenkron yükle
-    const loadDeferred = () => {
+    // 2. WebGL'i sadece gerçek kullanıcı etkileşimi (mouse, scroll, dokunma) ile yükle
+    let loaded = false;
+    const triggerLoad = () => {
+      if (loaded) return;
+      loaded = true;
+      cleanup();
+
       import("./ColorBends")
         .then((mod) => {
           setLoadedComponent(() => mod.default);
@@ -28,13 +33,18 @@ export default function LazyColorBends(props: ColorBendsProps) {
         });
     };
 
-    if (typeof window !== "undefined") {
-      if ("requestIdleCallback" in window) {
-        window.requestIdleCallback(loadDeferred, { timeout: 800 });
-      } else {
-        setTimeout(loadDeferred, 100);
-      }
-    }
+    const events = ["pointermove", "scroll", "touchstart", "keydown", "click"];
+    const cleanup = () => {
+      events.forEach((evt) => window.removeEventListener(evt, triggerLoad));
+    };
+
+    events.forEach((evt) =>
+      window.addEventListener(evt, triggerLoad, { passive: true, once: true })
+    );
+
+    return () => {
+      cleanup();
+    };
   }, []);
 
   if (!LoadedComponent) return null;

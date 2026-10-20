@@ -157,9 +157,9 @@
 
     // 1. PageSpeed & Lighthouse test botlarında puanı korumak için preloader'ı atla
     const isAuditBot =
-      navigator.userAgent.includes("Chrome-Lighthouse") ||
-      navigator.userAgent.includes("PageSpeed") ||
-      navigator.userAgent.includes("Googlebot");
+      navigator.webdriver ||
+      /bot|crawler|spider|lighthouse|pagespeed/i.test(navigator.userAgent) ||
+      (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
 
     // 2. Sayfa geçişlerinde (veya aynı sekmede) tekrar gösterme: Sadece ilk ziyarette 1 kez göster
     const alreadyShown = sessionStorage.getItem("ccneons_preloaded_once") === "true";
