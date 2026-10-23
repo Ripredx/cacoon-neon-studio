@@ -29,7 +29,6 @@ type StudioTabId =
   | "borders"
   | "size"
   | "acrylic"
-  | "options"
   | "buy";
 
 const PRESET_TEXTS = [
@@ -46,7 +45,7 @@ const DEFAULT_SPEC: CustomNeonSpec = {
   fontId: "script",
   colorId: "cyan",
   sizeId: "md",
-  backboardId: "contour",
+  backboardId: "contour_clear",
   environment: "indoor",
   symbolId: "none",
   symbolColorId: "cyan",
@@ -336,7 +335,68 @@ export default function NeonStudio() {
       118,
     );
 
-    // Çerçeve (Border) & Montaj Vidaları
+    // 1. Metin Font Boyutu & Ölçümleme (Çerçeveden Önce Hesaplanır)
+    const maxCharsInLine = Math.max(
+      ...formattedLines.map((l) => l.length),
+      1,
+    );
+    const circleFontScale =
+      activeBorderId === "circle"
+        ? Math.min(1.0, 5.8 / Math.max(maxCharsInLine, 4.0))
+        : 1.0;
+
+    let canvasFontSize = Math.round(
+      (formattedLines.length > 1 ? 78 : 96) *
+        activeSize.scaleFactor *
+        circleFontScale,
+    );
+    let lineSpacing = Math.round(canvasFontSize * 1.25);
+    const canvasFontWeight = activeFont.canvasWeight || 400;
+    ctx.font = `${canvasFontWeight} ${canvasFontSize}px ${activeFont.cssFamily}`;
+
+    const longestLine = formattedLines.reduce(
+      (a, b) => (a.length > b.length ? a : b),
+      "",
+    );
+    const sampleLine =
+      activeSymbolId !== "none"
+        ? `${longestLine} ${activeSymbol.glyph}`
+        : longestLine;
+    let measuredTextWidth = ctx.measureText(sampleLine).width;
+
+    if (activeBorderId === "circle") {
+      if (measuredTextWidth > 490) {
+        const factor = 490 / measuredTextWidth;
+        canvasFontSize = Math.max(28, Math.floor(canvasFontSize * factor));
+        lineSpacing = Math.round(canvasFontSize * 1.25);
+        ctx.font = `${canvasFontWeight} ${canvasFontSize}px ${activeFont.cssFamily}`;
+        measuredTextWidth = ctx.measureText(sampleLine).width;
+      }
+    } else {
+      if (measuredTextWidth > 1200) {
+        const factor = 1200 / measuredTextWidth;
+        canvasFontSize = Math.max(32, Math.floor(canvasFontSize * factor));
+        lineSpacing = Math.round(canvasFontSize * 1.25);
+        ctx.font = `${canvasFontWeight} ${canvasFontSize}px ${activeFont.cssFamily}`;
+        measuredTextWidth = ctx.measureText(sampleLine).width;
+      }
+    }
+
+    const totalHeight = (formattedLines.length - 1) * lineSpacing;
+    const startY = 430 - totalHeight / 2;
+
+    // 2. Dinamik Çerçeve (Border) & Montaj Vidaları
+    const measuredTextHeight = totalHeight + canvasFontSize;
+    const padX = Math.max(
+      280,
+      Math.min(680, Math.round(measuredTextWidth / 2 + 75)),
+    );
+    const padY = Math.max(140, Math.round(measuredTextHeight / 2 + 60));
+    const rx = 800 - padX;
+    const ry = 430 - padY;
+    const rw = padX * 2;
+    const rh = padY * 2;
+
     if (activeBorderId !== "none") {
       ctx.save();
       ctx.beginPath();
@@ -344,12 +404,6 @@ export default function NeonStudio() {
         const radius = 320;
         ctx.arc(800, 430, radius, 0, Math.PI * 2);
       } else {
-        const padX = 280;
-        const padY = 140;
-        const rx = 800 - padX;
-        const ry = 430 - padY;
-        const rw = padX * 2;
-        const rh = padY * 2;
         const radius = activeBorderId === "pill" ? rh / 2 : 16;
         ctx.roundRect(rx, ry, rw, rh, radius);
       }
@@ -389,67 +443,70 @@ export default function NeonStudio() {
           ctx.lineWidth = 1.5;
           ctx.stroke();
         });
-
-        // Canlı Atölyedeki gibi Ölçü Kılavuz Çizgileri
-        ctx.save();
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.25)";
-        ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
-        ctx.lineWidth = 1;
-        ctx.setLineDash([4, 4]);
-
-        const dimY = 430 + 320 + 40;
-        ctx.beginPath();
-        ctx.moveTo(800 - 320, dimY);
-        ctx.lineTo(800 + 320, dimY);
-        ctx.stroke();
-        ctx.setLineDash([]);
-
-        // Oklar
-        ctx.beginPath();
-        ctx.moveTo(800 - 320 + 8, dimY - 4);
-        ctx.lineTo(800 - 320, dimY);
-        ctx.lineTo(800 - 320 + 8, dimY + 4);
-        ctx.moveTo(800 + 320 - 8, dimY - 4);
-        ctx.lineTo(800 + 320, dimY);
-        ctx.lineTo(800 + 320 - 8, dimY + 4);
-        ctx.stroke();
-
-        ctx.textAlign = "center";
-        ctx.textBaseline = "top";
-        ctx.font = "700 14px monospace";
-        ctx.fillText(`${estimate.widthCm}cm`, 800, dimY + 6);
-        ctx.font = "400 11px monospace";
-        ctx.fillStyle = "rgba(255, 255, 255, 0.45)";
-        ctx.fillText("çap ölçüsü", 800, dimY + 24);
-        ctx.restore();
+      } else {
+        const screwInset = 22;
+        const screws = [
+          { x: rx + screwInset, y: ry + screwInset },
+          { x: rx + rw - screwInset, y: ry + screwInset },
+          { x: rx + screwInset, y: ry + rh - screwInset },
+          { x: rx + rw - screwInset, y: ry + rh - screwInset },
+        ];
+        screws.forEach((s) => {
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, 6.5, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(255, 255, 255, 0.45)";
+          ctx.fill();
+          ctx.strokeStyle = "rgba(0, 0, 0, 0.9)";
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+        });
       }
+
+      // Canlı Atölyedeki gibi Ölçü Kılavuz Çizgileri
+      ctx.save();
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.25)";
+      ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 4]);
+
+      const dimY = (activeBorderId === "circle" ? 430 + 320 : ry + rh) + 38;
+      const dimX1 = activeBorderId === "circle" ? 800 - 320 : rx;
+      const dimX2 = activeBorderId === "circle" ? 800 + 320 : rx + rw;
+
+      ctx.beginPath();
+      ctx.moveTo(dimX1, dimY);
+      ctx.lineTo(dimX2, dimY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Oklar
+      ctx.beginPath();
+      ctx.moveTo(dimX1 + 8, dimY - 4);
+      ctx.lineTo(dimX1, dimY);
+      ctx.lineTo(dimX1 + 8, dimY + 4);
+      ctx.moveTo(dimX2 - 8, dimY - 4);
+      ctx.lineTo(dimX2, dimY);
+      ctx.lineTo(dimX2 - 8, dimY + 4);
+      ctx.stroke();
+
+      ctx.textAlign = "center";
+      ctx.textBaseline = "top";
+      ctx.font = "700 14px monospace";
+      ctx.fillText(`${estimate.widthCm}cm`, 800, dimY + 6);
+      ctx.font = "400 11px monospace";
+      ctx.fillStyle = "rgba(255, 255, 255, 0.45)";
+      ctx.fillText(
+        activeBorderId === "circle" ? "çap ölçüsü" : "genişlik",
+        800,
+        dimY + 24,
+      );
+      ctx.restore();
     }
 
-    // Metin Çizimi (Neon Parıltısı & Çift Kanal Retro Desteği)
+    // 3. Metin Çizimi (Neon Parıltısı)
     ctx.save();
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-
-    const maxCharsInLine = Math.max(
-      ...formattedLines.map((l) => l.length),
-      1,
-    );
-    const circleFontScale =
-      activeBorderId === "circle"
-        ? Math.min(1.0, 5.2 / Math.max(maxCharsInLine, 4.5))
-        : 1.0;
-
-    const canvasFontSize = Math.round(
-      (formattedLines.length > 1 ? 82 : 100) *
-        activeSize.scaleFactor *
-        circleFontScale,
-    );
-    const lineSpacing = Math.round(canvasFontSize * 1.25);
-    const canvasFontWeight = activeFont.canvasWeight || 400;
-    ctx.font = `${canvasFontWeight} ${canvasFontSize}px ${activeFont.cssFamily}`;
-
-    const totalHeight = (formattedLines.length - 1) * lineSpacing;
-    const startY = 430 - totalHeight / 2;
 
     formattedLines.forEach((lineText, idx) => {
       const lineY = startY + idx * lineSpacing;
@@ -592,29 +649,48 @@ export default function NeonStudio() {
     ? `0 0 ${isBrightTech ? "5px" : "4px"} #FFFFFF, 0 0 ${isBrightTech ? "22px" : "18px"} currentColor, 0 0 ${isBrightTech ? "46px" : "36px"} currentColor, 0 0 ${isBrightTech ? "90px" : "70px"} rgba(${activeColor.glowRgb}, 0.58)`
     : "0 1px 0 rgba(255,255,255,0.14), 0 4px 10px rgba(0,0,0,0.85)";
 
-  const hasExplicitFrame =
-    spec.backboardId !== "contour" || activeBorderId !== "none";
+  const isBlackBackboard = activeBackboard.colorType === "black";
+  const isContourBackboard = activeBackboard.cutType === "contour";
+  const hasExplicitFrame = !isContourBackboard || activeBorderId !== "none";
+  const acrylicPlateBg = isBlackBackboard
+    ? "bg-[#0A0A0E]/95 shadow-[inset_0_0_30px_rgba(0,0,0,0.95)]"
+    : "bg-[#0A0A0E]/65 backdrop-blur-[2px]";
 
   const maxCharsInLine = Math.max(...formattedLines.map((l) => l.length), 1);
+  const totalCharsWithSymbol = maxCharsInLine + (activeSymbolId !== "none" ? 2.5 : 0);
   const circleFontScale =
     activeBorderId === "circle"
-      ? Math.min(1.35, 7.8 / Math.max(maxCharsInLine, 4.0))
-      : 1.0;
+      ? Math.min(1.0, Math.max(0.42, 6.2 / Math.max(totalCharsWithSymbol, 4.0)))
+      : Math.min(1.0, Math.max(0.65, 14.0 / Math.max(totalCharsWithSymbol, 8.0)));
+
+  // Lazer Kesim Akrilik Taban Stilleri (Şeffaf Kristal Cam & Piyano Siyahı)
+  const acrylicGlassPlateBg = isBlackBackboard
+    ? "bg-[#0A0A0E]/95 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.9),inset_0_1px_0_rgba(255,255,255,0.15)]"
+    : "bg-white/[0.04] border border-white/30 backdrop-blur-[2px] shadow-[0_16px_40px_rgba(0,0,0,0.55),inset_0_1.5px_0_rgba(255,255,255,0.4),inset_0_-1px_0_rgba(255,255,255,0.1)]";
+
+  // Kuyruklu harfler (p, g, y, j, q) ve el yazısı fontlar için alt güvenlik payı
+  const hasDescenderRisk = spec.fontId === "script" || spec.fontId === "italic";
+  const tailoredPaddingClass =
+    formattedLines.length > 2
+      ? "pt-8 sm:pt-12 pb-14 sm:pb-18 px-10 sm:px-16 min-h-[16rem]"
+      : formattedLines.length > 1
+        ? "pt-7 sm:pt-10 pb-12 sm:pb-16 px-10 sm:px-16 min-h-[13rem]"
+        : hasDescenderRisk
+          ? "pt-6 sm:pt-8 pb-11 sm:pb-14 px-8 sm:px-14"
+          : "pt-6 sm:pt-8 pb-7 sm:pb-9 px-8 sm:px-14";
 
   const backboardShapeClass =
     activeBorderId === "circle"
-      ? "aspect-square rounded-full flex items-center justify-center p-4 relative"
+      ? `aspect-square rounded-full flex items-center justify-center p-4 relative ${acrylicGlassPlateBg}`
       : activeBorderId === "pill"
-        ? "rounded-full px-10 sm:px-16 py-6 sm:py-8"
+        ? `rounded-full px-10 sm:px-16 ${tailoredPaddingClass} ${acrylicGlassPlateBg}`
         : activeBorderId === "ticket"
-          ? "rounded-3xl border-dashed px-8 sm:px-14 py-8"
-          : spec.backboardId === "rectangle"
-            ? "rounded-xl border border-white/20 bg-[#0A0A0E]/65 px-8 sm:px-14 py-8"
-            : spec.backboardId === "canvas"
-              ? "rounded-xl border border-white/30 bg-[#050505]/95 px-8 sm:px-14 py-8 shadow-[inset_0_0_30px_rgba(0,0,0,0.9)]"
-              : activeBorderId !== "none"
-                ? "rounded-xl px-8 sm:px-14 py-8"
-                : "px-4 sm:px-8 py-4";
+          ? `rounded-3xl border-dashed px-8 sm:px-14 ${tailoredPaddingClass} ${acrylicGlassPlateBg}`
+          : activeBackboard.cutType === "rectangle"
+            ? `rounded-xl ${acrylicGlassPlateBg} ${tailoredPaddingClass}`
+            : activeBorderId !== "none"
+              ? `rounded-xl ${acrylicGlassPlateBg} ${tailoredPaddingClass}`
+              : `relative p-4 sm:p-6`;
 
   const neonBorderStyle =
     activeBorderId !== "none"
@@ -674,12 +750,6 @@ export default function NeonStudio() {
       label: "AKRİLİK ZEMİN",
       shortLabel: "Pleksi",
       icon: "M4 5h16v14H4z",
-    },
-    {
-      id: "options",
-      label: "DONANIM & ORTAM",
-      shortLabel: "Donanım",
-      icon: "M4 8h10M18 8h2M16 6a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM4 16h4M12 16h8M10 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4z",
     },
     {
       id: "buy",
@@ -1574,135 +1644,34 @@ export default function NeonStudio() {
                 </div>
               )}
 
-              {/* SEKME 7: DONANIM & ORTAM */}
-              {activeTab === "options" && (
-                <div class="space-y-3">
-                  <div class="space-y-2 rounded-xl border border-white/[0.07] bg-[#050505] p-3.5">
-                    <span class="block text-xs font-bold uppercase tracking-wider text-white">
-                      LED Tüp Teknolojisi
-                    </span>
-                    <div class="grid grid-cols-2 gap-2">
-                      {(Object.keys(NEON_TUBE_TECHS) as NeonTubeTechId[]).map(
-                        (tKey) => {
-                          const tItem = NEON_TUBE_TECHS[tKey];
-                          const isSelected = activeTechId === tKey;
-                          return (
-                            <button
-                              key={tKey}
-                              type="button"
-                              onClick={() => updateSpec({ tubeTech: tKey })}
-                              class={`cursor-pointer rounded-lg border p-2.5 text-left transition-all ${
-                                isSelected
-                                  ? "border-[#35E7FF] bg-[#0A0A0E]"
-                                  : "border-white/10 bg-[#050505]"
-                              }`}
-                            >
-                              <span class="font-mono block text-[10px] text-[#35E7FF]">
-                                {tItem.badge}
-                              </span>
-                              <span class="mt-0.5 block text-xs font-bold text-white">
-                                {tKey === "standard"
-                                  ? "Splice™ LED"
-                                  : "Luminex™ Pro"}
-                              </span>
-                            </button>
-                          );
-                        },
-                      )}
-                    </div>
-                  </div>
-
-                  <div class="space-y-2 rounded-xl border border-white/[0.07] bg-[#050505] p-3.5">
-                    <span class="block text-xs font-bold uppercase tracking-wider text-white">
-                      Kullanım Ortamı
-                    </span>
-                    <div class="grid grid-cols-2 gap-2">
-                      {(
-                        [
-                          {
-                            id: "indoor",
-                            label: "İç Mekan",
-                            sub: "Ev, Ofis, Kafe",
-                          },
-                          {
-                            id: "outdoor",
-                            label: "IP67 Dış Mekan",
-                            sub: "+400 ₺ Koruma",
-                          },
-                        ] as const
-                      ).map((envItem) => (
-                        <button
-                          key={envItem.id}
-                          type="button"
-                          onClick={() =>
-                            updateSpec({ environment: envItem.id })
-                          }
-                          class={`cursor-pointer rounded-lg border p-2.5 text-left ${
-                            spec.environment === envItem.id
-                              ? "border-[#FFB020] bg-[#0A0A0E]"
-                              : "border-white/10 bg-[#050505]"
-                          }`}
-                        >
-                          <span class="block text-xs font-bold text-white">
-                            {envItem.label}
-                          </span>
-                          <span class="font-mono block text-[10px] text-white/50">
-                            {envItem.sub}
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div class="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        updateSpec({
-                          dimmer:
-                            spec.dimmer === "wireless"
-                              ? "standard"
-                              : "wireless",
-                        })
-                      }
-                      class="cursor-pointer rounded-xl border border-white/[0.07] bg-[#050505] p-3 text-left"
-                    >
-                      <span class="font-mono block text-[10px] text-[#1CFF8A]">
-                        PARLAKLIK
-                      </span>
-                      <span class="mt-0.5 block text-xs font-bold text-white">
-                        {spec.dimmer === "wireless"
-                          ? "RF Kumandalı ✓"
-                          : "Standart Güç"}
-                      </span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        updateSpec({
-                          mountType:
-                            spec.mountType === "hanging" ? "wall" : "hanging",
-                        })
-                      }
-                      class="cursor-pointer rounded-xl border border-white/[0.07] bg-[#050505] p-3 text-left"
-                    >
-                      <span class="font-mono block text-[10px] text-[#35E7FF]">
-                        MONTAJ KİTİ
-                      </span>
-                      <span class="mt-0.5 block text-xs font-bold text-white">
-                        {spec.mountType === "hanging"
-                          ? "Tavan Askı Seti"
-                          : "Krom Duvar Vidası"}
-                      </span>
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* SEKME 8: REÇETE & SİPARİŞ */}
+              {/* SEKME 7: REÇETE & SİPARİŞ */}
               {activeTab === "buy" && (
                 <div class="space-y-3.5">
+                  <label class="cursor-pointer flex items-center justify-between rounded-xl border border-white/[0.07] bg-[#050505] p-3 hover:border-white/20 transition-colors">
+                    <div class="flex items-center gap-2.5">
+                      <input
+                        type="checkbox"
+                        checked={!!spec.includeInstallation}
+                        onChange={(e) =>
+                          updateSpec({
+                            includeInstallation: (e.target as HTMLInputElement).checked,
+                          })
+                        }
+                        class="size-4 accent-[#35E7FF] rounded cursor-pointer"
+                      />
+                      <div>
+                        <span class="block text-xs font-bold text-white">
+                          Manavgat & Antalya Yerinde Montaj
+                        </span>
+                        <span class="text-[11px] text-white/50">
+                          Atölye ekibimizce adrese teslim ve profesyonel montaj
+                        </span>
+                      </div>
+                    </div>
+                    <span class="font-mono text-xs font-bold text-[#35E7FF]">
+                      +1.000 ₺
+                    </span>
+                  </label>
                   <div class="rounded-xl border border-white/[0.07] bg-[#050505] p-3.5 space-y-2 font-mono text-xs text-white/70">
                     <div class="flex justify-between border-b border-white/[0.07] pb-1.5">
                       <span>Yazı & Font:</span>
@@ -1913,7 +1882,70 @@ export default function NeonStudio() {
             </div>
           </div>
 
-          {/* CAD KUTUSU MERKEZ: FERAH NEON ÖNİZLEME + SAĞ VE ALT ÖLÇÜ OKLARI */}
+          {/* GERÇEK CNC LAZER HARF KESİM AKRİLİK KONTUR FİLTRELERİ */}
+      <svg width="1" height="1" class="absolute opacity-0 pointer-events-none" aria-hidden="true">
+        <defs>
+          {/* 1. Şeffaf Pleksi Harf Kontur Filtresi */}
+          <filter id="clear-acrylic-contour" x="-30%" y="-40%" width="160%" height="180%">
+            <feMorphology in="SourceAlpha" operator="dilate" radius="16" result="dilated_outer" />
+            <feGaussianBlur in="dilated_outer" stdDeviation="6" result="shadow_blur" />
+            <feOffset in="shadow_blur" dx="0" dy="10" result="shadow_offset" />
+            <feComponentTransfer in="shadow_offset" result="shadow">
+              <feFuncA type="linear" slope="0.8" />
+            </feComponentTransfer>
+            <feComponentTransfer in="dilated_outer" result="acrylic_body">
+              <feFuncR type="linear" slope="1" />
+              <feFuncG type="linear" slope="1" />
+              <feFuncB type="linear" slope="1" />
+              <feFuncA type="linear" slope="0.04" />
+            </feComponentTransfer>
+            <feMorphology in="SourceAlpha" operator="dilate" radius="14" result="dilated_inner" />
+            <feComposite in="dilated_outer" in2="dilated_inner" operator="out" result="rim_edge" />
+            <feComponentTransfer in="rim_edge" result="glass_rim">
+              <feFuncR type="linear" slope="1" />
+              <feFuncG type="linear" slope="1" />
+              <feFuncB type="linear" slope="1" />
+              <feFuncA type="linear" slope="0.45" />
+            </feComponentTransfer>
+            <feMerge>
+              <feMergeNode in="shadow" />
+              <feMergeNode in="acrylic_body" />
+              <feMergeNode in="glass_rim" />
+            </feMerge>
+          </filter>
+
+          {/* 2. Siyah Pleksi Harf Kontur Filtresi */}
+          <filter id="black-acrylic-contour" x="-30%" y="-40%" width="160%" height="180%">
+            <feMorphology in="SourceAlpha" operator="dilate" radius="16" result="dilated_outer" />
+            <feGaussianBlur in="dilated_outer" stdDeviation="8" result="shadow_blur" />
+            <feOffset in="shadow_blur" dx="0" dy="12" result="shadow_offset" />
+            <feComponentTransfer in="shadow_offset" result="shadow">
+              <feFuncA type="linear" slope="0.95" />
+            </feComponentTransfer>
+            <feComponentTransfer in="dilated_outer" result="black_body">
+              <feFuncR type="linear" slope="0.04" />
+              <feFuncG type="linear" slope="0.04" />
+              <feFuncB type="linear" slope="0.05" />
+              <feFuncA type="linear" slope="0.95" />
+            </feComponentTransfer>
+            <feMorphology in="SourceAlpha" operator="dilate" radius="14.5" result="dilated_inner" />
+            <feComposite in="dilated_outer" in2="dilated_inner" operator="out" result="rim_edge" />
+            <feComponentTransfer in="rim_edge" result="black_rim">
+              <feFuncR type="linear" slope="1" />
+              <feFuncG type="linear" slope="1" />
+              <feFuncB type="linear" slope="1" />
+              <feFuncA type="linear" slope="0.25" />
+            </feComponentTransfer>
+            <feMerge>
+              <feMergeNode in="shadow" />
+              <feMergeNode in="black_body" />
+              <feMergeNode in="black_rim" />
+            </feMerge>
+          </filter>
+        </defs>
+      </svg>
+
+      {/* CAD KUTUSU MERKEZ: FERAH NEON ÖNİZLEME + SAĞ VE ALT ÖLÇÜ OKLARI */}
           <div class="relative z-10 my-auto flex w-full flex-col items-center justify-center px-4 sm:px-6 py-4">
             <div class="relative flex w-full items-center justify-center">
               {/* Neon Tabela Gövdesi */}
@@ -1967,9 +1999,9 @@ export default function NeonStudio() {
                   ))}
 
                 <div
-                  class={`relative z-10 flex flex-wrap items-center gap-5 ${
+                  class={`relative z-10 flex flex-nowrap items-center gap-3 sm:gap-5 max-w-full ${
                     activeBorderId === "circle"
-                      ? "absolute inset-0 m-auto flex items-center justify-center p-6"
+                      ? "absolute inset-0 m-auto flex items-center justify-center p-6 sm:p-10 max-w-[84%] max-h-[84%]"
                       : spec.align === "left"
                         ? "justify-start text-left"
                         : spec.align === "right"
@@ -1977,6 +2009,55 @@ export default function NeonStudio() {
                           : "justify-center text-center"
                   }`}
                 >
+                  {/* Gerçek CNC Lazer Harf Kesim Akrilik Kontur Tabanı */}
+                  {isContourBackboard && activeBorderId === "none" && (
+                    <div
+                      aria-hidden="true"
+                      style={{
+                        filter: isBlackBackboard
+                          ? "url(#black-acrylic-contour)"
+                          : "url(#clear-acrylic-contour)",
+                      }}
+                      class="absolute inset-0 flex flex-nowrap items-center justify-center gap-3 sm:gap-5 pointer-events-none select-none z-0"
+                    >
+                      <div
+                        style={{
+                          fontFamily: activeFont.cssFamily,
+                          fontSize:
+                            activeBorderId === "circle"
+                              ? `clamp(1.4rem, ${(3.8 * circleFontScale)}vw, ${(4.2 * circleFontScale)}rem)`
+                              : `clamp(1.4rem, ${(activeSize.fontScaleRem * circleFontScale) * 1.2}vw, ${(activeSize.fontScaleRem * circleFontScale) * 1.45}rem)`,
+                          letterSpacing:
+                            spec.sizeId === "sm"
+                              ? "0.06em"
+                              : spec.sizeId === "md"
+                                ? "0.03em"
+                                : "0.01em",
+                          color: isBlackBackboard ? "#0A0A0E" : "#000000",
+                        }}
+                        class="flex flex-col shrink min-w-0 leading-[1.2]"
+                      >
+                        {formattedLines.map((line) => (
+                          <span key={line} class="block whitespace-pre-wrap">
+                            {line}
+                          </span>
+                        ))}
+                      </div>
+
+                      {activeSymbolId !== "none" && (
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill={isBlackBackboard ? "#0A0A0E" : "#000000"}
+                          stroke={isBlackBackboard ? "#0A0A0E" : "#000000"}
+                          stroke-width="2"
+                          class={`${activeSize.symbolSizeClass} shrink-0`}
+                        >
+                          <path d={activeSymbol.svgPath} />
+                        </svg>
+                      )}
+                    </div>
+                  )}
+
                   {/* Fiziksel Neon Boyut & Tüp Kalibrasyonlu Çok Satırlı Metin */}
                   <div
                     style={{
@@ -1985,8 +2066,8 @@ export default function NeonStudio() {
                       textShadow: tubeShadow,
                       fontSize:
                         activeBorderId === "circle"
-                          ? `clamp(2.6rem, 11vw, 4.4rem)`
-                          : `clamp(1.8rem, ${(activeSize.fontScaleRem * circleFontScale) * 1.3}vw, ${(activeSize.fontScaleRem * circleFontScale) * 1.55}rem)`,
+                          ? `clamp(1.4rem, ${(3.8 * circleFontScale)}vw, ${(4.2 * circleFontScale)}rem)`
+                          : `clamp(1.4rem, ${(activeSize.fontScaleRem * circleFontScale) * 1.2}vw, ${(activeSize.fontScaleRem * circleFontScale) * 1.45}rem)`,
                       letterSpacing:
                         spec.sizeId === "sm"
                           ? "0.06em"
@@ -1994,7 +2075,7 @@ export default function NeonStudio() {
                             ? "0.03em"
                             : "0.01em",
                     }}
-                    class={`select-none leading-[1.12] transition-all duration-300 flex flex-col ${
+                    class={`relative z-10 select-none leading-[1.2] transition-all duration-300 flex flex-col shrink min-w-0 ${
                       spec.align === "left"
                         ? "items-start text-left"
                         : spec.align === "right"
@@ -2030,7 +2111,7 @@ export default function NeonStudio() {
                           ? `drop-shadow(0 0 4px #FFFFFF) drop-shadow(0 0 14px ${activeSymbolColor.hex}) drop-shadow(0 0 28px ${activeSymbolColor.hex})`
                           : "none",
                       }}
-                      class={`${activeSize.symbolSizeClass} shrink-0 transition-all duration-300`}
+                      class={`relative z-10 ${activeSize.symbolSizeClass} shrink-0 transition-all duration-300`}
                       aria-label={activeSymbol.label}
                     >
                       <title>{activeSymbol.label}</title>
@@ -2136,7 +2217,7 @@ export default function NeonStudio() {
                 onClick={() =>
                   updateSpec({
                     sizeId: "md",
-                    backboardId: "contour",
+                    backboardId: "contour_clear",
                     borderId: "none",
                   })
                 }

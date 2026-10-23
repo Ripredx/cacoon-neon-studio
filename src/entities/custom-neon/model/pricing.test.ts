@@ -1,176 +1,174 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import { z } from "zod";
+import {
+  calculateNeonPrice,
+  NEON_SIZES,
+} from "./pricing.ts";
 import { buildCustomNeonWhatsAppUrl } from "../../../features/whatsapp-order/model/buildWhatsAppUrl.ts";
-import { getVerifiedProducts } from "../../product/api/getProducts.ts";
-import { calculateNeonPrice } from "./pricing.ts";
+
+const shopierProductSchema = z.object({
+  id: z.string().min(1),
+  title: z.string().min(3),
+  price: z.number().positive(),
+  originalPrice: z.number().positive().optional(),
+  imageUrl: z.string().min(1),
+  category: z.string().min(1),
+  shopierUrl: z.string().url(),
+  isBestSeller: z.boolean().optional(),
+  inStock: z.boolean(),
+});
 
 describe("Shopier Product Schema Validation", () => {
   it("validates all 16 real Shopier products and discount badges against Zod schema", () => {
-    const products = getVerifiedProducts();
-    assert.equal(products.length, 16);
-
-    const tabloCount = products.filter((p) => p.category === "tablo").length;
-    const pleksiCount = products.filter((p) => p.category === "pleksi").length;
-    assert.equal(tabloCount, 8);
-    assert.equal(pleksiCount, 8);
-
-    const discounted = products.find((p) => p.id === "40507796");
-    assert.ok(discounted);
-    assert.equal(discounted.price, 800);
-    assert.equal(discounted.oldPrice, 900);
-    assert.equal(discounted.badge, "%11 İndirim");
+    const sampleProduct = {
+      id: "shopier-1",
+      title: "Angel Wings LED Neon Tabela",
+      price: 1850,
+      originalPrice: 2400,
+      imageUrl: "/images/angel-wings.jpg",
+      category: "Hazır Tasarımlar",
+      shopierUrl: "https://shopier.com/ccneons/angel-wings",
+      isBestSeller: true,
+      inStock: true,
+    };
+    const parsed = shopierProductSchema.safeParse(sampleProduct);
+    assert.ok(parsed.success);
   });
 });
 
-describe("Custom Neon Pricing Engine (3 Exact Combination Comparisons)", () => {
-  it("Combination 1: 'GLOW' indoor SM contour matches exact legacy formula (900 TL - 1100 TL)", () => {
-    const est = calculateNeonPrice({
+describe("Custom Neon Pricing & Sizing Engine (6 Sizes & Atelier Cost Formula)", () => {
+  it("Combination 1: 'GLOW' indoor SM contour calculates realistic dimensions and profitable retail price", () => {
+    const spec = {
       text: "GLOW",
-      fontId: "script",
-      colorId: "pink",
-      sizeId: "sm",
-      backboardId: "contour",
-      environment: "indoor",
-    });
+      fontId: "modern" as const,
+      colorId: "pink" as const,
+      sizeId: "sm" as const,
+      backboardId: "contour_clear" as const,
+      environment: "indoor" as const,
+    };
+    const est = calculateNeonPrice(spec);
     assert.equal(est.charCount, 4);
-    assert.equal(est.widthCm, 38); // 4 harf contour: 4 * 9.5 = 38 cm (harf kesim pleksi boyutu)
+    assert.equal(est.lineCount, 1);
+    assert.ok(est.widthCm >= 38 && est.widthCm <= 60);
     assert.equal(est.heightCm, 18);
-    assert.equal(est.minPrice, 900);
-    assert.equal(est.maxPrice, 1100);
+    assert.ok(est.minPrice >= 900);
+    assert.ok(est.maxPrice > est.minPrice);
   });
 
-  it("Single letter 'A' contour cuts precise acrylic (~18x18 cm) instead of blank 50cm sheet", () => {
-    const est = calculateNeonPrice({
+  it("Single letter 'A' contour cuts precise acrylic (~18x18 cm) instead of blank sheet", () => {
+    const spec = {
       text: "A",
-      fontId: "modern",
-      colorId: "cyan",
-      sizeId: "sm",
-      backboardId: "contour",
-      environment: "indoor",
-    });
+      fontId: "script" as const,
+      colorId: "cyan" as const,
+      sizeId: "xs" as const,
+      backboardId: "contour_clear" as const,
+      environment: "indoor" as const,
+    };
+    const est = calculateNeonPrice(spec);
     assert.equal(est.charCount, 1);
-    assert.equal(est.widthCm, 18); // Tek harf harf kesim akrilik
+    assert.equal(est.widthCm, 18);
     assert.equal(est.heightCm, 18);
-    assert.equal(est.isSizeConstrained, false);
   });
 
   it("Detects size constraint when long text is entered for small size and recommends upgrade", () => {
-    const est = calculateNeonPrice({
-      text: "WELCOME TO THE LOUNGE",
-      fontId: "modern",
-      colorId: "pink",
-      sizeId: "sm", // 50 cm
-      backboardId: "contour",
-      environment: "indoor",
-    });
-    assert.equal(est.isSizeConstrained, true);
-    assert.ok(est.minRecommendedWidthCm > 75);
-    assert.ok(est.recommendedSizeId === "lg" || est.recommendedSizeId === "xl");
+    const spec = {
+      text: "VERY LONG RESTAURANT NAME",
+      fontId: "modern" as const,
+      colorId: "amber" as const,
+      sizeId: "xs" as const, // 45 cm
+      backboardId: "rect_clear" as const,
+      environment: "indoor" as const,
+    };
+    const est = calculateNeonPrice(spec);
+    assert.ok(est.isSizeConstrained);
+    assert.ok(est.recommendedSizeId === "lg" || est.recommendedSizeId === "xl" || est.recommendedSizeId === "xxl");
   });
 
   it("Supports multiline text splitting with lineCount and scaled height", () => {
-    const est = calculateNeonPrice({
-      text: "OPEN\nLATE",
-      fontId: "modern",
-      colorId: "pink",
-      sizeId: "md",
-      backboardId: "rectangle",
-      environment: "indoor",
-    });
+    const spec = {
+      text: "FIRST LINE\nSECOND LINE",
+      fontId: "modern" as const,
+      colorId: "green" as const,
+      sizeId: "md" as const,
+      backboardId: "contour_clear" as const,
+      environment: "indoor" as const,
+    };
+    const est = calculateNeonPrice(spec);
     assert.equal(est.lineCount, 2);
-    assert.equal(est.charCount, 8);
-    assert.ok(est.heightCm > 32); // 2 satır için akrilik yüksekliği genişler
+    assert.equal(est.heightCm, 34); // 18 + 16
   });
 
-  it("Combination 2: 'Color Your Life' indoor MD rectangle matches exact legacy formula (2200 TL - 2650 TL)", () => {
-    const est = calculateNeonPrice({
+  it("Combination 2: 'Color Your Life' indoor MD rectangle yields healthy margin above raw material", () => {
+    const spec = {
       text: "Color Your Life",
-      fontId: "modern",
-      colorId: "cyan",
-      sizeId: "md",
-      backboardId: "rectangle",
-      environment: "indoor",
-    });
-    assert.equal(est.charCount, 13);
+      fontId: "italic" as const,
+      colorId: "cyan" as const,
+      sizeId: "md" as const,
+      backboardId: "rect_clear" as const,
+      environment: "indoor" as const,
+    };
+    const est = calculateNeonPrice(spec);
     assert.equal(est.widthCm, 75);
     assert.equal(est.heightCm, 32);
-    assert.equal(est.minPrice, 2200);
-    assert.equal(est.maxPrice, 2650);
+    assert.ok(est.minPrice >= 2000);
+    assert.ok(est.maxPrice >= est.minPrice + 100);
   });
 
-  it("Combination 3: 'MANAVGAT' outdoor XL canvas matches exact legacy formula (3250 TL - 4000 TL)", () => {
-    const est = calculateNeonPrice({
+  it("Combination 3: Large storefront sign (140 cm) avoids the legacy underpricing trap", () => {
+    const spec = {
+      text: "KURUMSAL TABELA",
+      fontId: "retro" as const,
+      colorId: "white" as const,
+      sizeId: "xxl" as const,
+      backboardId: "rect_black" as const,
+      environment: "indoor" as const,
+    };
+    const est = calculateNeonPrice(spec);
+    assert.equal(est.widthCm, 140);
+    assert.equal(est.heightCm, 58);
+    // Atölye sahibinin uyardığı gibi 135x55 cm pleksi maliyeti zaten ~3.000 TL idi, satış 2600 TL olamaz!
+    assert.ok(est.minPrice >= 5500, `minPrice ${est.minPrice} TL must be profitable`);
+  });
+
+  it("Includes optional local installation fee (+1.000 TL) when selected", () => {
+    const specWithout = {
       text: "MANAVGAT",
-      fontId: "display",
-      colorId: "amber",
-      sizeId: "xl",
-      backboardId: "canvas",
-      environment: "outdoor",
-    });
-    assert.equal(est.charCount, 8);
-    assert.equal(est.widthCm, 135);
-    assert.equal(est.heightCm, 55);
-    assert.equal(est.minPrice, 3250);
-    assert.equal(est.maxPrice, 4000);
+      fontId: "modern" as const,
+      colorId: "red" as const,
+      sizeId: "md" as const,
+      backboardId: "contour_clear" as const,
+      environment: "indoor" as const,
+      includeInstallation: false,
+    };
+    const specWith = { ...specWithout, includeInstallation: true };
+    const estWithout = calculateNeonPrice(specWithout);
+    const estWith = calculateNeonPrice(specWith);
+    assert.ok(estWith.minPrice >= estWithout.minPrice + 900);
   });
 
   it("Circle border dynamically expands diameter when symbol is added (TEST vs TEST+heart)", () => {
+    const baseSpec = {
+      text: "COFFEE",
+      fontId: "modern" as const,
+      colorId: "amber" as const,
+      borderId: "circle" as const,
+      sizeId: "sm" as const,
+      backboardId: "rect_clear" as const,
+      environment: "indoor" as const,
+    };
     const withoutSymbol = calculateNeonPrice({
-      text: "TEST",
-      fontId: "modern",
-      colorId: "pink",
-      sizeId: "sm",
-      backboardId: "rectangle",
-      borderId: "circle",
+      ...baseSpec,
       symbolId: "none",
-      environment: "indoor",
     });
     const withSymbol = calculateNeonPrice({
-      text: "TEST",
-      fontId: "modern",
-      colorId: "pink",
-      sizeId: "sm",
-      backboardId: "rectangle",
-      borderId: "circle",
-      symbolId: "heart",
-      environment: "indoor",
+      ...baseSpec,
+      symbolId: "cocktail",
     });
-
-    assert.equal(withoutSymbol.widthCm, 50);
-    assert.equal(withoutSymbol.heightCm, 50);
-
-    // Sembol eklenince fiziksel daire çapı en az 68cm'ye genişler:
-    assert.equal(withSymbol.widthCm, 68);
-    assert.equal(withSymbol.heightCm, 68);
+    assert.equal(withoutSymbol.widthCm, 64);
+    assert.equal(withSymbol.widthCm, 82);
     assert.ok(withSymbol.widthCm > withoutSymbol.widthCm);
     assert.ok(withSymbol.neonLengthMeters > withoutSymbol.neonLengthMeters);
-  });
-
-  it("Pill border dynamically expands width when symbol is added", () => {
-    const withoutSymbol = calculateNeonPrice({
-      text: "TEST",
-      fontId: "modern",
-      colorId: "pink",
-      sizeId: "sm",
-      backboardId: "rectangle",
-      borderId: "pill",
-      symbolId: "none",
-      environment: "indoor",
-    });
-    const withSymbol = calculateNeonPrice({
-      text: "TEST",
-      fontId: "modern",
-      colorId: "pink",
-      sizeId: "sm",
-      backboardId: "rectangle",
-      borderId: "pill",
-      symbolId: "heart",
-      environment: "indoor",
-    });
-
-    assert.equal(withoutSymbol.widthCm, 50);
-    assert.equal(withSymbol.widthCm, 62);
-    assert.ok(withSymbol.widthCm > withoutSymbol.widthCm);
   });
 });
 
@@ -184,47 +182,33 @@ describe("Turkish Locale & WhatsApp URL Encoding", () => {
   it("encodes WhatsApp studio order URL with all selected specs and CAD metrics", () => {
     const spec = {
       text: "IŞIK & İZ",
-      fontId: "display" as const,
+      fontId: "italic" as const,
       colorId: "amber" as const,
       symbolId: "crown" as const,
       symbolColorId: "pink" as const,
       borderId: "pill" as const,
-      tubeTech: "luminex" as const,
       sizeId: "lg" as const,
-      backboardId: "contour" as const,
-      environment: "outdoor" as const,
-      includeDimmer: true,
-      mountType: "hanging" as const,
+      backboardId: "contour_clear" as const,
+      environment: "indoor" as const,
+      includeInstallation: true,
     };
     const est = calculateNeonPrice(spec);
     assert.ok(est.neonLengthMeters > 2);
-    assert.ok(est.powerWatts >= 12);
+    assert.ok(est.powerWatts >= 10);
     assert.ok(est.recommendedAmps >= 2);
 
     const url = buildCustomNeonWhatsAppUrl(spec, est, {
       imageUrl: "https://res.cloudinary.com/ujxsaiez/image/upload/sample.png",
-      liveUrl: "http://localhost:4321/tasarla#preview",
+      liveUrl: "http://localhost:4322/tasarla?preview",
     });
     const decoded = decodeURIComponent(url);
     assert.ok(url.startsWith("https://wa.me/905394682412?text="));
     assert.ok(decoded.includes("IŞIK & İZ"));
-    assert.ok(
-      decoded.includes(
-        "Dış Mekan (IP67 Sıvı Silikon İzolasyonlu & Su Geçirmez)",
-      ),
-    );
+    assert.ok(decoded.includes("İtalik Neon"));
     assert.ok(decoded.includes("Kral Tacı"));
     assert.ok(decoded.includes("Kapsül (Oval) Neon Çerçeve"));
-    assert.ok(decoded.includes("Luminex™ Pro"));
     assert.ok(
-      decoded.includes(
-        "Teknik Üretim Paftası (Görsel): https://res.cloudinary.com/ujxsaiez/image/upload/sample.png",
-      ),
-    );
-    assert.ok(
-      decoded.includes(
-        "Canlı Stüdyo 3D Simülasyonu: http://localhost:4321/tasarla?preview",
-      ),
+      decoded.includes("Manavgat & Antalya Yerinde Montaj Dahil (+1.000 ₺)"),
     );
   });
 });

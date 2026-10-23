@@ -1,4 +1,4 @@
-export type NeonFontId = "script" | "modern" | "display" | "retro";
+export type NeonFontId = "script" | "modern" | "italic" | "retro";
 export type NeonColorId =
   | "pink"
   | "cyan"
@@ -7,8 +7,12 @@ export type NeonColorId =
   | "red"
   | "purple"
   | "white";
-export type NeonSizeId = "sm" | "md" | "lg" | "xl";
-export type NeonBackboardId = "contour" | "rectangle" | "canvas";
+export type NeonSizeId = "xs" | "sm" | "md" | "lg" | "xl" | "xxl";
+export type NeonBackboardId =
+  | "contour_clear"
+  | "rect_clear"
+  | "contour_black"
+  | "rect_black";
 export type NeonEnvironment = "indoor" | "outdoor";
 
 export type NeonSymbolId =
@@ -39,7 +43,7 @@ export interface CustomNeonSpec {
   sizeId: NeonSizeId;
   backboardId: NeonBackboardId;
   environment: NeonEnvironment;
-  // Kings of Neon esinli gelişmiş stüdyo özellikleri (opsiyonel — varsayılanlarda mevcut fiyatı değiştirmez)
+  includeInstallation?: boolean;
   symbolId?: NeonSymbolId;
   symbolColorId?: NeonColorId;
   borderId?: NeonBorderId;
@@ -62,6 +66,7 @@ export interface PriceEstimate {
   neonLengthMeters: number;
   powerWatts: number;
   recommendedAmps: number;
+  isCustomQuoteRequired?: boolean;
 }
 
 export const NEON_FONTS: Record<
@@ -89,12 +94,11 @@ export const NEON_FONTS: Record<
     tubeType: "Single Neon · 8mm Keskin Hat",
     canvasWeight: 400,
   },
-  display: {
-    label: "Kalın Tabela",
-    cssFamily: "'Oswald', sans-serif",
-    description: "İşletme ve vitrinler için yüksek görünürlük",
-    tubeType: "Bold Neon · 8mm Yüksek Kontrast",
-    uppercase: true,
+  italic: {
+    label: "İtalik Neon",
+    cssFamily: "'Caveat', cursive",
+    description: "Zarif, ince kıvrımlı italik neon akışı",
+    tubeType: "Single Neon · 6mm Zarif Hat",
     canvasWeight: 700,
   },
   retro: {
@@ -125,7 +129,7 @@ export const NEON_COLORS: Record<
     glowRgb: "255, 42, 133",
     unlitHex: "#f472b6",
     unlitDescription:
-      "Renkli silikon ceket: Işık kapalıyken gündüz pastel pembe görünür, açıldığında canlı magenta-pembe yanar.",
+      "Renkli silikon ceket: Işık kapalıyken pastel pembe, yanınca canlı magenta-pembe yanar.",
   },
   cyan: {
     label: "Buz Mavisi",
@@ -134,7 +138,7 @@ export const NEON_COLORS: Record<
     glowRgb: "0, 240, 255",
     unlitHex: "#67e8f9",
     unlitDescription:
-      "Buz mavisi silikon ceket: Gündüz kapalıyken açık turkuaz-mavi okunur, gece keskin siber buz mavisi parlar.",
+      "Buz mavisi silikon ceket: Gündüz açık turkuaz, gece keskin siber buz mavisi parlar.",
   },
   green: {
     label: "Zümrüt Yeşili",
@@ -143,7 +147,7 @@ export const NEON_COLORS: Record<
     glowRgb: "16, 245, 108",
     unlitHex: "#6ee7b7",
     unlitDescription:
-      "Yeşil pigmentli silikon: Gündüz kapalıyken mat zümrüt yeşili durur, yanınca yüksek kontrastlı fosforlu yeşil verir.",
+      "Yeşil pigmentli silikon: Gündüz zümrüt yeşili, yanınca fosforlu parlak yeşil verir.",
   },
   amber: {
     label: "Amber Sarı",
@@ -152,7 +156,7 @@ export const NEON_COLORS: Record<
     glowRgb: "255, 184, 0",
     unlitHex: "#fcd34d",
     unlitDescription:
-      "Altın-sarı silikon ceket: Gündüz sıcak sarı görünür, gece kafe ve barlar için sıcak kehribar (amber) ışık yayar.",
+      "Altın-sarı silikon: Sıcak amber altın rengi ışık yayar.",
   },
   red: {
     label: "Ateş Kırmızısı",
@@ -161,7 +165,7 @@ export const NEON_COLORS: Record<
     glowRgb: "255, 46, 46",
     unlitHex: "#f87171",
     unlitDescription:
-      "Kırmızı silikon ceket: Gündüz kapalıyken bile net kırmızı tabela etkisi verir, yanınca yoğun yakut kırmızısı parlar.",
+      "Kırmızı silikon: Gündüz net kırmızı tabela etkisi verir, yanınca yoğun yakut kırmızısı parlar.",
   },
   purple: {
     label: "Ultraviyole Mor",
@@ -170,7 +174,7 @@ export const NEON_COLORS: Record<
     glowRgb: "181, 56, 255",
     unlitHex: "#e9d5ff",
     unlitDescription:
-      "Beyaz/Lila difüzör silikon: Gündüz kapalıyken süt beyazı-lila görünür, açıldığında derin ultraviyole mor atmosfer kurar.",
+      "Lila difüzör: Açıldığında derin ultraviyole mor atmosfer kurar.",
   },
   white: {
     label: "Gün Işığı",
@@ -179,7 +183,7 @@ export const NEON_COLORS: Record<
     glowRgb: "255, 247, 230",
     unlitHex: "#f8fafc",
     unlitDescription:
-      "Saf beyaz silikon: Gündüz kapalıyken temiz mat beyaz durur, yanınca 3500K sıcak-doğal cam tüp beyazı verir.",
+      "Saf beyaz silikon: 3500K sıcak-doğal cam tüp beyazı verir.",
   },
 };
 
@@ -190,28 +194,43 @@ export const NEON_SIZES: Record<
     widthCm: number;
     heightCm: number;
     multiplier: number;
+    scaleFactor: number;
+    tubeGaugeMm: string;
     recommendedFor: string;
+    fontScaleRem: number;
+    symbolSizeClass: string;
   }
 > = {
-  sm: {
-    label: "Küçük (50 cm)",
-    widthCm: 50,
-    heightCm: 22,
-    multiplier: 1.0,
-    scaleFactor: 0.72,
+  xs: {
+    label: "Mini (45 cm)",
+    widthCm: 45,
+    heightCm: 20,
+    multiplier: 0.85,
+    scaleFactor: 0.65,
     tubeGaugeMm: "6mm Micro-Flex",
-    recommendedFor: "Oda & Masaüstü",
-    fontScaleRem: 3.2,
-    symbolSizeClass: "size-10 sm:size-14",
+    recommendedFor: "Masaüstü & Raf",
+    fontScaleRem: 2.8,
+    symbolSizeClass: "size-9 sm:size-12",
+  },
+  sm: {
+    label: "Küçük (60 cm)",
+    widthCm: 60,
+    heightCm: 26,
+    multiplier: 1.0,
+    scaleFactor: 0.82,
+    tubeGaugeMm: "6mm / 8mm Flex",
+    recommendedFor: "Oda & Kapı",
+    fontScaleRem: 3.6,
+    symbolSizeClass: "size-11 sm:size-15",
   },
   md: {
-    label: "Orta (75 cm)",
+    label: "Standart (75 cm)",
     widthCm: 75,
     heightCm: 32,
-    multiplier: 1.35,
+    multiplier: 1.25,
     scaleFactor: 1.0,
     tubeGaugeMm: "8mm Standart Flex",
-    recommendedFor: "Duvar & Ev Dekoru",
+    recommendedFor: "Salon & Duvar Dekoru",
     fontScaleRem: 4.5,
     symbolSizeClass: "size-14 sm:size-18",
   },
@@ -219,44 +238,74 @@ export const NEON_SIZES: Record<
     label: "Büyük (100 cm)",
     widthCm: 100,
     heightCm: 42,
-    multiplier: 1.75,
+    multiplier: 1.6,
     scaleFactor: 1.28,
     tubeGaugeMm: "8mm / 10mm Yüksek Işık",
-    recommendedFor: "Kafe & Stüdyo",
+    recommendedFor: "Kafe & Ofis",
     fontScaleRem: 5.6,
     symbolSizeClass: "size-18 sm:size-24",
   },
   xl: {
-    label: "Kurumsal (135 cm)",
-    widthCm: 135,
-    heightCm: 55,
-    multiplier: 2.25,
-    scaleFactor: 1.55,
-    tubeGaugeMm: "10mm / 12mm Ultra-Geniş",
-    recommendedFor: "Dükkan Cephesi & Bar",
-    fontScaleRem: 7.0,
+    label: "Ekstra Büyük (120 cm)",
+    widthCm: 120,
+    heightCm: 50,
+    multiplier: 2.0,
+    scaleFactor: 1.48,
+    tubeGaugeMm: "10mm Ultra-Geniş",
+    recommendedFor: "Dükkan & Giriş",
+    fontScaleRem: 6.4,
+    symbolSizeClass: "size-20 sm:size-26",
+  },
+  xxl: {
+    label: "Kurumsal Vitrin (140 cm)",
+    widthCm: 140,
+    heightCm: 58,
+    multiplier: 2.4,
+    scaleFactor: 1.65,
+    tubeGaugeMm: "10mm / 12mm Cadde Tipi",
+    recommendedFor: "Cadde Cephesi & Bar",
+    fontScaleRem: 7.2,
     symbolSizeClass: "size-22 sm:size-28",
   },
 };
 
 export const NEON_BACKBOARDS: Record<
   NeonBackboardId,
-  { label: string; description: string; extraCost: number }
+  {
+    label: string;
+    description: string;
+    colorType: "clear" | "black";
+    cutType: "contour" | "rectangle";
+    extraCost: number;
+  }
 > = {
-  contour: {
-    label: "Harf Kesim Şeffaf Pleksi",
-    description: "Yazı formuna göre sıfır kenar lazer kesim",
+  contour_clear: {
+    label: "Şeffaf Pleksi (Harf Kontur)",
+    description: "Yazı formunu takip eden lazer kesim şeffaf akrilik",
+    colorType: "clear",
+    cutType: "contour",
     extraCost: 0,
   },
-  rectangle: {
-    label: "Dikdörtgen Pleksi Pano",
-    description: "Montajı kolay tam çerçeve şeffaf/siyah pleksi",
+  rect_clear: {
+    label: "Şeffaf Pleksi (Düz Pano)",
+    description: "Montajı kolay düz dikdörtgen şeffaf akrilik levha",
+    colorType: "clear",
+    cutType: "rectangle",
     extraCost: 150,
   },
-  canvas: {
-    label: "Baskılı Kanvas Tablo Üzeri",
-    description: "Özel tasarım kanvas tablo üstü LED neon",
-    extraCost: 300,
+  contour_black: {
+    label: "Siyah Pleksi (Harf Kontur)",
+    description: "Yazı formuna göre kesilmiş opak siyah akrilik",
+    colorType: "black",
+    cutType: "contour",
+    extraCost: 100,
+  },
+  rect_black: {
+    label: "Siyah Pleksi (Düz Pano)",
+    description: "Kontrastı artıran düz dikdörtgen siyah akrilik pano",
+    colorType: "black",
+    cutType: "rectangle",
+    extraCost: 250,
   },
 };
 
@@ -358,8 +407,8 @@ export const NEON_BORDERS: Record<
   }
 > = {
   none: {
-    label: "Çerçevesiz",
-    description: "Sadece yazı ve sembol parlar",
+    label: "Çerçevesiz (Sade)",
+    description: "Tabela etrafında ek ışık çerçevesi olmadan sade tasarım",
     extraMeters: 0,
   },
   rectangle: {
@@ -417,18 +466,19 @@ export const NEON_TUBE_TECHS: Record<
   },
 };
 
-// Tek noktadan güncellenebilir fiyatlandırma sabitleri
-// shortcut: Harf sayısına dayalı doğrusal tahmin kullanır, gerçek CNC/LED metraj ölçümü gerektiğinde SVG path uzunluğu hesabına yükseltilmeli.
-const PRICING_RULES = {
-  baseCostTl: 650, // Adaptör, işçilik ve minimum pleksi taban maliyeti
-  perCharCostTl: 75, // Harf başı ortalama LED + lehim maliyeti
-  outdoorExtraTl: 400, // IP67 dış mekan silikon ve su geçirmez trafo farkı
-  rangeSpreadRatio: 0.14, // +/- %14 esnaf güvenlik marjı
+// Dahili atölye maliyet katsayıları
+const ATELIER_ENGINE_RULES = {
+  plexiPerM2Cost: 4000,
+  neonPerMeterCost: 100,
+  adapterCost: 120,
+  overheadBaseCost: 250,
+  marginMultiplier: 1.5,
+  rangeSpreadRatio: 0.08,
   roundingStepTl: 50,
+  installationFeeTl: 1000,
 } as const;
 
 export function calculateNeonPrice(spec: CustomNeonSpec): PriceEstimate {
-  // Satır kırılımlarını (Enter) destekle:
   const lines = spec.text
     .split(/\r?\n/)
     .map((l) => l.trim())
@@ -436,7 +486,6 @@ export function calculateNeonPrice(spec: CustomNeonSpec): PriceEstimate {
   const effectiveLines = lines.length > 0 ? lines : ["GLOW"];
   const lineCount = effectiveLines.length;
 
-  // En uzun satırdaki karakter sayısı fiziksel genişlik sınırını belirler:
   const maxLineLength = Math.max(
     ...effectiveLines.map((l) => l.replace(/\s+/g, "").length),
     1,
@@ -447,44 +496,38 @@ export function calculateNeonPrice(spec: CustomNeonSpec): PriceEstimate {
   );
   const effectiveCharCount = Math.max(1, Math.min(totalChars, 45));
 
-  const sizeConfig = NEON_SIZES[spec.sizeId];
-  const backboardConfig = NEON_BACKBOARDS[spec.backboardId];
+  const sizeConfig = NEON_SIZES[spec.sizeId] || NEON_SIZES.md;
+  const backboardConfig =
+    NEON_BACKBOARDS[spec.backboardId] || NEON_BACKBOARDS.contour_clear;
 
-  // Fiziksel Neon Atölye Kuralı:
-  // 6mm-8mm silikon tüpün harf oluşturabilmesi için harf başı min 7.5cm yer gerekir.
-  // Sembol varsa +18cm ek genişlik gerekir.
+  // Fiziksel Neon Atölye Kuralı: Harf başı min 7.5cm, sembol için +18cm
   const symbolBonusCm = spec.symbolId && spec.symbolId !== "none" ? 18 : 0;
   const minRequiredWidthCm = Math.round(maxLineLength * 7.5 + symbolBonusCm);
 
-  // Müşterinin seçtiği boyut metni taşırıyor mu?
   const isSizeConstrained = minRequiredWidthCm > sizeConfig.widthCm;
   let recommendedSizeId: NeonSizeId | undefined = undefined;
   if (isSizeConstrained) {
-    if (minRequiredWidthCm <= 75) recommendedSizeId = "md";
+    if (minRequiredWidthCm <= 60) recommendedSizeId = "sm";
+    else if (minRequiredWidthCm <= 75) recommendedSizeId = "md";
     else if (minRequiredWidthCm <= 100) recommendedSizeId = "lg";
-    else recommendedSizeId = "xl";
+    else if (minRequiredWidthCm <= 120) recommendedSizeId = "xl";
+    else recommendedSizeId = "xxl";
   }
 
-  // Gerçek Akrilik Ölçüsü Kalibrasyonu:
-  // Eğer "Harf Kesim (contour)" seçiliyse ve harf sayısı azsa pleksi devasa kalmaz, harfe oturur.
   let calculatedWidthCm = sizeConfig.widthCm;
   let calculatedHeightCm = sizeConfig.heightCm;
 
-  if (
-    (spec.backboardId === "contour" && !spec.borderId) ||
-    spec.borderId === "none"
-  ) {
-    // Harf Kesim Pleksi: Harf adedine göre gerçek kesim eni
+  const isContour = backboardConfig.cutType === "contour";
+
+  if (isContour && (!spec.borderId || spec.borderId === "none")) {
     const naturalWidth = Math.max(
       18,
       Math.round(maxLineLength * 9.5 + symbolBonusCm),
     );
-    // Çok satırlıysa her ek satır +16cm ekler
     const naturalHeight = Math.max(18, Math.round(18 + (lineCount - 1) * 16));
     calculatedWidthCm = Math.min(naturalWidth, sizeConfig.widthCm);
     calculatedHeightCm = naturalHeight;
   } else {
-    // Dikdörtgen / Pano / Çerçeveli: Çok satırlıysa pleksi boyunu otomatik genişlet
     if (lineCount > 1) {
       calculatedHeightCm = Math.round(
         sizeConfig.heightCm * (1 + (lineCount - 1) * 0.45),
@@ -492,10 +535,7 @@ export function calculateNeonPrice(spec: CustomNeonSpec): PriceEstimate {
     }
   }
 
-  // Çerçeve Geometrisi Kontrolleri:
   if (spec.borderId === "circle") {
-    // Dairesel çerçeve: İçerik (metin + sembol) dairesel yayın içine sığmalıdır.
-    // Geometrik kural: Daire içine yerleşen dikdörtgenin köşegen uzunluğu + dairesel yay payı.
     const contentWidth = Math.max(
       minRequiredWidthCm,
       maxLineLength * 7.5 + symbolBonusCm,
@@ -513,7 +553,6 @@ export function calculateNeonPrice(spec: CustomNeonSpec): PriceEstimate {
     calculatedWidthCm = circleDiameter;
     calculatedHeightCm = circleDiameter;
   } else if (spec.borderId === "pill") {
-    // Kapsül çerçeve: Yuvarlatılmış uçlar ve sembol için genişletme
     if (minRequiredWidthCm + 14 > sizeConfig.widthCm) {
       calculatedWidthCm = minRequiredWidthCm + 14;
     }
@@ -523,28 +562,7 @@ export function calculateNeonPrice(spec: CustomNeonSpec): PriceEstimate {
     );
   }
 
-  // Fiyat Hesaplama:
-  const lineMultiplier = 1 + (lineCount - 1) * 0.28; // Çok satırlı lehim/kablo işçilik farkı
-  const rawCore =
-    (PRICING_RULES.baseCostTl +
-      effectiveCharCount * PRICING_RULES.perCharCostTl * lineMultiplier) *
-    sizeConfig.multiplier;
-
-  const envCost =
-    spec.environment === "outdoor" ? PRICING_RULES.outdoorExtraTl : 0;
-  const centerPrice = rawCore + backboardConfig.extraCost + envCost;
-
-  const minRaw = centerPrice * (1 - PRICING_RULES.rangeSpreadRatio * 0.5);
-  const maxRaw = centerPrice * (1 + PRICING_RULES.rangeSpreadRatio);
-
-  const minPrice =
-    Math.round(minRaw / PRICING_RULES.roundingStepTl) *
-    PRICING_RULES.roundingStepTl;
-  const maxPrice =
-    Math.round(maxRaw / PRICING_RULES.roundingStepTl) *
-    PRICING_RULES.roundingStepTl;
-
-  // Mühendislik Paftası için gerçekçi LED metraj ve Güç (Watt / Amper) hesabı:
+  // Metraj & Güç hesabı
   const symbolExtraMeters =
     spec.symbolId && spec.symbolId !== "none"
       ? NEON_SYMBOLS[spec.symbolId].extraMeters
@@ -559,13 +577,43 @@ export function calculateNeonPrice(spec: CustomNeonSpec): PriceEstimate {
     symbolExtraMeters +
     borderExtraMeters;
   const neonLengthMeters = Math.max(0.6, Math.round(rawMeters * 10) / 10);
-  const wattsPerMeter = spec.tubeTech === "luminex" ? 11.5 : 9.0;
-  const powerWatts = Math.max(10, Math.round(neonLengthMeters * wattsPerMeter));
+  const powerWatts = Math.max(10, Math.round(neonLengthMeters * 9.0));
   const recommendedAmps = Math.max(2, Math.ceil((powerWatts * 1.25) / 12));
+
+  // Dahili Atölye Taban Maliyet Hesabı
+  const areaM2 = (calculatedWidthCm * calculatedHeightCm) / 10000;
+  const rawMaterialCost =
+    areaM2 * ATELIER_ENGINE_RULES.plexiPerM2Cost +
+    neonLengthMeters * ATELIER_ENGINE_RULES.neonPerMeterCost +
+    ATELIER_ENGINE_RULES.adapterCost +
+    ATELIER_ENGINE_RULES.overheadBaseCost;
+
+  // Satış Fiyatı Hesabı (Kâr marjlı taban)
+  let centerPrice =
+    rawMaterialCost * ATELIER_ENGINE_RULES.marginMultiplier +
+    backboardConfig.extraCost;
+
+  if (spec.includeInstallation) {
+    centerPrice += ATELIER_ENGINE_RULES.installationFeeTl;
+  }
+
+  const minRaw =
+    centerPrice * (1 - ATELIER_ENGINE_RULES.rangeSpreadRatio);
+  const maxRaw =
+    centerPrice * (1 + ATELIER_ENGINE_RULES.rangeSpreadRatio);
+
+  const minPrice =
+    Math.round(minRaw / ATELIER_ENGINE_RULES.roundingStepTl) *
+    ATELIER_ENGINE_RULES.roundingStepTl;
+  const maxPrice =
+    Math.round(maxRaw / ATELIER_ENGINE_RULES.roundingStepTl) *
+    ATELIER_ENGINE_RULES.roundingStepTl;
+
+  const isCustomQuoteRequired = calculatedWidthCm > 140;
 
   return {
     minPrice,
-    maxPrice: Math.max(minPrice + 150, maxPrice),
+    maxPrice: Math.max(minPrice + 100, maxPrice),
     charCount: totalChars,
     lineCount,
     widthCm: calculatedWidthCm,
@@ -576,5 +624,6 @@ export function calculateNeonPrice(spec: CustomNeonSpec): PriceEstimate {
     neonLengthMeters,
     powerWatts,
     recommendedAmps,
+    isCustomQuoteRequired,
   };
 }
