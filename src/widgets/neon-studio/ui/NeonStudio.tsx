@@ -273,6 +273,27 @@ export default function NeonStudio() {
 
   const [isOrdering, setIsOrdering] = useState(false);
   const [orderStatus, setOrderStatus] = useState<string | null>(null);
+  const [cooldownSeconds, setCooldownSeconds] = useState(0);
+
+  // Spam ve ardisik tiklama korumasi (15 sn cooldown)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const lastOrderTime = Number(sessionStorage.getItem("ccneons_order_cooldown") || 0);
+      const elapsed = Math.floor((Date.now() - lastOrderTime) / 1000);
+      if (elapsed < 15) {
+        setCooldownSeconds(15 - elapsed);
+      }
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    if (cooldownSeconds <= 0) return;
+    const timer = setInterval(() => {
+      setCooldownSeconds((prev) => (prev <= 1 ? 0 : prev - 1));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [cooldownSeconds]);
 
   async function generatePaftaDataUrl(): Promise<string | null> {
     if (typeof document === "undefined") return null;
@@ -579,7 +600,17 @@ export default function NeonStudio() {
   }
 
   async function handleOrderClick() {
-    if (isOrdering) return;
+    if (isOrdering || cooldownSeconds > 0) return;
+    if (typeof window !== "undefined") {
+      try {
+        const lastOrderTime = Number(sessionStorage.getItem("ccneons_order_cooldown") || 0);
+        const elapsed = Math.floor((Date.now() - lastOrderTime) / 1000);
+        if (elapsed < 15) {
+          setCooldownSeconds(15 - elapsed);
+          return;
+        }
+      } catch {}
+    }
     setIsOrdering(true);
     setOrderStatus("Teknik pafta hazırlanıyor...");
 
@@ -628,10 +659,14 @@ export default function NeonStudio() {
         window.open(fallbackUrl, "_blank", "noopener,noreferrer");
       }
     } finally {
-      setTimeout(() => {
-        setIsOrdering(false);
-        setOrderStatus(null);
-      }, 1500);
+      if (typeof window !== "undefined") {
+        try {
+          sessionStorage.setItem("ccneons_order_cooldown", Date.now().toString());
+        } catch {}
+      }
+      setCooldownSeconds(15);
+      setIsOrdering(false);
+      setOrderStatus(null);
     }
   }
 
@@ -829,8 +864,8 @@ export default function NeonStudio() {
           <button
             type="button"
             onClick={handleOrderClick}
-            disabled={isOrdering}
-            title="Sipariş Ver / Sepete Ekle"
+            disabled={isOrdering || cooldownSeconds > 0}
+            title={cooldownSeconds > 0 ? `Lütfen bekleyin (${cooldownSeconds}s)` : "Sipariş Ver / Sepete Ekle"}
             aria-label="Sipariş Ver"
             class="cursor-pointer whitespace-nowrap inline-flex h-9 sm:h-11 items-center justify-center gap-2 rounded-full border border-white/20 bg-white/[0.08] px-3 sm:px-6 font-mono text-xs font-bold uppercase tracking-wider text-white transition-all duration-200 hover:border-[var(--neon-color)] hover:bg-white/[0.15] hover:shadow-[0_0_24px_rgba(var(--neon-rgb),0.4)] disabled:opacity-60 disabled:cursor-not-allowed"
           >
@@ -843,6 +878,8 @@ export default function NeonStudio() {
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
               </svg>
+            ) : cooldownSeconds > 0 ? (
+              <span class="text-white/60 font-mono text-[11px]">{cooldownSeconds}s BEKLEYİN</span>
             ) : (
               <>
                 <svg class="size-4 sm:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1712,11 +1749,13 @@ export default function NeonStudio() {
                   <button
                     type="button"
                     onClick={handleOrderClick}
-                    disabled={isOrdering}
+                    disabled={isOrdering || cooldownSeconds > 0}
                     class="cursor-pointer flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-[#1CFF8A]/50 bg-[#1CFF8A]/15 px-4 py-3 font-mono text-xs font-bold uppercase tracking-wider text-white transition-all hover:bg-[#1CFF8A]/25 disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                     {isOrdering ? (
                       <span>{orderStatus || "HAZIRLANIYOR..."}</span>
+                    ) : cooldownSeconds > 0 ? (
+                      <span class="text-white/70">LÜTFEN BEKLEYİN ({cooldownSeconds} sn)...</span>
                     ) : (
                       <span>BU REÇETEYİ WHATSAPP'TAN SİPARİŞ ET →</span>
                     )}
