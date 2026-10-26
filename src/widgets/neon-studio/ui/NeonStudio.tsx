@@ -356,18 +356,16 @@ export default function NeonStudio() {
       118,
     );
 
-    // 1. Metin Font Boyutu & Ölçümleme (Çerçeveden Önce Hesaplanır)
-    const maxCharsInLine = Math.max(
-      ...formattedLines.map((l) => l.length),
-      1,
-    );
+    // 1. Metin & Sembol Boyutlandırması ve Ölçümleme
+    const hasSymbol = activeSymbolId !== "none" && Boolean(activeSymbol.svgPath);
+    const maxCharsInLine = Math.max(...formattedLines.map((l) => l.length), 1);
     const circleFontScale =
       activeBorderId === "circle"
         ? Math.min(1.0, 5.8 / Math.max(maxCharsInLine, 4.0))
         : 1.0;
 
     let canvasFontSize = Math.round(
-      (formattedLines.length > 1 ? 78 : 96) *
+      (formattedLines.length > 1 ? 76 : 94) *
         activeSize.scaleFactor *
         circleFontScale,
     );
@@ -375,59 +373,103 @@ export default function NeonStudio() {
     const canvasFontWeight = activeFont.canvasWeight || 400;
     ctx.font = `${canvasFontWeight} ${canvasFontSize}px ${activeFont.cssFamily}`;
 
-    const longestLine = formattedLines.reduce(
-      (a, b) => (a.length > b.length ? a : b),
-      "",
-    );
-    const sampleLine =
-      activeSymbolId !== "none"
-        ? `${longestLine} ${activeSymbol.glyph}`
-        : longestLine;
-    let measuredTextWidth = ctx.measureText(sampleLine).width;
+    // Metin genişlikleri ölçümü
+    let textLineWidths = formattedLines.map((l) => ctx.measureText(l).width);
+    let maxTextWidth = Math.max(...textLineWidths, 40);
+    const symbolGap = 28;
+    let symbolSize = Math.round(canvasFontSize * 1.05);
 
-    if (activeBorderId === "circle") {
-      if (measuredTextWidth > 490) {
-        const factor = 490 / measuredTextWidth;
-        canvasFontSize = Math.max(28, Math.floor(canvasFontSize * factor));
-        lineSpacing = Math.round(canvasFontSize * 1.25);
-        ctx.font = `${canvasFontWeight} ${canvasFontSize}px ${activeFont.cssFamily}`;
-        measuredTextWidth = ctx.measureText(sampleLine).width;
-      }
-    } else {
-      if (measuredTextWidth > 1200) {
-        const factor = 1200 / measuredTextWidth;
-        canvasFontSize = Math.max(32, Math.floor(canvasFontSize * factor));
-        lineSpacing = Math.round(canvasFontSize * 1.25);
-        ctx.font = `${canvasFontWeight} ${canvasFontSize}px ${activeFont.cssFamily}`;
-        measuredTextWidth = ctx.measureText(sampleLine).width;
-      }
+    let totalContentWidth = maxTextWidth + (hasSymbol ? symbolGap + symbolSize : 0);
+
+    const maxAllowedWidth = activeBorderId === "circle" ? 480 : 1160;
+    if (totalContentWidth > maxAllowedWidth) {
+      const factor = maxAllowedWidth / totalContentWidth;
+      canvasFontSize = Math.max(26, Math.floor(canvasFontSize * factor));
+      lineSpacing = Math.round(canvasFontSize * 1.25);
+      symbolSize = Math.round(canvasFontSize * 1.05);
+      ctx.font = `${canvasFontWeight} ${canvasFontSize}px ${activeFont.cssFamily}`;
+      textLineWidths = formattedLines.map((l) => ctx.measureText(l).width);
+      maxTextWidth = Math.max(...textLineWidths, 40);
+      totalContentWidth = maxTextWidth + (hasSymbol ? symbolGap + symbolSize : 0);
     }
 
-    const totalHeight = (formattedLines.length - 1) * lineSpacing;
-    const startY = 430 - totalHeight / 2;
+    const textBlockHeight = (formattedLines.length - 1) * lineSpacing;
+    const totalSignHeight = Math.max(textBlockHeight + canvasFontSize, hasSymbol ? symbolSize : 0);
+    const centerY = 430;
+    const startY = centerY - textBlockHeight / 2;
 
-    // 2. Dinamik Çerçeve (Border) & Montaj Vidaları
-    const measuredTextHeight = totalHeight + canvasFontSize;
-    const padX = Math.max(
-      280,
-      Math.min(680, Math.round(measuredTextWidth / 2 + 75)),
-    );
-    const padY = Math.max(140, Math.round(measuredTextHeight / 2 + 60));
+    // Yatay Yerleşim Koordinatları
+    const contentStartX = 800 - totalContentWidth / 2;
+    const textBlockCenterX = contentStartX + maxTextWidth / 2;
+    const symbolX = contentStartX + maxTextWidth + symbolGap;
+    const symbolY = centerY - symbolSize / 2;
+
+    // Pleksi / Çerçeve Alanı Sınırları
+    const padX = Math.max(260, Math.min(680, Math.round(totalContentWidth / 2 + 55)));
+    const padY = Math.max(130, Math.round(totalSignHeight / 2 + 45));
     const rx = 800 - padX;
-    const ry = 430 - padY;
+    const ry = centerY - padY;
     const rw = padX * 2;
     const rh = padY * 2;
 
+    // Yardımcı Vida Çizim Fonksiyonu (Paslanmaz Krom Yükseltme Vidası)
+    const drawScrew = (sx: number, sy: number) => {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(sx, sy, 7, 0, Math.PI * 2);
+      const sGrad = ctx.createLinearGradient(sx - 5, sy - 5, sx + 5, sy + 5);
+      sGrad.addColorStop(0, "#F0F0F5");
+      sGrad.addColorStop(0.5, "#8E8E98");
+      sGrad.addColorStop(1, "#36363E");
+      ctx.fillStyle = sGrad;
+      ctx.shadowColor = "rgba(0, 0, 0, 0.75)";
+      ctx.shadowBlur = 6;
+      ctx.fill();
+      ctx.strokeStyle = "rgba(0, 0, 0, 0.85)";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      // Vida Yarığı
+      ctx.beginPath();
+      ctx.moveTo(sx - 3.5, sy);
+      ctx.lineTo(sx + 3.5, sy);
+      ctx.strokeStyle = "rgba(0, 0, 0, 0.65)";
+      ctx.lineWidth = 1.3;
+      ctx.stroke();
+      ctx.restore();
+    };
+
+    // 2. Akrilik Taban ve Çerçeve Çizimi
+    const isBlackBoard = activeBackboard.colorType === "black";
+    const isContourBoard = activeBackboard.cutType === "contour";
+
     if (activeBorderId !== "none") {
+      // Belirgin Neon Çerçeveli Taban (Rectangle, Pill, Circle, Ticket)
       ctx.save();
       ctx.beginPath();
       if (activeBorderId === "circle") {
         const radius = 320;
-        ctx.arc(800, 430, radius, 0, Math.PI * 2);
+        ctx.arc(800, centerY, radius, 0, Math.PI * 2);
       } else {
         const radius = activeBorderId === "pill" ? rh / 2 : 16;
         ctx.roundRect(rx, ry, rw, rh, radius);
       }
+
+      // Akrilik Zemin Dolgusu
+      if (isBlackBoard) {
+        ctx.fillStyle = "#0A0A0E";
+        ctx.shadowColor = "rgba(0, 0, 0, 0.9)";
+        ctx.shadowBlur = 28;
+        ctx.shadowOffsetY = 12;
+        ctx.fill();
+      } else {
+        ctx.fillStyle = "rgba(255, 255, 255, 0.035)";
+        ctx.shadowColor = "rgba(0, 0, 0, 0.6)";
+        ctx.shadowBlur = 20;
+        ctx.shadowOffsetY = 8;
+        ctx.fill();
+      }
+
+      // Neon Çerçeve Hattı
       ctx.lineWidth = 4;
       if (activeBorderId === "ticket") {
         ctx.setLineDash([12, 10]);
@@ -446,119 +488,325 @@ export default function NeonStudio() {
       }
       ctx.restore();
 
-      // Montaj Vidaları (4x Paslanmaz Krom Yükseltme Vidası)
+      // Montaj Vidaları
       if (activeBorderId === "circle") {
         const screwDist = 320 * 0.65;
-        const screws = [
-          { x: 800 - screwDist, y: 430 - screwDist },
-          { x: 800 + screwDist, y: 430 - screwDist },
-          { x: 800 - screwDist, y: 430 + screwDist },
-          { x: 800 + screwDist, y: 430 + screwDist },
-        ];
-        screws.forEach((s) => {
-          ctx.beginPath();
-          ctx.arc(s.x, s.y, 6.5, 0, Math.PI * 2);
-          ctx.fillStyle = "rgba(255, 255, 255, 0.45)";
-          ctx.fill();
-          ctx.strokeStyle = "rgba(0, 0, 0, 0.9)";
-          ctx.lineWidth = 1.5;
-          ctx.stroke();
-        });
+        for (const s of [
+          { x: 800 - screwDist, y: centerY - screwDist },
+          { x: 800 + screwDist, y: centerY - screwDist },
+          { x: 800 - screwDist, y: centerY + screwDist },
+          { x: 800 + screwDist, y: centerY + screwDist },
+        ]) {
+          drawScrew(s.x, s.y);
+        }
       } else {
         const screwInset = 22;
-        const screws = [
+        for (const s of [
           { x: rx + screwInset, y: ry + screwInset },
           { x: rx + rw - screwInset, y: ry + screwInset },
           { x: rx + screwInset, y: ry + rh - screwInset },
           { x: rx + rw - screwInset, y: ry + rh - screwInset },
-        ];
-        screws.forEach((s) => {
-          ctx.beginPath();
-          ctx.arc(s.x, s.y, 6.5, 0, Math.PI * 2);
-          ctx.fillStyle = "rgba(255, 255, 255, 0.45)";
-          ctx.fill();
-          ctx.strokeStyle = "rgba(0, 0, 0, 0.9)";
-          ctx.lineWidth = 1.5;
-          ctx.stroke();
+        ]) {
+          drawScrew(s.x, s.y);
+        }
+      }
+    } else if (!isContourBoard) {
+      // Düz Dikdörtgen Pleksi Pano (rect_clear veya rect_black)
+      ctx.save();
+      ctx.beginPath();
+      ctx.roundRect(rx, ry, rw, rh, 16);
+      if (isBlackBoard) {
+        ctx.fillStyle = "#0A0A0E";
+        ctx.shadowColor = "rgba(0, 0, 0, 0.9)";
+        ctx.shadowBlur = 30;
+        ctx.shadowOffsetY = 14;
+        ctx.fill();
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.16)";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      } else {
+        ctx.fillStyle = "rgba(255, 255, 255, 0.04)";
+        ctx.shadowColor = "rgba(0, 0, 0, 0.65)";
+        ctx.shadowBlur = 22;
+        ctx.shadowOffsetY = 10;
+        ctx.fill();
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.28)";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      // 4 Köşe Krom Yükseltme Vidaları
+      const screwInset = 22;
+      [
+        { x: rx + screwInset, y: ry + screwInset },
+        { x: rx + rw - screwInset, y: ry + screwInset },
+        { x: rx + screwInset, y: ry + rh - screwInset },
+        { x: rx + rw - screwInset, y: ry + rh - screwInset },
+      ].forEach((s) => drawScrew(s.x, s.y));
+    } else {
+      // Gerçek Lazer Kesim Harf Kontur Tabanı (contour_clear veya contour_black)
+      ctx.save();
+      ctx.lineJoin = "round";
+      ctx.lineCap = "round";
+      ctx.textAlign = spec.align === "left" ? "left" : spec.align === "right" ? "right" : "center";
+      ctx.textBaseline = "middle";
+
+      const contourStrokeWidth = Math.round(canvasFontSize * 0.44);
+
+      if (isBlackBoard) {
+        // Siyah Pleksi Harf Konturu
+        ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
+        ctx.shadowBlur = 24;
+        ctx.shadowOffsetY = 10;
+        ctx.lineWidth = contourStrokeWidth;
+        ctx.strokeStyle = "#0A0A0E";
+        ctx.fillStyle = "#0A0A0E";
+
+        // Harf silueti
+        formattedLines.forEach((lineText, idx) => {
+          const lineY = startY + idx * lineSpacing;
+          const lineX =
+            spec.align === "left"
+              ? contentStartX
+              : spec.align === "right"
+                ? contentStartX + maxTextWidth
+                : textBlockCenterX;
+          ctx.strokeText(lineText, lineX, lineY);
+          ctx.fillText(lineText, lineX, lineY);
+        });
+
+        // Sembol silueti
+        if (hasSymbol) {
+          ctx.save();
+          ctx.translate(symbolX, symbolY);
+          const scale = symbolSize / 24;
+          ctx.scale(scale, scale);
+          const p = new Path2D(activeSymbol.svgPath);
+          ctx.lineWidth = contourStrokeWidth / scale;
+          ctx.stroke(p);
+          ctx.fill(p);
+          ctx.restore();
+        }
+
+        // İnce Parlak Kenar Rim
+        ctx.shadowColor = "transparent";
+        ctx.lineWidth = Math.round(contourStrokeWidth - 4);
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.12)";
+        formattedLines.forEach((lineText, idx) => {
+          const lineY = startY + idx * lineSpacing;
+          const lineX =
+            spec.align === "left"
+              ? contentStartX
+              : spec.align === "right"
+                ? contentStartX + maxTextWidth
+                : textBlockCenterX;
+          ctx.strokeText(lineText, lineX, lineY);
+        });
+      } else {
+        // Şeffaf Pleksi Harf Konturu (Lazer Kenar Kırılması ve Cam Gölgesi)
+        ctx.shadowColor = "rgba(0, 0, 0, 0.75)";
+        ctx.shadowBlur = 18;
+        ctx.shadowOffsetY = 8;
+        ctx.lineWidth = contourStrokeWidth;
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
+        ctx.fillStyle = "rgba(255, 255, 255, 0.02)";
+
+        formattedLines.forEach((lineText, idx) => {
+          const lineY = startY + idx * lineSpacing;
+          const lineX =
+            spec.align === "left"
+              ? contentStartX
+              : spec.align === "right"
+                ? contentStartX + maxTextWidth
+                : textBlockCenterX;
+          ctx.strokeText(lineText, lineX, lineY);
+          ctx.fillText(lineText, lineX, lineY);
+        });
+
+        if (hasSymbol) {
+          ctx.save();
+          ctx.translate(symbolX, symbolY);
+          const scale = symbolSize / 24;
+          ctx.scale(scale, scale);
+          const p = new Path2D(activeSymbol.svgPath);
+          ctx.lineWidth = contourStrokeWidth / scale;
+          ctx.stroke(p);
+          ctx.restore();
+        }
+
+        // Cam Kenar Işığı (3D Lazer Kenar Çizgisi)
+        ctx.shadowColor = "transparent";
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
+        formattedLines.forEach((lineText, idx) => {
+          const lineY = startY + idx * lineSpacing;
+          const lineX =
+            spec.align === "left"
+              ? contentStartX
+              : spec.align === "right"
+                ? contentStartX + maxTextWidth
+                : textBlockCenterX;
+          ctx.strokeText(lineText, lineX, lineY);
         });
       }
-
-      // Canlı Atölyedeki gibi Ölçü Kılavuz Çizgileri
-      ctx.save();
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.25)";
-      ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
-      ctx.lineWidth = 1;
-      ctx.setLineDash([4, 4]);
-
-      const dimY = (activeBorderId === "circle" ? 430 + 320 : ry + rh) + 38;
-      const dimX1 = activeBorderId === "circle" ? 800 - 320 : rx;
-      const dimX2 = activeBorderId === "circle" ? 800 + 320 : rx + rw;
-
-      ctx.beginPath();
-      ctx.moveTo(dimX1, dimY);
-      ctx.lineTo(dimX2, dimY);
-      ctx.stroke();
-      ctx.setLineDash([]);
-
-      // Oklar
-      ctx.beginPath();
-      ctx.moveTo(dimX1 + 8, dimY - 4);
-      ctx.lineTo(dimX1, dimY);
-      ctx.lineTo(dimX1 + 8, dimY + 4);
-      ctx.moveTo(dimX2 - 8, dimY - 4);
-      ctx.lineTo(dimX2, dimY);
-      ctx.lineTo(dimX2 - 8, dimY + 4);
-      ctx.stroke();
-
-      ctx.textAlign = "center";
-      ctx.textBaseline = "top";
-      ctx.font = "700 14px monospace";
-      ctx.fillText(`${estimate.widthCm}cm`, 800, dimY + 6);
-      ctx.font = "400 11px monospace";
-      ctx.fillStyle = "rgba(255, 255, 255, 0.45)";
-      ctx.fillText(
-        activeBorderId === "circle" ? "çap ölçüsü" : "genişlik",
-        800,
-        dimY + 24,
-      );
       ctx.restore();
     }
 
-    // 3. Metin Çizimi (Neon Parıltısı)
+    // 3. Neon Metin Çizimi (Canlı Işık & Cam Çekirdek)
     ctx.save();
-    ctx.textAlign = "center";
+    ctx.textAlign = spec.align === "left" ? "left" : spec.align === "right" ? "right" : "center";
     ctx.textBaseline = "middle";
 
     formattedLines.forEach((lineText, idx) => {
       const lineY = startY + idx * lineSpacing;
-      const textToDraw =
-        idx === formattedLines.length - 1 && activeSymbolId !== "none"
-          ? `${lineText} ${activeSymbol.glyph}`
-          : lineText;
+      const lineX =
+        spec.align === "left"
+          ? contentStartX
+          : spec.align === "right"
+            ? contentStartX + maxTextWidth
+            : textBlockCenterX;
 
       if (isLit) {
-        // 1. Katman: Geniş dış parıltı (neon aurası)
-        ctx.shadowColor = `rgba(${activeColor.glowRgb}, 0.75)`;
+        // 1. Katman: Geniş dış aurası
+        ctx.shadowColor = `rgba(${activeColor.glowRgb}, 0.8)`;
         ctx.shadowBlur = 55;
         ctx.fillStyle = activeColor.hex;
-        ctx.fillText(textToDraw, 800, lineY);
+        ctx.fillText(lineText, lineX, lineY);
 
         // 2. Katman: Orta gövde halesi
-        ctx.shadowBlur = 20;
+        ctx.shadowBlur = 18;
         ctx.shadowColor = activeColor.hex;
         ctx.fillStyle = activeColor.hex;
-        ctx.fillText(textToDraw, 800, lineY);
+        ctx.fillText(lineText, lineX, lineY);
 
-        // 3. Katman: İnce beyaz tüp çekirdeği (harf rengini silmeden canlı neon efekti)
+        // 3. Katman: İnce beyaz tüp çekirdeği
         ctx.shadowColor = "#FFFFFF";
         ctx.shadowBlur = 4;
         ctx.fillStyle = activeColor.hex;
-        ctx.fillText(textToDraw, 800, lineY);
+        ctx.fillText(lineText, lineX, lineY);
       } else {
         ctx.fillStyle = activeColor.unlitHex;
-        ctx.fillText(textToDraw, 800, lineY);
+        ctx.fillText(lineText, lineX, lineY);
       }
     });
+    ctx.restore();
+
+    // 4. Vektörel SVG Sembol Çizimi (Bağımsız Path2D & Kendi Neon Rengi)
+    if (hasSymbol) {
+      ctx.save();
+      ctx.translate(symbolX, symbolY);
+      const scale = symbolSize / 24;
+      ctx.scale(scale, scale);
+
+      const symbolPath = new Path2D(activeSymbol.svgPath);
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+
+      if (isLit) {
+        // 1. Dış Hâlâ
+        ctx.shadowColor = `rgba(${activeSymbolColor.glowRgb}, 0.85)`;
+        ctx.shadowBlur = 32 / scale;
+        ctx.strokeStyle = activeSymbolColor.hex;
+        ctx.lineWidth = 2.4;
+        ctx.stroke(symbolPath);
+
+        // 2. Orta Canlı Hâlâ
+        ctx.shadowBlur = 14 / scale;
+        ctx.shadowColor = activeSymbolColor.hex;
+        ctx.strokeStyle = activeSymbolColor.hex;
+        ctx.lineWidth = 2.0;
+        ctx.stroke(symbolPath);
+
+        // 3. İç Beyaz Tüp Çekirdeği
+        ctx.shadowColor = "#FFFFFF";
+        ctx.shadowBlur = 3 / scale;
+        ctx.strokeStyle = "#FFFFFF";
+        ctx.lineWidth = 1.3;
+        ctx.stroke(symbolPath);
+      } else {
+        ctx.strokeStyle = activeSymbolColor.unlitHex;
+        ctx.lineWidth = 2.0;
+        ctx.stroke(symbolPath);
+      }
+      ctx.restore();
+    }
+
+    // 5. Teknik Ölçü Kılavuz Çizgileri ve Okları (Her Zaman Çizilir)
+    ctx.save();
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
+    ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+    ctx.lineWidth = 1;
+
+    // A) Alt Genişlik Ölçü Oku (X Ekseni)
+    const dimY = (activeBorderId === "circle" ? centerY + 320 : ry + rh) + 38;
+    const dimX1 = activeBorderId === "circle" ? 800 - 320 : rx;
+    const dimX2 = activeBorderId === "circle" ? 800 + 320 : rx + rw;
+
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    ctx.moveTo(dimX1, dimY);
+    ctx.lineTo(dimX2, dimY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Sol/Sağ Ok Başları
+    ctx.beginPath();
+    ctx.moveTo(dimX1 + 8, dimY - 4);
+    ctx.lineTo(dimX1, dimY);
+    ctx.lineTo(dimX1 + 8, dimY + 4);
+    ctx.moveTo(dimX2 - 8, dimY - 4);
+    ctx.lineTo(dimX2, dimY);
+    ctx.lineTo(dimX2 - 8, dimY + 4);
+    ctx.stroke();
+
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+    ctx.font = "700 14px monospace";
+    ctx.fillText(`${estimate.widthCm}cm`, 800, dimY + 6);
+    ctx.font = "400 11px monospace";
+    ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+    ctx.fillText(
+      activeBorderId === "circle" ? "çap ölçüsü" : "akrilik genişlik",
+      800,
+      dimY + 24,
+    );
+
+    // B) Sağ Yükseklik Ölçü Oku (Y Ekseni)
+    const dimHX = (activeBorderId === "circle" ? 800 + 320 : rx + rw) + 38;
+    const dimHY1 = activeBorderId === "circle" ? centerY - 320 : ry;
+    const dimHY2 = activeBorderId === "circle" ? centerY + 320 : ry + rh;
+
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    ctx.moveTo(dimHX, dimHY1);
+    ctx.lineTo(dimHX, dimHY2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Üst/Alt Ok Başları
+    ctx.beginPath();
+    ctx.moveTo(dimHX - 4, dimHY1 + 8);
+    ctx.lineTo(dimHX, dimHY1);
+    ctx.lineTo(dimHX + 4, dimHY1 + 8);
+    ctx.moveTo(dimHX - 4, dimHY2 - 8);
+    ctx.lineTo(dimHX, dimHY2);
+    ctx.lineTo(dimHX + 4, dimHY2 - 8);
+    ctx.stroke();
+
+    ctx.save();
+    ctx.translate(dimHX + 18, (dimHY1 + dimHY2) / 2);
+    ctx.rotate(Math.PI / 2);
+    ctx.textAlign = "center";
+    ctx.textBaseline = "bottom";
+    ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+    ctx.font = "700 14px monospace";
+    ctx.fillText(`${estimate.heightCm}cm`, 0, 0);
+    ctx.font = "400 10px monospace";
+    ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+    ctx.fillText("yükseklik", 0, 14);
+    ctx.restore();
+
     ctx.restore();
 
     // Alt Teknik Bilgi Tablosu
