@@ -155,8 +155,7 @@ export const NEON_COLORS: Record<
     tubeHex: "#fff2cc",
     glowRgb: "255, 184, 0",
     unlitHex: "#fcd34d",
-    unlitDescription:
-      "Altın-sarı silikon: Sıcak amber altın rengi ışık yayar.",
+    unlitDescription: "Altın-sarı silikon: Sıcak amber altın rengi ışık yayar.",
   },
   red: {
     label: "Ateş Kırmızısı",
@@ -470,12 +469,13 @@ export const NEON_TUBE_TECHS: Record<
 const ATELIER_ENGINE_RULES = {
   plexiPerM2Cost: 4000,
   neonPerMeterCost: 100,
-  adapterCost: 120,
-  overheadBaseCost: 250,
+  luminexPerMeterCost: 140, // +%40 Çift yoğunluklu difüzörlü vitrin tipi
   marginMultiplier: 1.5,
   rangeSpreadRatio: 0.08,
   roundingStepTl: 50,
   installationFeeTl: 1000,
+  wirelessDimmerCost: 180, // Kablosuz RF uzaktan kumandalı dimmer modülü
+  outdoorExtraCost: 350, // IP67 su geçirmezlik, silikon conta yalıtımı ve koruma
 } as const;
 
 export function calculateNeonPrice(spec: CustomNeonSpec): PriceEstimate {
@@ -563,6 +563,7 @@ export function calculateNeonPrice(spec: CustomNeonSpec): PriceEstimate {
   }
 
   // Metraj & Güç hesabı
+  const fontNeonMultiplier = spec.fontId === "retro" ? 1.85 : 1.0;
   const symbolExtraMeters =
     spec.symbolId && spec.symbolId !== "none"
       ? NEON_SYMBOLS[spec.symbolId].extraMeters
@@ -572,21 +573,70 @@ export function calculateNeonPrice(spec: CustomNeonSpec): PriceEstimate {
       ? NEON_BORDERS[spec.borderId].extraMeters * (calculatedWidthCm / 75)
       : 0;
 
+  // Harf büyüklüğü seçilen ebadın scaleFactor katsayısıyla büyür
+  const scaleMultiplier = Math.max(
+    calculatedWidthCm / 75,
+    sizeConfig.scaleFactor,
+  );
   const rawMeters =
-    effectiveCharCount * 0.24 * (calculatedWidthCm / 75) +
-    symbolExtraMeters +
-    borderExtraMeters;
+    (effectiveCharCount * 0.24 * scaleMultiplier +
+      symbolExtraMeters +
+      borderExtraMeters) *
+    fontNeonMultiplier;
   const neonLengthMeters = Math.max(0.6, Math.round(rawMeters * 10) / 10);
   const powerWatts = Math.max(10, Math.round(neonLengthMeters * 9.0));
   const recommendedAmps = Math.max(2, Math.ceil((powerWatts * 1.25) / 12));
 
-  // Dahili Atölye Taban Maliyet Hesabı
-  const areaM2 = (calculatedWidthCm * calculatedHeightCm) / 10000;
+  // Trafo / Adaptör maliyeti amper gücüne göre dinamik kademelendirilir:
+  // 2A prize tipi adaptör 120 TL, 4-6A metal trafo 220 TL, 8-10A 350 TL, 12A+ 480 TL
+  const adapterCost =
+    recommendedAmps <= 3
+      ? 120
+      : recommendedAmps <= 6
+        ? 220
+        : recommendedAmps <= 10
+          ? 350
+          : 480;
+
+  // Ebat büyüdükçe kargo kırılma emniyeti ve ahşap kasa/sandık maliyeti:
+  const overheadCost =
+    sizeConfig.widthCm <= 60
+      ? 250
+      : sizeConfig.widthCm <= 75
+        ? 300
+        : sizeConfig.widthCm <= 100
+          ? 380
+          : sizeConfig.widthCm <= 120
+            ? 450
+            : 550;
+
+  // Silikon tüp teknolojisi birim maliyet farkı:
+  const neonUnitCost =
+    spec.tubeTech === "luminex"
+      ? ATELIER_ENGINE_RULES.luminexPerMeterCost
+      : ATELIER_ENGINE_RULES.neonPerMeterCost;
+
+  // Çevresel ve kumanda ek donanımları:
+  const outdoorCost =
+    spec.environment === "outdoor" ? ATELIER_ENGINE_RULES.outdoorExtraCost : 0;
+  const dimmerCost =
+    spec.dimmer === "wireless" ? ATELIER_ENGINE_RULES.wirelessDimmerCost : 0;
+
+  // Dahili Atölye Taban Maliyet Hesabı:
+  // Atölye kütük plaka tahsis kuralı: Müşteri bir boyut seçtiğinde atölye o ebadın
+  // plakasını kesim tezgâhına bağlar. Kontur kesimde dahi levha o ebat kütüğünden
+  // çıktığı için pleksi maliyeti plaka alanından aşağı düşemez.
+  const plateAreaM2 = (sizeConfig.widthCm * sizeConfig.heightCm) / 10000;
+  const contourAreaM2 = (calculatedWidthCm * calculatedHeightCm) / 10000;
+  const billablePlexiAreaM2 = Math.max(contourAreaM2, plateAreaM2);
+
   const rawMaterialCost =
-    areaM2 * ATELIER_ENGINE_RULES.plexiPerM2Cost +
-    neonLengthMeters * ATELIER_ENGINE_RULES.neonPerMeterCost +
-    ATELIER_ENGINE_RULES.adapterCost +
-    ATELIER_ENGINE_RULES.overheadBaseCost;
+    billablePlexiAreaM2 * ATELIER_ENGINE_RULES.plexiPerM2Cost +
+    neonLengthMeters * neonUnitCost +
+    adapterCost +
+    overheadCost +
+    outdoorCost +
+    dimmerCost;
 
   // Satış Fiyatı Hesabı (Kâr marjlı taban)
   let centerPrice =
@@ -597,10 +647,8 @@ export function calculateNeonPrice(spec: CustomNeonSpec): PriceEstimate {
     centerPrice += ATELIER_ENGINE_RULES.installationFeeTl;
   }
 
-  const minRaw =
-    centerPrice * (1 - ATELIER_ENGINE_RULES.rangeSpreadRatio);
-  const maxRaw =
-    centerPrice * (1 + ATELIER_ENGINE_RULES.rangeSpreadRatio);
+  const minRaw = centerPrice * (1 - ATELIER_ENGINE_RULES.rangeSpreadRatio);
+  const maxRaw = centerPrice * (1 + ATELIER_ENGINE_RULES.rangeSpreadRatio);
 
   const minPrice =
     Math.round(minRaw / ATELIER_ENGINE_RULES.roundingStepTl) *

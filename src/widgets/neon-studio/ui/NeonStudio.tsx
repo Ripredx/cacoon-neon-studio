@@ -823,8 +823,8 @@ export default function NeonStudio() {
       },
       { title: "TOPLAM METRAJ", val: `~${estimate.neonLengthMeters} m` },
       {
-        title: "GÜÇ / TRAFO",
-        val: `${estimate.powerWatts} W (${estimate.recommendedAmps}A)`,
+        title: "KULLANIM ALANI",
+        val: spec.environment === "outdoor" ? "Dış Mekan" : "İç Mekan",
       },
       {
         title: "TAHMİNİ ARALIK",
@@ -1980,10 +1980,9 @@ export default function NeonStudio() {
                       </strong>
                     </div>
                     <div class="flex justify-between border-b border-white/[0.07] pb-1.5">
-                      <span>LED Metraj & Güç:</span>
+                      <span>LED Metraj:</span>
                       <strong class="text-[#35E7FF]">
-                        ~{estimate.neonLengthMeters}m · {estimate.powerWatts}W (
-                        {estimate.recommendedAmps}A)
+                        ~{estimate.neonLengthMeters} metre
                       </strong>
                     </div>
                     <div class="flex justify-between">
@@ -2556,10 +2555,10 @@ export default function NeonStudio() {
               </div>
               <div class="hidden sm:block px-3.5 py-3">
                 <span class="block text-[9px] uppercase tracking-wider text-[#35E7FF]">
-                  GÜÇ / TRAFO
+                  KULLANIM
                 </span>
                 <strong class="mt-0.5 block text-sm font-bold text-white">
-                  {estimate.powerWatts} W
+                  {spec.environment === "outdoor" ? "Dış Mekan" : "İç Mekan"}
                 </strong>
               </div>
               <div class="hidden sm:block px-3.5 py-3">

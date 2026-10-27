@@ -1,11 +1,8 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { z } from "zod";
-import {
-  calculateNeonPrice,
-  NEON_SIZES,
-} from "./pricing.ts";
 import { buildCustomNeonWhatsAppUrl } from "../../../features/whatsapp-order/model/buildWhatsAppUrl.ts";
+import { calculateNeonPrice } from "./pricing.ts";
 
 const shopierProductSchema = z.object({
   id: z.string().min(1),
@@ -82,7 +79,11 @@ describe("Custom Neon Pricing & Sizing Engine (6 Sizes & Atelier Cost Formula)",
     };
     const est = calculateNeonPrice(spec);
     assert.ok(est.isSizeConstrained);
-    assert.ok(est.recommendedSizeId === "lg" || est.recommendedSizeId === "xl" || est.recommendedSizeId === "xxl");
+    assert.ok(
+      est.recommendedSizeId === "lg" ||
+        est.recommendedSizeId === "xl" ||
+        est.recommendedSizeId === "xxl",
+    );
   });
 
   it("Supports multiline text splitting with lineCount and scaled height", () => {
@@ -128,7 +129,10 @@ describe("Custom Neon Pricing & Sizing Engine (6 Sizes & Atelier Cost Formula)",
     assert.equal(est.widthCm, 140);
     assert.equal(est.heightCm, 58);
     // Atölye sahibinin uyardığı gibi 135x55 cm pleksi maliyeti zaten ~3.000 TL idi, satış 2600 TL olamaz!
-    assert.ok(est.minPrice >= 5500, `minPrice ${est.minPrice} TL must be profitable`);
+    assert.ok(
+      est.minPrice >= 5500,
+      `minPrice ${est.minPrice} TL must be profitable`,
+    );
   });
 
   it("Includes optional local installation fee (+1.000 TL) when selected", () => {
@@ -169,6 +173,78 @@ describe("Custom Neon Pricing & Sizing Engine (6 Sizes & Atelier Cost Formula)",
     assert.equal(withSymbol.widthCm, 82);
     assert.ok(withSymbol.widthCm > withoutSymbol.widthCm);
     assert.ok(withSymbol.neonLengthMeters > withoutSymbol.neonLengthMeters);
+  });
+
+  it("Combination 4: XL 120cm sign with contour cut guarantees at least 4.000 TL retail price to cover 2.400 TL acrylic sheet cost", () => {
+    const spec = {
+      text: "RESTAURANT",
+      fontId: "modern" as const,
+      colorId: "pink" as const,
+      sizeId: "xl" as const, // 120 cm
+      backboardId: "contour_clear" as const,
+      environment: "indoor" as const,
+    };
+    const est = calculateNeonPrice(spec);
+    // 120x50 pleksi maliyeti 2.400 TL olduğu için satış fiyatı 1.550 TL olamaz, minimum 4.200 TL üstü olmalı
+    assert.ok(
+      est.minPrice >= 4200,
+      `minPrice was ${est.minPrice}, must be >= 4200 TL to cover 2.400 TL acrylic sheet`,
+    );
+  });
+
+  it("Retro double-line font increases neon meterage and price above single line font", () => {
+    const baseSpec = {
+      text: "RETRO",
+      colorId: "pink" as const,
+      sizeId: "md" as const,
+      backboardId: "contour_clear" as const,
+      environment: "indoor" as const,
+    };
+    const singleLine = calculateNeonPrice({ ...baseSpec, fontId: "modern" });
+    const doubleLine = calculateNeonPrice({ ...baseSpec, fontId: "retro" });
+    assert.ok(doubleLine.neonLengthMeters > singleLine.neonLengthMeters);
+    assert.ok(doubleLine.minPrice > singleLine.minPrice);
+  });
+
+  it("Outdoor environment adds IP67 weatherproofing margin", () => {
+    const baseSpec = {
+      text: "OUTDOOR",
+      fontId: "modern" as const,
+      colorId: "cyan" as const,
+      sizeId: "md" as const,
+      backboardId: "contour_clear" as const,
+    };
+    const indoor = calculateNeonPrice({ ...baseSpec, environment: "indoor" });
+    const outdoor = calculateNeonPrice({ ...baseSpec, environment: "outdoor" });
+    assert.ok(outdoor.minPrice >= indoor.minPrice + 400);
+  });
+
+  it("Luminex Pro tube tech reflects premium tube cost", () => {
+    const baseSpec = {
+      text: "LUMINEX",
+      fontId: "modern" as const,
+      colorId: "amber" as const,
+      sizeId: "md" as const,
+      backboardId: "contour_clear" as const,
+      environment: "indoor" as const,
+    };
+    const standard = calculateNeonPrice({ ...baseSpec, tubeTech: "standard" });
+    const luminex = calculateNeonPrice({ ...baseSpec, tubeTech: "luminex" });
+    assert.ok(luminex.minPrice >= standard.minPrice + 100);
+  });
+
+  it("Wireless dimmer adds remote hardware cost", () => {
+    const baseSpec = {
+      text: "DIMMER",
+      fontId: "modern" as const,
+      colorId: "white" as const,
+      sizeId: "md" as const,
+      backboardId: "contour_clear" as const,
+      environment: "indoor" as const,
+    };
+    const standard = calculateNeonPrice({ ...baseSpec, dimmer: "standard" });
+    const wireless = calculateNeonPrice({ ...baseSpec, dimmer: "wireless" });
+    assert.ok(wireless.minPrice >= standard.minPrice + 200);
   });
 });
 

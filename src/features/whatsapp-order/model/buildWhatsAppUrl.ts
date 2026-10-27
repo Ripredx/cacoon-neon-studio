@@ -40,7 +40,8 @@ export function buildCustomNeonWhatsAppUrl(
   const font = NEON_FONTS[spec.fontId]?.label || spec.fontId;
   const color = NEON_COLORS[spec.colorId]?.label || spec.colorId;
   const size = NEON_SIZES[spec.sizeId]?.label || spec.sizeId;
-  const backboard = NEON_BACKBOARDS[spec.backboardId]?.label || spec.backboardId;
+  const backboard =
+    NEON_BACKBOARDS[spec.backboardId]?.label || spec.backboardId;
   const envLabel =
     spec.environment === "outdoor"
       ? "Dış Mekan (IP67 Sıvı Silikon İzolasyonlu & Su Geçirmez)"
@@ -94,9 +95,13 @@ export function buildCustomNeonWhatsAppUrl(
     ...(borderLine ? [borderLine] : []),
     `• Boyut: ${size} (~${estimate.widthCm}x${estimate.heightCm} cm)`,
     pleksiLine,
+    `• LED Tüp: ${spec.tubeTech === "luminex" ? "Luminex™ Pro Çift Yoğunluklu Tüp" : "Splice™ Standart Silikon LED"}`,
+    ...(spec.dimmer === "wireless"
+      ? ["• Dimmer & Kontrol: Kablosuz RF Uzaktan Kumanda"]
+      : []),
     `• Kullanım Alanı: ${envLabel}`,
     mountLine,
-    `• Teknik Metraj: ~${estimate.neonLengthMeters}m LED Tüp · ${estimate.powerWatts}W (${estimate.recommendedAmps}A 12V Adaptör Dahil)`,
+    `• LED Metraj: ~${estimate.neonLengthMeters} metre`,
     estimate.isCustomQuoteRequired
       ? "• Sitedeki Tahmini Durum: 140 cm üzeri özel ebat için doğrudan fiyat teklifi"
       : `• Sitedeki Tahmini Aralık: ${estimate.minPrice.toLocaleString("tr-TR")} TL - ${estimate.maxPrice.toLocaleString("tr-TR")} TL`,
