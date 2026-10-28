@@ -35,6 +35,7 @@ export type NeonTubeTechId = "standard" | "luminex";
 export type NeonDimmerId = "standard" | "wireless";
 export type NeonMountId = "wall" | "hanging";
 export type NeonTextAlign = "left" | "center" | "right";
+export type NeonSymbolPosition = "left" | "right" | "top" | "bottom";
 
 export interface CustomNeonSpec {
   text: string;
@@ -46,6 +47,8 @@ export interface CustomNeonSpec {
   includeInstallation?: boolean;
   symbolId?: NeonSymbolId;
   symbolColorId?: NeonColorId;
+  symbolPosition?: NeonSymbolPosition;
+  symbolScale?: number;
   borderId?: NeonBorderId;
   tubeTech?: NeonTubeTechId;
   dimmer?: NeonDimmerId;
@@ -469,7 +472,7 @@ export const NEON_TUBE_TECHS: Record<
 const ATELIER_ENGINE_RULES = {
   plexiPerM2Cost: 4000,
   neonPerMeterCost: 100,
-  luminexPerMeterCost: 140, // +%40 Çift yoğunluklu difüzörlü vitrin tipi
+  luminexPerMeterCost: 160, // +%60 Çift yoğunluklu difüzörlü vitrin tipi
   marginMultiplier: 1.5,
   rangeSpreadRatio: 0.08,
   roundingStepTl: 50,
@@ -500,8 +503,15 @@ export function calculateNeonPrice(spec: CustomNeonSpec): PriceEstimate {
   const backboardConfig =
     NEON_BACKBOARDS[spec.backboardId] || NEON_BACKBOARDS.contour_clear;
 
-  // Fiziksel Neon Atölye Kuralı: Harf başı min 7.5cm, sembol için +18cm
-  const symbolBonusCm = spec.symbolId && spec.symbolId !== "none" ? 18 : 0;
+  // Fiziksel Neon Atölye Kuralı: Harf başı min 7.5cm, sembol için ölçekli pay
+  const hasActiveSymbol = Boolean(spec.symbolId && spec.symbolId !== "none");
+  const symScale = Math.max(0.6, Math.min(1.8, spec.symbolScale ?? 1));
+  const symPos: NeonSymbolPosition = spec.symbolPosition || "right";
+  const isVerticalSymbol =
+    hasActiveSymbol && (symPos === "top" || symPos === "bottom");
+  const symbolCm = hasActiveSymbol ? Math.round(18 * symScale) : 0;
+  const symbolBonusCm = hasActiveSymbol && !isVerticalSymbol ? symbolCm : 0;
+  const symbolHeightBonusCm = isVerticalSymbol ? symbolCm : 0;
   const minRequiredWidthCm = Math.round(maxLineLength * 7.5 + symbolBonusCm);
 
   const isSizeConstrained = minRequiredWidthCm > sizeConfig.widthCm;
@@ -518,47 +528,111 @@ export function calculateNeonPrice(spec: CustomNeonSpec): PriceEstimate {
   let calculatedHeightCm = sizeConfig.heightCm;
 
   const isContour = backboardConfig.cutType === "contour";
+  const baseNaturalWidth = Math.max(
+    18,
+    Math.round(maxLineLength * 9.5 + symbolBonusCm),
+  );
+  const lineScaleDamping =
+    lineCount > 2 ? Math.max(0.55, 1 - (lineCount - 2) * 0.14) : 1;
+  const sizeRatio =
+    sizeConfig.widthCm > 75
+      ? 1 + (sizeConfig.widthCm / 75 - 1) * lineScaleDamping
+      : 1;
+  const scaledNaturalWidth = Math.round(baseNaturalWidth * sizeRatio);
 
   if (isContour && (!spec.borderId || spec.borderId === "none")) {
-    const naturalWidth = Math.max(
-      18,
-      Math.round(maxLineLength * 9.5 + symbolBonusCm),
-    );
-    const naturalHeight = Math.max(18, Math.round(18 + (lineCount - 1) * 16));
-    calculatedWidthCm = Math.min(naturalWidth, sizeConfig.widthCm);
-    calculatedHeightCm = naturalHeight;
+    if (effectiveCharCount === 1 && !hasActiveSymbol) {
+      calculatedWidthCm = 18;
+      calculatedHeightCm = 18;
+    } else {
+      calculatedWidthCm = Math.min(
+        Math.max(scaledNaturalWidth, isVerticalSymbol ? symbolCm : 18),
+        sizeConfig.widthCm,
+      );
+      const baseHeight = Math.max(
+        18,
+        Math.round(18 + (lineCount - 1) * 16 + symbolHeightBonusCm),
+      );
+      calculatedHeightCm = Math.min(
+        135,
+        Math.max(
+          !isVerticalSymbol && hasActiveSymbol ? symbolCm : 18,
+          Math.round(baseHeight * sizeRatio),
+        ),
+      );
+    }
   } else {
-    if (lineCount > 1) {
-      calculatedHeightCm = Math.round(
-        sizeConfig.heightCm * (1 + (lineCount - 1) * 0.45),
+    if (lineCount >= 3 && scaledNaturalWidth + 16 < sizeConfig.widthCm) {
+      calculatedWidthCm = Math.max(
+        sizeConfig.heightCm,
+        scaledNaturalWidth + 16,
+      );
+    }
+    if (lineCount > 1 || symbolHeightBonusCm > 0) {
+      calculatedHeightCm = Math.min(
+        135,
+        Math.round(
+          sizeConfig.heightCm * (1 + (lineCount - 1) * 0.45) +
+            symbolHeightBonusCm,
+        ),
       );
     }
   }
 
+  // Harf metrajı için çerçeve genişlemesinden önceki doğal içerik kutusu saklanır:
+  // Daire veya kapsül çerçeve eklendiğinde dış pleksi büyür ancak içteki harfler iki katına çıkmaz.
+  const letterBoxWidthCm = calculatedWidthCm;
+  const letterBoxHeightCm = calculatedHeightCm;
+
   if (spec.borderId === "circle") {
-    const contentWidth = Math.max(
-      minRequiredWidthCm,
-      maxLineLength * 7.5 + symbolBonusCm,
-    );
-    const contentHeight = Math.max(16, 16 + (lineCount - 1) * 14);
-    const requiredDiameter =
-      Math.ceil(
-        (Math.sqrt(
-          contentWidth * contentWidth + contentHeight * contentHeight,
-        ) +
-          16) /
-          2,
-      ) * 2;
-    const circleDiameter = Math.max(sizeConfig.widthCm, requiredDiameter);
-    calculatedWidthCm = circleDiameter;
-    calculatedHeightCm = circleDiameter;
+    if (lineCount >= 3) {
+      const multiLineScale = 1 + (lineCount - 2) * 0.08;
+      const symExtraDia = hasActiveSymbol ? Math.round(symbolCm * 0.45) : 0;
+      const scaledDia =
+        Math.ceil((sizeConfig.widthCm * multiLineScale + symExtraDia) / 2) * 2;
+      const minSafeDia =
+        Math.ceil(Math.max(60, minRequiredWidthCm + 12) / 2) * 2;
+      const circleDiameter = Math.min(150, Math.max(scaledDia, minSafeDia));
+      calculatedWidthCm = circleDiameter;
+      calculatedHeightCm = circleDiameter;
+    } else {
+      const contentWidth = Math.max(
+        minRequiredWidthCm,
+        maxLineLength * 7.5 + symbolBonusCm,
+      );
+      const contentHeight = Math.max(
+        16,
+        Math.round(16 + (lineCount - 1) * 14 + symbolHeightBonusCm),
+      );
+      const marginCm =
+        lineCount === 1 && !hasActiveSymbol && maxLineLength <= 4 ? 10 : 16;
+      const requiredDiameter =
+        Math.ceil(
+          (Math.sqrt(
+            contentWidth * contentWidth + contentHeight * contentHeight,
+          ) +
+            marginCm) /
+            2,
+        ) * 2;
+      const circleDiameter = Math.max(sizeConfig.widthCm, requiredDiameter);
+      calculatedWidthCm = circleDiameter;
+      calculatedHeightCm = circleDiameter;
+    }
   } else if (spec.borderId === "pill") {
     if (minRequiredWidthCm + 14 > sizeConfig.widthCm) {
       calculatedWidthCm = minRequiredWidthCm + 14;
     }
+    const pillLineStepCm = lineCount >= 3 ? 10.5 : 16;
     calculatedHeightCm = Math.max(
       Math.round(calculatedWidthCm * 0.48),
-      18 + (lineCount - 1) * 16 + 10,
+      Math.round(
+        18 + (lineCount - 1) * pillLineStepCm + symbolHeightBonusCm + 10,
+      ),
+    );
+    // Kapsül (oval) her zaman yatay stadyum formundadır (genişlik >= yükseklik * 1.45)
+    calculatedWidthCm = Math.max(
+      calculatedWidthCm,
+      Math.round(calculatedHeightCm * 1.45),
     );
   }
 
@@ -566,23 +640,39 @@ export function calculateNeonPrice(spec: CustomNeonSpec): PriceEstimate {
   const fontNeonMultiplier = spec.fontId === "retro" ? 1.85 : 1.0;
   const symbolExtraMeters =
     spec.symbolId && spec.symbolId !== "none"
-      ? NEON_SYMBOLS[spec.symbolId].extraMeters
+      ? NEON_SYMBOLS[spec.symbolId].extraMeters * symScale
       : 0;
   const borderExtraMeters =
     spec.borderId && spec.borderId !== "none"
       ? NEON_BORDERS[spec.borderId].extraMeters * (calculatedWidthCm / 75)
       : 0;
 
-  // Harf büyüklüğü seçilen ebadın scaleFactor katsayısıyla büyür
-  const scaleMultiplier = Math.max(
-    calculatedWidthCm / 75,
-    sizeConfig.scaleFactor,
+  // Harf başı silikon neon sarfiyatı:
+  // Karakterin fiziksel boyutuna (genişlik/yükseklik) göre hesaplanır.
+  // Sıkışık çok satırlı metinlerde harfler küçülür (min 0.16m), ferah büyük tabelalarda büyür (maks 0.38m).
+  const availableLetterWidthCm = Math.max(
+    14,
+    letterBoxWidthCm - (hasActiveSymbol && !isVerticalSymbol ? symbolCm : 0),
   );
-  const rawMeters =
-    (effectiveCharCount * 0.24 * scaleMultiplier +
-      symbolExtraMeters +
-      borderExtraMeters) *
-    fontNeonMultiplier;
+  const approxCharWidthCm = availableLetterWidthCm / Math.max(maxLineLength, 1);
+  const availableLetterHeightCm = Math.max(
+    14,
+    letterBoxHeightCm - (isVerticalSymbol ? symbolCm : 0),
+  );
+  const approxCharHeightCm = availableLetterHeightCm / Math.max(lineCount, 1);
+  const effectiveCharDimCm = Math.min(
+    Math.max(7.0, approxCharWidthCm * 1.15),
+    Math.max(7.5, approxCharHeightCm),
+  );
+  const singleStrokeMetersPerChar = Math.min(
+    0.38,
+    Math.max(0.16, (effectiveCharDimCm / 14) * 0.24),
+  );
+
+  // Retro font (çift kanal paralel tüp) sadece harfleri 1.85 ile çarpar; sembol ve çerçeve tek hat kalır.
+  const lettersMeterage =
+    effectiveCharCount * singleStrokeMetersPerChar * fontNeonMultiplier;
+  const rawMeters = lettersMeterage + symbolExtraMeters + borderExtraMeters;
   const neonLengthMeters = Math.max(0.6, Math.round(rawMeters * 10) / 10);
   const powerWatts = Math.max(10, Math.round(neonLengthMeters * 9.0));
   const recommendedAmps = Math.max(2, Math.ceil((powerWatts * 1.25) / 12));

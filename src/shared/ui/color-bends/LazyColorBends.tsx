@@ -2,8 +2,9 @@ import { useEffect, useState } from "preact/hooks";
 import type { ColorBendsProps } from "./ColorBends";
 
 export default function LazyColorBends(props: ColorBendsProps) {
-  const [LoadedComponent, setLoadedComponent] =
-    useState<null | ((p: ColorBendsProps) => preact.JSX.Element)>(null);
+  const [LoadedComponent, setLoadedComponent] = useState<
+    null | ((p: ColorBendsProps) => preact.JSX.Element)
+  >(null);
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -39,7 +40,7 @@ export default function LazyColorBends(props: ColorBendsProps) {
     };
 
     events.forEach((evt) =>
-      window.addEventListener(evt, triggerLoad, { passive: true, once: true })
+      window.addEventListener(evt, triggerLoad, { passive: true, once: true }),
     );
 
     return () => {

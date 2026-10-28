@@ -165,7 +165,7 @@ export default function ColorBends({
     const geometry = new THREE.PlaneGeometry(2, 2);
     const uColorsArray = Array.from(
       { length: MAX_COLORS },
-      () => new THREE.Vector3(0, 0, 0)
+      () => new THREE.Vector3(0, 0, 0),
     );
     const material = new THREE.ShaderMaterial({
       vertexShader: vert,
@@ -263,7 +263,10 @@ export default function ColorBends({
       material.dispose();
       renderer.dispose();
       renderer.forceContextLoss();
-      if (renderer.domElement && renderer.domElement.parentElement === container) {
+      if (
+        renderer.domElement &&
+        renderer.domElement.parentElement === container
+      ) {
         container.removeChild(renderer.domElement);
       }
     };
@@ -304,14 +307,14 @@ export default function ColorBends({
       const v =
         h.length === 3
           ? [
-              parseInt(h[0] + h[0], 16),
-              parseInt(h[1] + h[1], 16),
-              parseInt(h[2] + h[2], 16),
+              Number.parseInt(h[0] + h[0], 16),
+              Number.parseInt(h[1] + h[1], 16),
+              Number.parseInt(h[2] + h[2], 16),
             ]
           : [
-              parseInt(h.slice(0, 2), 16),
-              parseInt(h.slice(2, 4), 16),
-              parseInt(h.slice(4, 6), 16),
+              Number.parseInt(h.slice(0, 2), 16),
+              Number.parseInt(h.slice(2, 4), 16),
+              Number.parseInt(h.slice(4, 6), 16),
             ];
       return new THREE.Vector3(v[0] / 255, v[1] / 255, v[2] / 255);
     };
@@ -353,7 +356,9 @@ export default function ColorBends({
       pointerTargetRef.current.set(x, y);
     };
 
-    window.addEventListener("pointermove", handlePointerMove, { passive: true });
+    window.addEventListener("pointermove", handlePointerMove, {
+      passive: true,
+    });
     return () => {
       window.removeEventListener("pointermove", handlePointerMove);
     };

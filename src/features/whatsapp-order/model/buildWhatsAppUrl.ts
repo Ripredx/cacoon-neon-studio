@@ -24,6 +24,8 @@ export function buildLiveStudioUrl(
     env: spec.environment,
     sym: spec.symbolId || "none",
     symColor: spec.symbolColorId || spec.colorId,
+    symPos: spec.symbolPosition || "right",
+    symScale: String(spec.symbolScale ?? 1),
     border: spec.borderId || "none",
   });
   return `${base.replace(/\/$/, "")}/tasarla?${params.toString()}`;
@@ -47,9 +49,17 @@ export function buildCustomNeonWhatsAppUrl(
       ? "Dış Mekan (IP67 Sıvı Silikon İzolasyonlu & Su Geçirmez)"
       : "İç Mekan (IP20 Toz Korumalı)";
 
+  const posLabels: Record<string, string> = {
+    left: "Sol",
+    right: "Sağ",
+    top: "Üst",
+    bottom: "Alt",
+  };
+  const symPosLabel = posLabels[spec.symbolPosition || "right"] || "Sağ";
+  const symScaleVal = spec.symbolScale ?? 1;
   const symbolLine =
     spec.symbolId && spec.symbolId !== "none"
-      ? `• Ek Sembol: ${NEON_SYMBOLS[spec.symbolId]?.label || spec.symbolId} (${NEON_COLORS[spec.symbolColorId || spec.colorId]?.label || ""})`
+      ? `• Ek Sembol: ${NEON_SYMBOLS[spec.symbolId]?.label || spec.symbolId} (${NEON_COLORS[spec.symbolColorId || spec.colorId]?.label || ""} · Konum: ${symPosLabel}${symScaleVal !== 1 ? ` · Ölçek: ${symScaleVal}x` : ""})`
       : null;
 
   const borderLine =

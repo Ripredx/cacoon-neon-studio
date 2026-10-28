@@ -246,6 +246,244 @@ describe("Custom Neon Pricing & Sizing Engine (6 Sizes & Atelier Cost Formula)",
     const wireless = calculateNeonPrice({ ...baseSpec, dimmer: "wireless" });
     assert.ok(wireless.minPrice >= standard.minPrice + 200);
   });
+
+  it("Updates calculated dimensions dynamically when size is changed in studio ('Open Late' across sizes)", () => {
+    const baseSpec = {
+      text: "Open Late",
+      fontId: "script" as const,
+      colorId: "cyan" as const,
+      backboardId: "contour_clear" as const,
+      environment: "indoor" as const,
+    };
+    const xs = calculateNeonPrice({ ...baseSpec, sizeId: "xs" });
+    const sm = calculateNeonPrice({ ...baseSpec, sizeId: "sm" });
+    const md = calculateNeonPrice({ ...baseSpec, sizeId: "md" });
+    const lg = calculateNeonPrice({ ...baseSpec, sizeId: "lg" });
+    const xl = calculateNeonPrice({ ...baseSpec, sizeId: "xl" });
+    const xxl = calculateNeonPrice({ ...baseSpec, sizeId: "xxl" });
+
+    assert.equal(xs.widthCm, 45);
+    assert.equal(sm.widthCm, 60);
+    assert.equal(md.widthCm, 75);
+    assert.equal(lg.widthCm, 100);
+    assert.equal(xl.widthCm, 120);
+    assert.equal(xxl.widthCm, 140);
+
+    assert.ok(lg.heightCm > md.heightCm);
+    assert.ok(xl.heightCm > lg.heightCm);
+    assert.ok(xxl.heightCm > xl.heightCm);
+  });
+
+  it("Prevents vertical multi-line narrow text from inflating to 140 cm horizontal width in XXL", () => {
+    const verticalSpec = {
+      text: "Open\nLatee\neeeee\neeeee",
+      fontId: "script" as const,
+      colorId: "cyan" as const,
+      symbolId: "moon" as const,
+      sizeId: "xxl" as const,
+      backboardId: "contour_clear" as const,
+      environment: "indoor" as const,
+    };
+    const est = calculateNeonPrice(verticalSpec);
+    assert.equal(est.lineCount, 4);
+    assert.ok(
+      est.widthCm < 110,
+      `Expected narrow vertical sign width < 110 cm, got ${est.widthCm} cm`,
+    );
+    assert.ok(
+      est.heightCm <= 135,
+      `Expected vertical sign height <= 135 cm, got ${est.heightCm} cm`,
+    );
+  });
+
+  it("Adjusts dimensions and meterage when symbolPosition and symbolScale are customized", () => {
+    const baseSpec = {
+      text: "OPEN",
+      fontId: "modern" as const,
+      colorId: "pink" as const,
+      symbolId: "moon" as const,
+      sizeId: "md" as const,
+      backboardId: "contour_clear" as const,
+      environment: "indoor" as const,
+    };
+    const rightNormal = calculateNeonPrice({
+      ...baseSpec,
+      symbolPosition: "right",
+      symbolScale: 1,
+    });
+    const bottomLarge = calculateNeonPrice({
+      ...baseSpec,
+      symbolPosition: "bottom",
+      symbolScale: 1.5,
+    });
+
+    assert.ok(rightNormal.widthCm > bottomLarge.widthCm);
+    assert.ok(bottomLarge.heightCm > rightNormal.heightCm);
+    assert.ok(bottomLarge.neonLengthMeters > rightNormal.neonLengthMeters);
+  });
+
+  it("User Scenario: Calculates physically calibrated meterage (~9.8m, NOT 12.4m) for 29-letter 6-line retro font with diamond symbol", () => {
+    const denseMultiLineSpec = {
+      text: "OPEN\nLATEE\nEEEEE\nEEEEE\nEEEEE\nEEEEE",
+      fontId: "retro" as const, // Double stroke (1.85x)
+      colorId: "pink" as const,
+      symbolId: "diamond" as const, // 0.9m single stroke
+      sizeId: "sm" as const, // 60cm
+      backboardId: "rect_black" as const,
+      environment: "indoor" as const,
+    };
+    const est = calculateNeonPrice(denseMultiLineSpec);
+    assert.equal(est.charCount, 29);
+    assert.equal(est.lineCount, 6);
+    assert.equal(est.widthCm, 60);
+    assert.equal(est.heightCm, 85);
+    // Previously bugged at 12.4m; physical calibration must yield 9.0m - 10.2m
+    assert.ok(
+      est.neonLengthMeters >= 9.0 && est.neonLengthMeters <= 10.2,
+      `Expected neonLengthMeters between 9.0 and 10.2m, got ${est.neonLengthMeters}m`,
+    );
+    assert.ok(est.powerWatts < 100);
+    assert.ok(
+      est.minPrice >= 5000 && est.minPrice <= 6500,
+      `Expected minPrice between 5000 and 6500 TL, got ${est.minPrice} TL`,
+    );
+  });
+
+  it("Isolates symbol meterage: Double-stroke retro font does NOT multiply single-stroke symbols by 1.85x", () => {
+    const withoutSymbol = calculateNeonPrice({
+      text: "RETRO",
+      fontId: "retro" as const,
+      colorId: "cyan" as const,
+      sizeId: "md" as const,
+      backboardId: "contour_clear" as const,
+      environment: "indoor" as const,
+    });
+    const withDiamond = calculateNeonPrice({
+      text: "RETRO",
+      fontId: "retro" as const,
+      colorId: "cyan" as const,
+      symbolId: "diamond" as const, // 0.55m
+      sizeId: "md" as const,
+      backboardId: "contour_clear" as const,
+      environment: "indoor" as const,
+    });
+    const meterDiff =
+      Math.round(
+        (withDiamond.neonLengthMeters - withoutSymbol.neonLengthMeters) * 10,
+      ) / 10;
+    // Diamond extraMeters is 0.55m. Difference should be ~0.5m - 0.6m, NOT 0.55 * 1.85 = 1.0m
+    assert.ok(
+      meterDiff >= 0.5 && meterDiff <= 0.6,
+      `Expected symbol meterage diff ~0.55m, got ${meterDiff}m`,
+    );
+  });
+
+  it("Isolates border meterage: Double-stroke retro font does NOT multiply border meterage by 1.85x", () => {
+    const withoutBorder = calculateNeonPrice({
+      text: "BAR",
+      fontId: "retro" as const,
+      colorId: "amber" as const,
+      sizeId: "sm" as const,
+      backboardId: "rect_clear" as const,
+      environment: "indoor" as const,
+    });
+    const withRectangleBorder = calculateNeonPrice({
+      text: "BAR",
+      fontId: "retro" as const,
+      colorId: "amber" as const,
+      borderId: "rectangle" as const,
+      sizeId: "sm" as const,
+      backboardId: "rect_clear" as const,
+      environment: "indoor" as const,
+    });
+    assert.ok(
+      withRectangleBorder.neonLengthMeters > withoutBorder.neonLengthMeters,
+    );
+    // Border extra meter for rectangle at 60cm is ~1.8m * (60/75) = 1.44m
+    const borderDiff =
+      withRectangleBorder.neonLengthMeters - withoutBorder.neonLengthMeters;
+    assert.ok(
+      borderDiff <= 2.0,
+      `Expected border diff <= 2.0m, got ${borderDiff}m`,
+    );
+  });
+
+  it("Handles dense 4-line 44-character text without NaN or dimension collapse", () => {
+    const denseSpec = {
+      text: "12345678901\n12345678901\n12345678901\n12345678901",
+      fontId: "modern" as const,
+      colorId: "green" as const,
+      sizeId: "lg" as const,
+      backboardId: "rect_clear" as const,
+      environment: "indoor" as const,
+    };
+    const est = calculateNeonPrice(denseSpec);
+    assert.equal(est.charCount, 44);
+    assert.equal(est.lineCount, 4);
+    assert.ok(!Number.isNaN(est.minPrice));
+    assert.ok(!Number.isNaN(est.neonLengthMeters));
+    assert.ok(est.neonLengthMeters >= 6.0 && est.neonLengthMeters <= 12.0);
+    assert.ok(est.minPrice >= 3500);
+  });
+
+  it("Maintains 1:1 circle and horizontal pill geometry without inflating letter meterage on 6-line text", () => {
+    const baseSpec = {
+      text: "OPEN\nLATEE\nEEEEE\nEEEEE\nEEEEE\nEEEEE",
+      fontId: "retro" as const,
+      colorId: "magenta" as const,
+      symbolId: "cocktail" as const,
+      symbolPosition: "left" as const,
+      symbolScale: 1.8,
+      sizeId: "sm" as const,
+      backboardId: "rect_black" as const,
+      environment: "indoor" as const,
+    };
+    const circleEst = calculateNeonPrice({ ...baseSpec, borderId: "circle" });
+    const pillEst = calculateNeonPrice({ ...baseSpec, borderId: "pill" });
+
+    // Circle must be 1:1 square dimensions and not inflate neon to 23m
+    assert.equal(circleEst.widthCm, circleEst.heightCm);
+    assert.ok(circleEst.neonLengthMeters <= 13.0);
+
+    // Pill must always be a horizontal capsule (width >= height * 1.4)
+    assert.ok(pillEst.widthCm >= Math.round(pillEst.heightCm * 1.4));
+    assert.ok(pillEst.neonLengthMeters <= 13.0);
+
+    // Multi-line circle diameter must scale across size tiers instead of locking at 112cm
+    const circleSm = calculateNeonPrice({
+      ...baseSpec,
+      symbolId: "none",
+      borderId: "circle",
+      sizeId: "sm",
+    });
+    const circleMd = calculateNeonPrice({
+      ...baseSpec,
+      symbolId: "none",
+      borderId: "circle",
+      sizeId: "md",
+    });
+    const circleLg = calculateNeonPrice({
+      ...baseSpec,
+      symbolId: "none",
+      borderId: "circle",
+      sizeId: "lg",
+    });
+    assert.ok(circleMd.widthCm > circleSm.widthCm);
+    assert.ok(circleLg.widthCm > circleMd.widthCm);
+
+    // Short 1-line 'TEST' in Mini (45cm) circle yields exact 45x45cm
+    const testXsCircle = calculateNeonPrice({
+      text: "TEST",
+      fontId: "modern",
+      colorId: "cyan",
+      sizeId: "xs",
+      backboardId: "rect_clear",
+      borderId: "circle",
+      environment: "indoor",
+    });
+    assert.equal(testXsCircle.widthCm, 45);
+    assert.equal(testXsCircle.heightCm, 45);
+  });
 });
 
 describe("Turkish Locale & WhatsApp URL Encoding", () => {

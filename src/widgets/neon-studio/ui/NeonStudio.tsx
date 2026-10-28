@@ -14,6 +14,7 @@ import {
   type NeonFontId,
   type NeonSizeId,
   type NeonSymbolId,
+  type NeonSymbolPosition,
   type NeonTextAlign,
   type NeonTubeTechId,
   calculateNeonPrice,
@@ -49,6 +50,8 @@ const DEFAULT_SPEC: CustomNeonSpec = {
   environment: "indoor",
   symbolId: "none",
   symbolColorId: "cyan",
+  symbolPosition: "right",
+  symbolScale: 1,
   borderId: "none",
   tubeTech: "standard",
   dimmer: "wireless",
@@ -86,13 +89,15 @@ function parseInitialSpecFromUrl(): CustomNeonSpec {
   const rawSym = params.get("sym") as NeonSymbolId | null;
   const rawSymColor = (params.get("symColor") ||
     params.get("scolor")) as NeonColorId | null;
+  const rawSymPos = params.get("symPos") as NeonSymbolPosition | null;
+  const rawSymScale = Number(params.get("symScale"));
   const rawBorder = params.get("border") as NeonBorderId | null;
   const rawTech = params.get("tech") as NeonTubeTechId | null;
 
   return {
     text:
       rawText && rawText.trim().length > 0
-        ? rawText.slice(0, 30)
+        ? rawText.slice(0, 65)
         : DEFAULT_SPEC.text,
     fontId: rawFont && rawFont in NEON_FONTS ? rawFont : DEFAULT_SPEC.fontId,
     colorId:
@@ -111,6 +116,17 @@ function parseInitialSpecFromUrl(): CustomNeonSpec {
       rawSymColor && rawSymColor in NEON_COLORS
         ? rawSymColor
         : DEFAULT_SPEC.symbolColorId,
+    symbolPosition:
+      rawSymPos === "left" ||
+      rawSymPos === "right" ||
+      rawSymPos === "top" ||
+      rawSymPos === "bottom"
+        ? rawSymPos
+        : DEFAULT_SPEC.symbolPosition,
+    symbolScale:
+      !Number.isNaN(rawSymScale) && rawSymScale >= 0.6 && rawSymScale <= 1.8
+        ? Number(rawSymScale.toFixed(2))
+        : DEFAULT_SPEC.symbolScale,
     borderId:
       rawBorder && rawBorder in NEON_BORDERS
         ? rawBorder
@@ -137,8 +153,60 @@ export default function NeonStudio() {
   );
   const [copiedLink, setCopiedLink] = useState<boolean>(false);
   const [isMobileSheetOpen, setIsMobileSheetOpen] = useState<boolean>(false);
+  const [showConstraintTip, setShowConstraintTip] = useState<boolean>(false);
   const stageRef = useRef<HTMLDivElement>(null);
+  const contentBoxRef = useRef<HTMLDivElement>(null);
+  const [contentSizePx, setContentSizePx] = useState<{ w: number; h: number }>({
+    w: 0,
+    h: 0,
+  });
+  const [viewportPx, setViewportPx] = useState<{ w: number; h: number }>({
+    w: 1280,
+    h: 800,
+  });
   const debounceRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onResize = () => {
+      setViewportPx({ w: window.innerWidth, h: window.innerHeight });
+    };
+    onResize();
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  useEffect(() => {
+    const el = contentBoxRef.current;
+    if (!el || typeof window === "undefined") return;
+    const measure = () => {
+      const w = Math.round(el.offsetWidth);
+      const h = Math.round(el.offsetHeight);
+      if (w > 0 && h > 0) {
+        setContentSizePx((prev) =>
+          Math.abs(prev.w - w) <= 1 && Math.abs(prev.h - h) <= 1
+            ? prev
+            : { w, h },
+        );
+      }
+    };
+    measure();
+    if (typeof ResizeObserver !== "undefined") {
+      const ro = new ResizeObserver(measure);
+      ro.observe(el);
+      return () => ro.disconnect();
+    }
+  }, [
+    spec.text,
+    spec.fontId,
+    spec.sizeId,
+    spec.symbolId,
+    spec.symbolPosition,
+    spec.symbolScale,
+    spec.borderId,
+    igniteTick,
+    viewportPx.w,
+  ]);
 
   useEffect(() => {
     const fromUrl = parseInitialSpecFromUrl();
@@ -173,11 +241,22 @@ export default function NeonStudio() {
   const rawDisplay = spec.text.trim().length > 0 ? spec.text : "Open Late";
   const displayLines = rawDisplay
     .split(/\r?\n/)
-    .filter((l) => l.trim().length > 0);
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0);
   const formattedLines = displayLines.map((line) =>
     activeFont.uppercase ? line.toLocaleUpperCase("tr-TR") : line,
   );
   const formattedText = formattedLines.join(" / ");
+  const activeSymbolPos: NeonSymbolPosition = spec.symbolPosition || "right";
+  const activeSymbolScale = Math.max(0.6, Math.min(1.8, spec.symbolScale ?? 1));
+  const symbolFlexDirClass =
+    activeSymbolPos === "top"
+      ? "flex-col-reverse"
+      : activeSymbolPos === "bottom"
+        ? "flex-col"
+        : activeSymbolPos === "left"
+          ? "flex-row-reverse"
+          : "flex-row";
 
   function syncUrlHash(next: CustomNeonSpec) {
     if (typeof window === "undefined") return;
@@ -195,6 +274,8 @@ export default function NeonStudio() {
       env: next.environment,
       sym: next.symbolId || "none",
       symColor: next.symbolColorId || next.colorId,
+      symPos: next.symbolPosition || "right",
+      symScale: String(next.symbolScale ?? 1),
       border: next.borderId || "none",
       tech: next.tubeTech || "standard",
     });
@@ -279,7 +360,9 @@ export default function NeonStudio() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
-      const lastOrderTime = Number(sessionStorage.getItem("ccneons_order_cooldown") || 0);
+      const lastOrderTime = Number(
+        sessionStorage.getItem("ccneons_order_cooldown") || 0,
+      );
       const elapsed = Math.floor((Date.now() - lastOrderTime) / 1000);
       if (elapsed < 15) {
         setCooldownSeconds(15 - elapsed);
@@ -357,7 +440,8 @@ export default function NeonStudio() {
     );
 
     // 1. Metin & Sembol Boyutlandırması ve Ölçümleme
-    const hasSymbol = activeSymbolId !== "none" && Boolean(activeSymbol.svgPath);
+    const hasSymbol =
+      activeSymbolId !== "none" && Boolean(activeSymbol.svgPath);
     const maxCharsInLine = Math.max(...formattedLines.map((l) => l.length), 1);
     const circleFontScale =
       activeBorderId === "circle"
@@ -377,36 +461,156 @@ export default function NeonStudio() {
     let textLineWidths = formattedLines.map((l) => ctx.measureText(l).width);
     let maxTextWidth = Math.max(...textLineWidths, 40);
     const symbolGap = 28;
-    let symbolSize = Math.round(canvasFontSize * 1.05);
+    const isCanvasVerticalSymbol =
+      hasSymbol && (activeSymbolPos === "top" || activeSymbolPos === "bottom");
+    const symbolScale = 1.05 * activeSymbolScale;
+    let symbolSize = Math.round(canvasFontSize * symbolScale);
 
-    let totalContentWidth = maxTextWidth + (hasSymbol ? symbolGap + symbolSize : 0);
+    let totalContentWidth = isCanvasVerticalSymbol
+      ? Math.max(maxTextWidth, symbolSize)
+      : maxTextWidth + (hasSymbol ? symbolGap + symbolSize : 0);
 
-    const maxAllowedWidth = activeBorderId === "circle" ? 480 : 1160;
+    const maxAllowedWidth = activeBorderId === "circle" ? 460 : 1160;
     if (totalContentWidth > maxAllowedWidth) {
       const factor = maxAllowedWidth / totalContentWidth;
       canvasFontSize = Math.max(26, Math.floor(canvasFontSize * factor));
       lineSpacing = Math.round(canvasFontSize * 1.25);
-      symbolSize = Math.round(canvasFontSize * 1.05);
+      symbolSize = Math.round(canvasFontSize * symbolScale);
       ctx.font = `${canvasFontWeight} ${canvasFontSize}px ${activeFont.cssFamily}`;
       textLineWidths = formattedLines.map((l) => ctx.measureText(l).width);
       maxTextWidth = Math.max(...textLineWidths, 40);
-      totalContentWidth = maxTextWidth + (hasSymbol ? symbolGap + symbolSize : 0);
+      totalContentWidth = isCanvasVerticalSymbol
+        ? Math.max(maxTextWidth, symbolSize)
+        : maxTextWidth + (hasSymbol ? symbolGap + symbolSize : 0);
     }
 
-    const textBlockHeight = (formattedLines.length - 1) * lineSpacing;
-    const totalSignHeight = Math.max(textBlockHeight + canvasFontSize, hasSymbol ? symbolSize : 0);
+    let textBlockHeight = (formattedLines.length - 1) * lineSpacing;
+    let totalSignHeight = isCanvasVerticalSymbol
+      ? textBlockHeight + canvasFontSize + symbolGap + symbolSize
+      : Math.max(textBlockHeight + canvasFontSize, hasSymbol ? symbolSize : 0);
+    const maxAllowedHeight = activeBorderId === "circle" ? 430 : 450;
+    if (totalSignHeight > maxAllowedHeight) {
+      const hFactor = maxAllowedHeight / totalSignHeight;
+      canvasFontSize = Math.max(24, Math.floor(canvasFontSize * hFactor));
+      lineSpacing = Math.round(canvasFontSize * 1.25);
+      symbolSize = Math.round(canvasFontSize * symbolScale);
+      ctx.font = `${canvasFontWeight} ${canvasFontSize}px ${activeFont.cssFamily}`;
+      textLineWidths = formattedLines.map((l) => ctx.measureText(l).width);
+      maxTextWidth = Math.max(...textLineWidths, 40);
+      totalContentWidth = isCanvasVerticalSymbol
+        ? Math.max(maxTextWidth, symbolSize)
+        : maxTextWidth + (hasSymbol ? symbolGap + symbolSize : 0);
+      textBlockHeight = (formattedLines.length - 1) * lineSpacing;
+      totalSignHeight = isCanvasVerticalSymbol
+        ? textBlockHeight + canvasFontSize + symbolGap + symbolSize
+        : Math.max(
+            textBlockHeight + canvasFontSize,
+            hasSymbol ? symbolSize : 0,
+          );
+    }
+
+    if (activeBorderId === "circle") {
+      const contentDiag = Math.hypot(totalContentWidth, totalSignHeight);
+      const maxCircleDiag = 480;
+      if (contentDiag > maxCircleDiag) {
+        const dFactor = maxCircleDiag / contentDiag;
+        canvasFontSize = Math.max(24, Math.floor(canvasFontSize * dFactor));
+        lineSpacing = Math.round(canvasFontSize * 1.25);
+        symbolSize = Math.round(canvasFontSize * symbolScale);
+        ctx.font = `${canvasFontWeight} ${canvasFontSize}px ${activeFont.cssFamily}`;
+        textLineWidths = formattedLines.map((l) => ctx.measureText(l).width);
+        maxTextWidth = Math.max(...textLineWidths, 40);
+        totalContentWidth = isCanvasVerticalSymbol
+          ? Math.max(maxTextWidth, symbolSize)
+          : maxTextWidth + (hasSymbol ? symbolGap + symbolSize : 0);
+        textBlockHeight = (formattedLines.length - 1) * lineSpacing;
+        totalSignHeight = isCanvasVerticalSymbol
+          ? textBlockHeight + canvasFontSize + symbolGap + symbolSize
+          : Math.max(
+              textBlockHeight + canvasFontSize,
+              hasSymbol ? symbolSize : 0,
+            );
+      }
+    }
     const centerY = 430;
-    const startY = centerY - textBlockHeight / 2;
+    const opticalYOffset = Math.round(canvasFontSize * 0.06);
+    const startY = isCanvasVerticalSymbol
+      ? activeSymbolPos === "top"
+        ? centerY -
+          totalSignHeight / 2 +
+          symbolSize +
+          symbolGap +
+          Math.round(canvasFontSize * 0.5) +
+          opticalYOffset
+        : centerY -
+          totalSignHeight / 2 +
+          Math.round(canvasFontSize * 0.5) +
+          opticalYOffset
+      : centerY - textBlockHeight / 2 + opticalYOffset;
 
-    // Yatay Yerleşim Koordinatları
+    // Yatay & Dikey Yerleşim Koordinatları
     const contentStartX = 800 - totalContentWidth / 2;
-    const textBlockCenterX = contentStartX + maxTextWidth / 2;
-    const symbolX = contentStartX + maxTextWidth + symbolGap;
-    const symbolY = centerY - symbolSize / 2;
+    const textBlockCenterX = isCanvasVerticalSymbol
+      ? 800
+      : hasSymbol && activeSymbolPos === "left"
+        ? contentStartX + symbolSize + symbolGap + maxTextWidth / 2
+        : contentStartX + maxTextWidth / 2;
+    const textStartX = textBlockCenterX - maxTextWidth / 2;
+    const getLineX = () =>
+      spec.align === "left"
+        ? textStartX
+        : spec.align === "right"
+          ? textStartX + maxTextWidth
+          : textBlockCenterX;
+    const symbolX = isCanvasVerticalSymbol
+      ? 800 - symbolSize / 2
+      : activeSymbolPos === "left"
+        ? contentStartX
+        : contentStartX + maxTextWidth + symbolGap;
+    const symbolY = isCanvasVerticalSymbol
+      ? activeSymbolPos === "top"
+        ? centerY - totalSignHeight / 2
+        : startY +
+          textBlockHeight +
+          Math.round(canvasFontSize * 0.48) +
+          symbolGap
+      : centerY - symbolSize / 2;
 
-    // Pleksi / Çerçeve Alanı Sınırları
-    const padX = Math.max(260, Math.min(680, Math.round(totalContentWidth / 2 + 55)));
-    const padY = Math.max(130, Math.round(totalSignHeight / 2 + 45));
+    // Pleksi / Çerçeve Alanı Sınırları (Gerçek en/boy oranına ve oval/daire kavis payına duyarlı)
+    const circleRadius = Math.max(
+      180,
+      Math.min(
+        310,
+        Math.round(Math.hypot(totalContentWidth, totalSignHeight) / 2 + 48),
+      ),
+    );
+    const pillPadBoostX =
+      activeBorderId === "pill"
+        ? Math.round(Math.max(48, totalSignHeight * 0.22))
+        : 0;
+    const pillPadBoostY =
+      activeBorderId === "pill"
+        ? Math.round(Math.max(36, totalContentWidth * 0.14))
+        : 0;
+    const padY =
+      activeBorderId === "circle"
+        ? circleRadius
+        : Math.max(105, Math.round(totalSignHeight / 2 + 45 + pillPadBoostY));
+    const aspectRatio = estimate.widthCm / Math.max(1, estimate.heightCm);
+    const minPadX =
+      estimate.widthCm < estimate.heightCm
+        ? Math.max(135, Math.round(padY * aspectRatio))
+        : Math.min(260, Math.max(150, Math.round(padY * aspectRatio)));
+    const padX =
+      activeBorderId === "circle"
+        ? circleRadius
+        : Math.max(
+            activeBorderId === "pill" ? Math.round(padY * 1.65) : minPadX,
+            Math.min(
+              680,
+              Math.round(totalContentWidth / 2 + 52 + pillPadBoostX),
+            ),
+          );
     const rx = 800 - padX;
     const ry = centerY - padY;
     const rw = padX * 2;
@@ -447,10 +651,9 @@ export default function NeonStudio() {
       ctx.save();
       ctx.beginPath();
       if (activeBorderId === "circle") {
-        const radius = 320;
-        ctx.arc(800, centerY, radius, 0, Math.PI * 2);
+        ctx.arc(800, centerY, circleRadius, 0, Math.PI * 2);
       } else {
-        const radius = activeBorderId === "pill" ? rh / 2 : 16;
+        const radius = activeBorderId === "pill" ? Math.min(rw, rh) / 2 : 16;
         ctx.roundRect(rx, ry, rw, rh, radius);
       }
 
@@ -490,7 +693,7 @@ export default function NeonStudio() {
 
       // Montaj Vidaları
       if (activeBorderId === "circle") {
-        const screwDist = 320 * 0.65;
+        const screwDist = circleRadius * 0.65;
         for (const s of [
           { x: 800 - screwDist, y: centerY - screwDist },
           { x: 800 + screwDist, y: centerY - screwDist },
@@ -500,12 +703,15 @@ export default function NeonStudio() {
           drawScrew(s.x, s.y);
         }
       } else {
-        const screwInset = 22;
+        const screwInsetX =
+          activeBorderId === "pill" ? Math.round(rw * 0.15) : 22;
+        const screwInsetY =
+          activeBorderId === "pill" ? Math.round(rh * 0.15) : 22;
         for (const s of [
-          { x: rx + screwInset, y: ry + screwInset },
-          { x: rx + rw - screwInset, y: ry + screwInset },
-          { x: rx + screwInset, y: ry + rh - screwInset },
-          { x: rx + rw - screwInset, y: ry + rh - screwInset },
+          { x: rx + screwInsetX, y: ry + screwInsetY },
+          { x: rx + rw - screwInsetX, y: ry + screwInsetY },
+          { x: rx + screwInsetX, y: ry + rh - screwInsetY },
+          { x: rx + rw - screwInsetX, y: ry + rh - screwInsetY },
         ]) {
           drawScrew(s.x, s.y);
         }
@@ -549,7 +755,12 @@ export default function NeonStudio() {
       ctx.save();
       ctx.lineJoin = "round";
       ctx.lineCap = "round";
-      ctx.textAlign = spec.align === "left" ? "left" : spec.align === "right" ? "right" : "center";
+      ctx.textAlign =
+        spec.align === "left"
+          ? "left"
+          : spec.align === "right"
+            ? "right"
+            : "center";
       ctx.textBaseline = "middle";
 
       const contourStrokeWidth = Math.round(canvasFontSize * 0.44);
@@ -566,12 +777,7 @@ export default function NeonStudio() {
         // Harf silueti
         formattedLines.forEach((lineText, idx) => {
           const lineY = startY + idx * lineSpacing;
-          const lineX =
-            spec.align === "left"
-              ? contentStartX
-              : spec.align === "right"
-                ? contentStartX + maxTextWidth
-                : textBlockCenterX;
+          const lineX = getLineX();
           ctx.strokeText(lineText, lineX, lineY);
           ctx.fillText(lineText, lineX, lineY);
         });
@@ -595,12 +801,7 @@ export default function NeonStudio() {
         ctx.strokeStyle = "rgba(255, 255, 255, 0.12)";
         formattedLines.forEach((lineText, idx) => {
           const lineY = startY + idx * lineSpacing;
-          const lineX =
-            spec.align === "left"
-              ? contentStartX
-              : spec.align === "right"
-                ? contentStartX + maxTextWidth
-                : textBlockCenterX;
+          const lineX = getLineX();
           ctx.strokeText(lineText, lineX, lineY);
         });
       } else {
@@ -614,12 +815,7 @@ export default function NeonStudio() {
 
         formattedLines.forEach((lineText, idx) => {
           const lineY = startY + idx * lineSpacing;
-          const lineX =
-            spec.align === "left"
-              ? contentStartX
-              : spec.align === "right"
-                ? contentStartX + maxTextWidth
-                : textBlockCenterX;
+          const lineX = getLineX();
           ctx.strokeText(lineText, lineX, lineY);
           ctx.fillText(lineText, lineX, lineY);
         });
@@ -641,12 +837,7 @@ export default function NeonStudio() {
         ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
         formattedLines.forEach((lineText, idx) => {
           const lineY = startY + idx * lineSpacing;
-          const lineX =
-            spec.align === "left"
-              ? contentStartX
-              : spec.align === "right"
-                ? contentStartX + maxTextWidth
-                : textBlockCenterX;
+          const lineX = getLineX();
           ctx.strokeText(lineText, lineX, lineY);
         });
       }
@@ -655,17 +846,17 @@ export default function NeonStudio() {
 
     // 3. Neon Metin Çizimi (Canlı Işık & Cam Çekirdek)
     ctx.save();
-    ctx.textAlign = spec.align === "left" ? "left" : spec.align === "right" ? "right" : "center";
+    ctx.textAlign =
+      spec.align === "left"
+        ? "left"
+        : spec.align === "right"
+          ? "right"
+          : "center";
     ctx.textBaseline = "middle";
 
     formattedLines.forEach((lineText, idx) => {
       const lineY = startY + idx * lineSpacing;
-      const lineX =
-        spec.align === "left"
-          ? contentStartX
-          : spec.align === "right"
-            ? contentStartX + maxTextWidth
-            : textBlockCenterX;
+      const lineX = getLineX();
 
       if (isLit) {
         // 1. Katman: Geniş dış aurası
@@ -739,9 +930,9 @@ export default function NeonStudio() {
     ctx.lineWidth = 1;
 
     // A) Alt Genişlik Ölçü Oku (X Ekseni)
-    const dimY = (activeBorderId === "circle" ? centerY + 320 : ry + rh) + 38;
-    const dimX1 = activeBorderId === "circle" ? 800 - 320 : rx;
-    const dimX2 = activeBorderId === "circle" ? 800 + 320 : rx + rw;
+    const dimY = ry + rh + 38;
+    const dimX1 = rx;
+    const dimX2 = rx + rw;
 
     ctx.setLineDash([4, 4]);
     ctx.beginPath();
@@ -773,9 +964,9 @@ export default function NeonStudio() {
     );
 
     // B) Sağ Yükseklik Ölçü Oku (Y Ekseni)
-    const dimHX = (activeBorderId === "circle" ? 800 + 320 : rx + rw) + 38;
-    const dimHY1 = activeBorderId === "circle" ? centerY - 320 : ry;
-    const dimHY2 = activeBorderId === "circle" ? centerY + 320 : ry + rh;
+    const dimHX = rx + rw + 38;
+    const dimHY1 = ry;
+    const dimHY2 = ry + rh;
 
     ctx.setLineDash([4, 4]);
     ctx.beginPath();
@@ -816,7 +1007,13 @@ export default function NeonStudio() {
     ctx.strokeRect(80, 820, 1440, 110);
 
     const cols = [
-      { title: "TABELA METNİ", val: formattedText.slice(0, 18) },
+      {
+        title: "TABELA METNİ",
+        val:
+          formattedText.length > 16
+            ? `${formattedText.slice(0, 15).trimEnd()}…`
+            : formattedText,
+      },
       {
         title: "AKRİLİK ÖLÇÜ",
         val: `${estimate.widthCm} × ${estimate.heightCm} cm`,
@@ -851,7 +1048,9 @@ export default function NeonStudio() {
     if (isOrdering || cooldownSeconds > 0) return;
     if (typeof window !== "undefined") {
       try {
-        const lastOrderTime = Number(sessionStorage.getItem("ccneons_order_cooldown") || 0);
+        const lastOrderTime = Number(
+          sessionStorage.getItem("ccneons_order_cooldown") || 0,
+        );
         const elapsed = Math.floor((Date.now() - lastOrderTime) / 1000);
         if (elapsed < 15) {
           setCooldownSeconds(15 - elapsed);
@@ -909,7 +1108,10 @@ export default function NeonStudio() {
     } finally {
       if (typeof window !== "undefined") {
         try {
-          sessionStorage.setItem("ccneons_order_cooldown", Date.now().toString());
+          sessionStorage.setItem(
+            "ccneons_order_cooldown",
+            Date.now().toString(),
+          );
         } catch {}
       }
       setCooldownSeconds(15);
@@ -940,40 +1142,229 @@ export default function NeonStudio() {
     : "bg-[#0A0A0E]/65 backdrop-blur-[2px]";
 
   const maxCharsInLine = Math.max(...formattedLines.map((l) => l.length), 1);
-  const totalCharsWithSymbol = maxCharsInLine + (activeSymbolId !== "none" ? 2.5 : 0);
-  const circleFontScale =
-    activeBorderId === "circle"
-      ? Math.min(1.0, Math.max(0.42, 6.2 / Math.max(totalCharsWithSymbol, 4.0)))
-      : Math.min(1.0, Math.max(0.65, 14.0 / Math.max(totalCharsWithSymbol, 8.0)));
+  const hasHorizontalSymbol =
+    activeSymbolId !== "none" &&
+    (activeSymbolPos === "left" || activeSymbolPos === "right");
+  const totalCharsWithSymbol =
+    maxCharsInLine + (hasHorizontalSymbol ? 2.8 * activeSymbolScale : 0);
+  const isMobileViewport = viewportPx.w < 640;
+  const sizeStageFactor =
+    spec.sizeId === "xs"
+      ? 0.8
+      : spec.sizeId === "sm"
+        ? 0.9
+        : spec.sizeId === "md"
+          ? 1.0
+          : spec.sizeId === "lg"
+            ? 1.12
+            : spec.sizeId === "xl"
+              ? 1.24
+              : 1.36;
+  const lineCountScale =
+    formattedLines.length >= 6
+      ? 0.62
+      : formattedLines.length === 5
+        ? 0.69
+        : formattedLines.length === 4
+          ? 0.77
+          : formattedLines.length === 3
+            ? 0.85
+            : formattedLines.length === 2
+              ? 0.93
+              : 1.0;
+  // Tüm çerçeve tiplerinde (Sade, Dikdörtgen, Kapsül, Daire, Bilet) ortak sahne ölçeği:
+  // Hem mobil hem masaüstünde güçlü ve doyurucu görünür, boyut değiştirildiğinde her kademede belirgin büyür.
+  const charDensityScale = Math.min(
+    1.0,
+    Math.max(0.62, 12.6 / Math.max(totalCharsWithSymbol, 7.5)),
+  );
+  const circleFontScale = Math.min(
+    1.0,
+    Math.max(0.55, charDensityScale * lineCountScale),
+  );
+  const maxPreviewFontRem = Math.min(
+    3.9 * sizeStageFactor * circleFontScale,
+    (12.6 * sizeStageFactor) / Math.max(formattedLines.length, 2.2),
+    14.4 / Math.max(formattedLines.length, 2.2),
+  );
+  const mobileHorizontalCeilingRem =
+    ((Math.max(320, viewportPx.w) - 108) /
+      16 /
+      Math.max(totalCharsWithSymbol * 0.58, 3.1)) *
+    (0.84 + (sizeStageFactor - 0.8) * 0.55);
+  const minPreviewFontRem = Math.min(
+    maxPreviewFontRem,
+    mobileHorizontalCeilingRem,
+    (11.4 * sizeStageFactor) / Math.max(formattedLines.length, 2.1),
+    Math.max(1.35 * sizeStageFactor, 3.15 * sizeStageFactor * circleFontScale),
+  );
+  const previewFontSizeCss = isMobileViewport
+    ? `${minPreviewFontRem.toFixed(2)}rem`
+    : `clamp(${minPreviewFontRem.toFixed(2)}rem, calc(${(minPreviewFontRem * 0.65).toFixed(2)}rem + ${(2.45 * sizeStageFactor * circleFontScale).toFixed(2)}vw), ${maxPreviewFontRem.toFixed(2)}rem)`;
+  const maxPreviewSymRem = Math.min(
+    3.6 * sizeStageFactor * circleFontScale * activeSymbolScale,
+    5.4 * sizeStageFactor * activeSymbolScale * lineCountScale,
+  );
+  const minPreviewSymRem = Math.min(
+    maxPreviewSymRem,
+    Math.max(
+      1.55 * sizeStageFactor * activeSymbolScale,
+      2.75 * sizeStageFactor * circleFontScale * activeSymbolScale,
+    ),
+  );
+  const previewSymbolSizeCss = isMobileViewport
+    ? `${minPreviewSymRem.toFixed(2)}rem`
+    : `clamp(${minPreviewSymRem.toFixed(2)}rem, calc(${(minPreviewSymRem * 0.65).toFixed(2)}rem + ${(2.1 * sizeStageFactor * circleFontScale * activeSymbolScale).toFixed(2)}vw), ${maxPreviewSymRem.toFixed(2)}rem)`;
 
   // Lazer Kesim Akrilik Taban Stilleri (Şeffaf Kristal Cam & Piyano Siyahı)
   const acrylicGlassPlateBg = isBlackBackboard
     ? "bg-[#0A0A0E]/95 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.9),inset_0_1px_0_rgba(255,255,255,0.15)]"
     : "bg-white/[0.04] border border-white/30 backdrop-blur-[2px] shadow-[0_16px_40px_rgba(0,0,0,0.55),inset_0_1.5px_0_rgba(255,255,255,0.4),inset_0_-1px_0_rgba(255,255,255,0.1)]";
 
-  // Kuyruklu harfler (p, g, y, j, q) ve el yazısı fontlar için alt güvenlik payı
+  // Kuyruklu harfler (p, g, y, j, q) ve oval/daire kavis payı için dengeli iç boşluk
   const hasDescenderRisk = spec.fontId === "script" || spec.fontId === "italic";
   const tailoredPaddingClass =
-    formattedLines.length > 2
-      ? "pt-8 sm:pt-12 pb-14 sm:pb-18 px-10 sm:px-16 min-h-[16rem]"
-      : formattedLines.length > 1
-        ? "pt-7 sm:pt-10 pb-12 sm:pb-16 px-10 sm:px-16 min-h-[13rem]"
-        : hasDescenderRisk
-          ? "pt-6 sm:pt-8 pb-11 sm:pb-14 px-8 sm:px-14"
-          : "pt-6 sm:pt-8 pb-7 sm:pb-9 px-8 sm:px-14";
+    formattedLines.length >= 3
+      ? "py-6 sm:py-9 px-7 sm:px-12"
+      : hasDescenderRisk
+        ? "pt-7 sm:pt-11 pb-9 sm:pb-13 px-8 sm:px-16"
+        : "py-7 sm:py-11 px-8 sm:px-16";
+  const pillPaddingClass =
+    contentSizePx.w > 0
+      ? "px-7 py-5"
+      : formattedLines.length >= 3
+        ? "py-9 sm:py-12 px-14 sm:px-22"
+        : "py-8 sm:py-11 px-14 sm:px-20";
+  const circlePaddingClass = contentSizePx.w > 0 ? "p-6" : "p-10 sm:p-14";
+
+  // Tüm çerçeveler için dengeli sahne geometrisi:
+  // Daire 1:1 tam çember, Kapsül yatay stadyum (width >= height * 1.52), Dikdörtgen/Bilet boyut kademesine duyarlı kutu
+  const frameGeometryStyle: Record<string, string> = (() => {
+    const maxViewportW = Math.max(
+      240,
+      viewportPx.w - (isMobileViewport ? 64 : 120),
+    );
+    const maxViewportH = Math.max(
+      240,
+      viewportPx.h - (isMobileViewport ? 265 : 295),
+    );
+    if (activeBorderId === "circle") {
+      if (contentSizePx.w <= 0 || contentSizePx.h <= 0) return {};
+      const diagFactor = formattedLines.length >= 3 ? 0.88 : 0.98;
+      const padPx = Math.round(
+        (formattedLines.length >= 3
+          ? isMobileViewport
+            ? 38
+            : 48
+          : isMobileViewport
+            ? 48
+            : 62) * sizeStageFactor,
+      );
+      const minCirclePx = Math.round(
+        (isMobileViewport ? 195 : 225) * sizeStageFactor,
+      );
+      const rawDia = Math.max(
+        minCirclePx,
+        Math.ceil(
+          Math.hypot(
+            contentSizePx.w * diagFactor,
+            contentSizePx.h * diagFactor,
+          ) + padPx,
+        ),
+      );
+      const d = Math.min(maxViewportW, maxViewportH, rawDia);
+      return {
+        width: `${d}px`,
+        height: `${d}px`,
+        minWidth: `${d}px`,
+        minHeight: `${d}px`,
+      };
+    }
+    if (activeBorderId === "pill") {
+      if (contentSizePx.w <= 0 || contentSizePx.h <= 0) return {};
+      const minPillH = Math.round(
+        (isMobileViewport ? 115 : 135) * sizeStageFactor,
+      );
+      const pillPadY = Math.round(
+        (formattedLines.length >= 3
+          ? isMobileViewport
+            ? 38
+            : 48
+          : isMobileViewport
+            ? 46
+            : 58) * sizeStageFactor,
+      );
+      const pillH = Math.min(
+        maxViewportH,
+        Math.max(minPillH, Math.ceil(contentSizePx.h + pillPadY)),
+      );
+      const pillW = Math.min(
+        maxViewportW,
+        Math.max(
+          Math.ceil(contentSizePx.w + pillH * 0.48 + 28 * sizeStageFactor),
+          Math.ceil(pillH * 1.54),
+        ),
+      );
+      return {
+        width: `${pillW}px`,
+        height: `${pillH}px`,
+        minWidth: `${pillW}px`,
+        minHeight: `${pillH}px`,
+      };
+    }
+    if (hasExplicitFrame) {
+      const minBoxW = Math.min(
+        maxViewportW,
+        Math.round((isMobileViewport ? 195 : 265) * sizeStageFactor),
+      );
+      const minBoxH = Math.min(
+        maxViewportH,
+        Math.round((isMobileViewport ? 95 : 118) * sizeStageFactor),
+      );
+      const padX = Math.round(
+        (formattedLines.length >= 3
+          ? isMobileViewport
+            ? 24
+            : 38
+          : isMobileViewport
+            ? 30
+            : 48) * sizeStageFactor,
+      );
+      const padTop = Math.round(
+        (formattedLines.length >= 3
+          ? isMobileViewport
+            ? 20
+            : 28
+          : isMobileViewport
+            ? 24
+            : 34) * sizeStageFactor,
+      );
+      const padBottom =
+        hasDescenderRisk && formattedLines.length < 3 ? padTop + 8 : padTop;
+      return {
+        minWidth: `${minBoxW}px`,
+        minHeight: `${minBoxH}px`,
+        paddingLeft: `${padX}px`,
+        paddingRight: `${padX}px`,
+        paddingTop: `${padTop}px`,
+        paddingBottom: `${padBottom}px`,
+      };
+    }
+    return {};
+  })();
 
   const backboardShapeClass =
     activeBorderId === "circle"
-      ? `aspect-square rounded-full flex items-center justify-center p-4 relative ${acrylicGlassPlateBg}`
+      ? `aspect-square rounded-full flex items-center justify-center ${circlePaddingClass} relative ${acrylicGlassPlateBg}`
       : activeBorderId === "pill"
-        ? `rounded-full px-10 sm:px-16 ${tailoredPaddingClass} ${acrylicGlassPlateBg}`
+        ? `flex items-center justify-center rounded-full ${pillPaddingClass} relative ${acrylicGlassPlateBg}`
         : activeBorderId === "ticket"
-          ? `rounded-3xl border-dashed px-8 sm:px-14 ${tailoredPaddingClass} ${acrylicGlassPlateBg}`
+          ? `flex items-center justify-center rounded-3xl border-dashed ${tailoredPaddingClass} ${acrylicGlassPlateBg}`
           : activeBackboard.cutType === "rectangle"
-            ? `rounded-xl ${acrylicGlassPlateBg} ${tailoredPaddingClass}`
+            ? `flex items-center justify-center rounded-xl ${acrylicGlassPlateBg} ${tailoredPaddingClass}`
             : activeBorderId !== "none"
-              ? `rounded-xl ${acrylicGlassPlateBg} ${tailoredPaddingClass}`
-              : `relative p-4 sm:p-6`;
+              ? `flex items-center justify-center rounded-xl ${acrylicGlassPlateBg} ${tailoredPaddingClass}`
+              : `relative flex items-center justify-center p-4 sm:p-6`;
 
   const neonBorderStyle =
     activeBorderId !== "none"
@@ -982,8 +1373,11 @@ export default function NeonStudio() {
           boxShadow: isLit
             ? `0 0 14px rgba(${activeColor.glowRgb}, 0.95), inset 0 0 14px rgba(${activeColor.glowRgb}, 0.6), 0 0 38px rgba(${activeColor.glowRgb}, 0.5)`
             : "none",
+          ...frameGeometryStyle,
         }
-      : {};
+      : hasExplicitFrame
+        ? { ...frameGeometryStyle }
+        : {};
 
   const wallTextureClass =
     sceneBg === "blueprint"
@@ -1066,7 +1460,9 @@ export default function NeonStudio() {
           >
             <span class="font-display text-base sm:text-xl font-bold tracking-tight text-white">
               CC NEON'S
-              <span class="text-[10px] sm:text-xs font-mono text-white/45 ml-0.5">™</span>
+              <span class="text-[10px] sm:text-xs font-mono text-white/45 ml-0.5">
+                ™
+              </span>
             </span>
           </a>
 
@@ -1101,10 +1497,16 @@ export default function NeonStudio() {
               class="block font-mono text-sm sm:text-xl font-bold text-white leading-tight"
             >
               {estimate.minPrice.toLocaleString("tr-TR")} ₺
-              <span class="hidden sm:inline text-white/70"> – {estimate.maxPrice.toLocaleString("tr-TR")} ₺</span>
+              <span class="hidden sm:inline text-white/70">
+                {" "}
+                – {estimate.maxPrice.toLocaleString("tr-TR")} ₺
+              </span>
             </output>
             <span class="font-mono block text-[9px] sm:text-[11px] text-white/55 font-medium leading-none mt-0.5">
-              <span class="hidden sm:inline-block size-1.5 rounded-full mr-1" style={{ backgroundColor: activeColor.hex }} />
+              <span
+                class="hidden sm:inline-block size-1.5 rounded-full mr-1"
+                style={{ backgroundColor: activeColor.hex }}
+              />
               <span>{NEON_SIZES[spec.sizeId].label}</span>
             </span>
           </div>
@@ -1113,7 +1515,11 @@ export default function NeonStudio() {
             type="button"
             onClick={handleOrderClick}
             disabled={isOrdering || cooldownSeconds > 0}
-            title={cooldownSeconds > 0 ? `Lütfen bekleyin (${cooldownSeconds}s)` : "Sipariş Ver / Sepete Ekle"}
+            title={
+              cooldownSeconds > 0
+                ? `Lütfen bekleyin (${cooldownSeconds}s)`
+                : "Sipariş Ver / Sepete Ekle"
+            }
             aria-label="Sipariş Ver"
             class="cursor-pointer whitespace-nowrap inline-flex h-9 sm:h-11 items-center justify-center gap-2 rounded-full border border-white/20 bg-white/[0.08] px-3 sm:px-6 font-mono text-xs font-bold uppercase tracking-wider text-white transition-all duration-200 hover:border-[var(--neon-color)] hover:bg-white/[0.15] hover:shadow-[0_0_24px_rgba(var(--neon-rgb),0.4)] disabled:opacity-60 disabled:cursor-not-allowed"
           >
@@ -1123,14 +1529,35 @@ export default function NeonStudio() {
                 fill="none"
                 viewBox="0 0 24 24"
               >
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                />
+                <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                />
               </svg>
             ) : cooldownSeconds > 0 ? (
-              <span class="text-white/60 font-mono text-[11px]">{cooldownSeconds}s BEKLEYİN</span>
+              <span class="text-white/60 font-mono text-[11px]">
+                {cooldownSeconds}s BEKLEYİN
+              </span>
             ) : (
               <>
-                <svg class="size-4 sm:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg
+                  class="size-4 sm:hidden"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
                   <circle cx="9" cy="21" r="1" />
                   <circle cx="20" cy="21" r="1" />
                   <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
@@ -1196,7 +1623,7 @@ export default function NeonStudio() {
         </nav>
 
         {/* BÖLGE B: Sol Araç Çekmecesi (Masaüstünde sol sabit panel; mobilde ise alttan açılan Bottom Sheet) */}
-        {((isDrawerOpen && typeof window !== "undefined") || isMobileSheetOpen) && (
+        {(isDrawerOpen || isMobileSheetOpen) && (
           <aside
             data-lenis-prevent
             class={`shrink-0 border-white/[0.07] bg-[#0A0A0E] flex flex-col z-40 transition-all duration-300 ${
@@ -1216,7 +1643,8 @@ export default function NeonStudio() {
                 <h1 class="font-display text-base sm:text-lg font-bold uppercase tracking-tight text-white flex items-center gap-2">
                   <span>{TABS.find((t) => t.id === activeTab)?.label}</span>
                   <span class="lg:hidden text-[10px] font-mono font-normal px-2 py-0.5 rounded-full bg-white/10 text-white/70">
-                    ADIM {TABS.findIndex((t) => t.id === activeTab) + 1}/{TABS.length}
+                    ADIM {TABS.findIndex((t) => t.id === activeTab) + 1}/
+                    {TABS.length}
                   </span>
                 </h1>
                 <p class="hidden sm:block mt-0.5 text-xs text-white/55 leading-relaxed">
@@ -1232,8 +1660,6 @@ export default function NeonStudio() {
                     "Genişliği seçin ve 170 cm insan silüetiyle gerçek ölçeği kıyaslayın."}
                   {activeTab === "acrylic" &&
                     "5mm şeffaf akrilik arka plakanın CNC lazer kesim formunu seçin."}
-                  {activeTab === "options" &&
-                    "Tüp teknolojisini, IP67 dış mekan korumasını ve montaj tipini seçin."}
                   {activeTab === "buy" &&
                     "Manavgat atölyemizde üretilecek tam teknik reçete ve teslimat takvimi."}
                 </p>
@@ -1244,13 +1670,22 @@ export default function NeonStudio() {
                 <button
                   type="button"
                   onClick={() => {
-                    if (activeTab === "text") updateSpec({ text: "Open Late", symbolId: "none" });
-                    else if (activeTab === "font") updateSpec({ fontId: "script" });
-                    else if (activeTab === "color") updateSpec({ colorId: "cyan", symbolColorId: "cyan" });
-                    else if (activeTab === "borders") updateSpec({ borderId: "none" });
+                    if (activeTab === "text")
+                      updateSpec({
+                        text: "Open Late",
+                        symbolId: "none",
+                        symbolPosition: "right",
+                        symbolScale: 1,
+                      });
+                    else if (activeTab === "font")
+                      updateSpec({ fontId: "script" });
+                    else if (activeTab === "color")
+                      updateSpec({ colorId: "cyan", symbolColorId: "cyan" });
+                    else if (activeTab === "borders")
+                      updateSpec({ borderId: "none" });
                     else if (activeTab === "size") updateSpec({ sizeId: "md" });
-                    else if (activeTab === "acrylic") updateSpec({ backboardId: "contour" });
-                    else if (activeTab === "options") updateSpec({ tubeTech: "standard", environment: "indoor", dimmer: "standard", mountType: "hanging" });
+                    else if (activeTab === "acrylic")
+                      updateSpec({ backboardId: "contour_clear" });
                   }}
                   title="Bu adımı varsayılana sıfırla"
                   class="cursor-pointer rounded-full border border-white/15 bg-white/[0.04] px-2.5 py-1 font-mono text-[11px] font-semibold text-white/75 hover:bg-white/10 hover:text-white"
@@ -1377,29 +1812,47 @@ export default function NeonStudio() {
                         id="neon-text-input"
                         rows={
                           estimate.lineCount > 1
-                            ? Math.min(estimate.lineCount, 3)
+                            ? Math.min(estimate.lineCount, 4)
                             : 1
                         }
-                        maxLength={45}
+                        maxLength={65}
                         value={spec.text}
                         onInput={(e) => {
-                          const rawVal = (e.target as HTMLTextAreaElement)
-                            .value;
-                          updateSpec({ text: rawVal }, true, true);
+                          const target = e.target as HTMLTextAreaElement;
+                          const cappedLines = target.value
+                            .split(/\r?\n/)
+                            .slice(0, 4);
+                          let nonSpaceCount = 0;
+                          let sanitized = "";
+                          for (let i = 0; i < cappedLines.length; i++) {
+                            if (i > 0) sanitized += "\n";
+                            for (const ch of cappedLines[i]) {
+                              if (/\s/.test(ch)) {
+                                sanitized += ch;
+                              } else if (nonSpaceCount < 45) {
+                                sanitized += ch;
+                                nonSpaceCount++;
+                              }
+                            }
+                          }
+                          if (target.value !== sanitized) {
+                            target.value = sanitized;
+                          }
+                          updateSpec({ text: sanitized }, true, true);
                         }}
-                        placeholder="Open Late&#10;(Yeni satır için Enter'a basabilirsiniz)"
+                        placeholder="Open Late&#10;(En fazla 4 satır, 45 harf)"
                         style={{ fontFamily: activeFont.cssFamily }}
                         class="w-full resize-none bg-transparent text-xl sm:text-2xl text-white placeholder:text-white/25 focus:outline-none leading-snug"
                       />
                       <div class="absolute bottom-2 left-3.5 right-3 flex items-center justify-between font-mono text-[11px]">
                         <span class="text-white/45">
                           {estimate.lineCount > 1
-                            ? `${estimate.lineCount} SATIR`
+                            ? `${estimate.lineCount} / 4 SATIR`
                             : "TEK SATIR"}{" "}
                           · {spec.text.replace(/\s+/g, "").length} / 45
                         </span>
                         <span class="text-[10px] text-white/35">
-                          ↵ Enter ile alt satır
+                          ↵ Enter ile alt satır (maks. 4)
                         </span>
                       </div>
                     </div>
@@ -1523,6 +1976,110 @@ export default function NeonStudio() {
                         },
                       )}
                     </div>
+
+                    {activeSymbolId !== "none" && (
+                      <div class="mt-3 pt-3 border-t border-white/[0.08] space-y-3">
+                        {/* Sembol Konumu (Sol / Üst / Alt / Sağ) */}
+                        <div class="space-y-1.5">
+                          <div class="flex items-center justify-between font-mono text-[10px] uppercase tracking-wider text-white/55">
+                            <span>SEMBOL KONUMU</span>
+                            <span class="text-[#35E7FF] font-bold">
+                              {activeSymbolPos === "left"
+                                ? "SOL"
+                                : activeSymbolPos === "top"
+                                  ? "ÜST"
+                                  : activeSymbolPos === "bottom"
+                                    ? "ALT"
+                                    : "SAĞ"}
+                            </span>
+                          </div>
+                          <div class="grid grid-cols-4 gap-1.5">
+                            {(
+                              [
+                                { id: "left", label: "← Sol" },
+                                { id: "top", label: "↑ Üst" },
+                                { id: "bottom", label: "↓ Alt" },
+                                { id: "right", label: "Sağ →" },
+                              ] as { id: NeonSymbolPosition; label: string }[]
+                            ).map((posItem) => {
+                              const isCurrentPos =
+                                activeSymbolPos === posItem.id;
+                              return (
+                                <button
+                                  key={posItem.id}
+                                  type="button"
+                                  onClick={() =>
+                                    updateSpec({ symbolPosition: posItem.id })
+                                  }
+                                  class={`cursor-pointer rounded-lg border py-1.5 font-mono text-[11px] font-semibold transition-all ${
+                                    isCurrentPos
+                                      ? "border-[#35E7FF] bg-[#35E7FF]/15 text-[#35E7FF]"
+                                      : "border-white/10 bg-[#0A0A0E] text-white/65 hover:border-white/25 hover:text-white"
+                                  }`}
+                                >
+                                  {posItem.label}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {/* Sembol Büyüklüğü (0.6x - 1.8x) */}
+                        <div class="space-y-1.5">
+                          <div class="flex items-center justify-between font-mono text-[10px] uppercase tracking-wider text-white/55">
+                            <label for="symbol-scale-slider">
+                              SEMBOL BÜYÜKLÜĞÜ
+                            </label>
+                            <span class="text-[#35E7FF] font-bold">
+                              %{Math.round(activeSymbolScale * 100)} (
+                              {activeSymbolScale.toFixed(1)}x)
+                            </span>
+                          </div>
+                          <input
+                            id="symbol-scale-slider"
+                            type="range"
+                            min="0.6"
+                            max="1.8"
+                            step="0.1"
+                            value={activeSymbolScale}
+                            onInput={(e) => {
+                              const val = Number(
+                                (e.target as HTMLInputElement).value,
+                              );
+                              updateSpec({ symbolScale: val }, true, true);
+                            }}
+                            class="w-full accent-[#35E7FF] cursor-pointer h-1.5 rounded-lg bg-white/15"
+                          />
+                          <div class="grid grid-cols-4 gap-1.5 pt-0.5">
+                            {[
+                              { val: 0.7, label: "Küçük" },
+                              { val: 1.0, label: "Standart" },
+                              { val: 1.3, label: "Büyük" },
+                              { val: 1.6, label: "Dev" },
+                            ].map((preset) => {
+                              const isCurrentScale =
+                                Math.abs(activeSymbolScale - preset.val) < 0.05;
+                              return (
+                                <button
+                                  key={preset.label}
+                                  type="button"
+                                  onClick={() =>
+                                    updateSpec({ symbolScale: preset.val })
+                                  }
+                                  class={`cursor-pointer rounded-md border py-1 font-mono text-[10px] transition-colors ${
+                                    isCurrentScale
+                                      ? "border-[#35E7FF]/70 bg-[#35E7FF]/15 text-[#35E7FF] font-bold"
+                                      : "border-white/10 bg-[#0A0A0E] text-white/55 hover:border-white/25 hover:text-white"
+                                  }`}
+                                >
+                                  {preset.label}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </>
               )}
@@ -1774,10 +2331,19 @@ export default function NeonStudio() {
                   {(() => {
                     const humanPx = 115; // 170cm = 115px (y=20 to y=135)
                     const cmScale = humanPx / 170; // ~0.676 px/cm
-                    const signW = Math.max(28, Math.round(estimate.widthCm * cmScale));
-                    const signH = Math.max(20, Math.round(estimate.heightCm * cmScale));
-                    const signCenterX = 235;
-                    const signCenterY = 70;
+                    const rawW = Math.max(
+                      28,
+                      Math.round(estimate.widthCm * cmScale),
+                    );
+                    const rawH = Math.max(
+                      20,
+                      Math.round(estimate.heightCm * cmScale),
+                    );
+                    const fitScale = Math.min(1, 215 / rawW, 118 / rawH);
+                    const signW = Math.max(28, Math.round(rawW * fitScale));
+                    const signH = Math.max(20, Math.round(rawH * fitScale));
+                    const signCenterX = 230;
+                    const signCenterY = 74;
                     const signX = Math.round(signCenterX - signW / 2);
                     const signY = Math.round(signCenterY - signH / 2);
                     const isCircle = activeBorderId === "circle";
@@ -1875,7 +2441,10 @@ export default function NeonStudio() {
                             x={signCenterX}
                             y={signCenterY + 4}
                             fill="#FFFFFF"
-                            font-size={Math.min(11, Math.max(8, Math.round(signH * 0.28)))}
+                            font-size={Math.min(
+                              11,
+                              Math.max(8, Math.round(signH * 0.28)),
+                            )}
                             font-weight="bold"
                             font-family="monospace"
                             text-anchor="middle"
@@ -1939,7 +2508,8 @@ export default function NeonStudio() {
                         checked={!!spec.includeInstallation}
                         onChange={(e) =>
                           updateSpec({
-                            includeInstallation: (e.target as HTMLInputElement).checked,
+                            includeInstallation: (e.target as HTMLInputElement)
+                              .checked,
                           })
                         }
                         class="size-4 accent-[#35E7FF] rounded cursor-pointer"
@@ -1969,7 +2539,7 @@ export default function NeonStudio() {
                       <strong class="text-white">
                         {activeColor.label}
                         {activeSymbolId !== "none"
-                          ? ` + ${activeSymbol.label}`
+                          ? ` + ${activeSymbol.label} (${activeSymbolPos === "left" ? "Sol" : activeSymbolPos === "top" ? "Üst" : activeSymbolPos === "bottom" ? "Alt" : "Sağ"}, %${Math.round(activeSymbolScale * 100)})`
                           : ""}
                       </strong>
                     </div>
@@ -2002,7 +2572,9 @@ export default function NeonStudio() {
                     {isOrdering ? (
                       <span>{orderStatus || "HAZIRLANIYOR..."}</span>
                     ) : cooldownSeconds > 0 ? (
-                      <span class="text-white/70">LÜTFEN BEKLEYİN ({cooldownSeconds} sn)...</span>
+                      <span class="text-white/70">
+                        LÜTFEN BEKLEYİN ({cooldownSeconds} sn)...
+                      </span>
                     ) : (
                       <span>BU REÇETEYİ WHATSAPP'TAN SİPARİŞ ET →</span>
                     )}
@@ -2075,7 +2647,7 @@ export default function NeonStudio() {
           />
 
           {/* CAD KUTUSU ÜST BAŞLIK: "GÖRSEL ÖNİZLEME" + Sahne Kontrolleri (Mobilde Sade İkon Çubuğu) */}
-          <div class="relative z-20 flex items-center justify-between gap-2 px-3.5 pt-3 sm:px-8 sm:pt-6">
+          <div class="relative z-20 shrink-0 flex items-center justify-between gap-2 px-3.5 pt-3 sm:px-8 sm:pt-6">
             <div class="text-left">
               <h2
                 class="hidden sm:block font-display text-xl sm:text-2xl font-bold uppercase tracking-wide"
@@ -2089,7 +2661,10 @@ export default function NeonStudio() {
               </p>
               {/* Mobilde Minimal Durum Etiketi */}
               <span class="sm:hidden font-mono text-[10px] tracking-widest uppercase text-white/50 flex items-center gap-1.5">
-                <span class="size-1.5 rounded-full" style={{ backgroundColor: activeColor.hex }} />
+                <span
+                  class="size-1.5 rounded-full"
+                  style={{ backgroundColor: activeColor.hex }}
+                />
                 <span>CANLI CAD ÖNİZLEME</span>
               </span>
             </div>
@@ -2117,7 +2692,9 @@ export default function NeonStudio() {
                       : { backgroundColor: "rgba(255,255,255,0.25)" }
                   }
                 />
-                <span class="hidden sm:inline">{isLit ? "IŞIK: AÇIK" : "IŞIK: KAPALI"}</span>
+                <span class="hidden sm:inline">
+                  {isLit ? "IŞIK: AÇIK" : "IŞIK: KAPALI"}
+                </span>
               </button>
 
               <div class="inline-flex rounded-lg border border-white/10 bg-[#0A0A0E]/90 p-0.5">
@@ -2151,7 +2728,15 @@ export default function NeonStudio() {
                 aria-label="WhatsApp Canlı Danışman"
                 class="cursor-pointer inline-flex h-7.5 sm:h-8 items-center gap-1 rounded-lg border border-[#1CFF8A]/35 bg-[#1CFF8A]/10 px-2 sm:px-2.5 font-mono text-[10px] sm:text-[11px] font-semibold text-[#1CFF8A] hover:bg-[#1CFF8A]/20"
               >
-                <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <svg
+                  class="size-3.5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                 </svg>
                 <span class="hidden sm:inline">DESTEK</span>
@@ -2169,71 +2754,136 @@ export default function NeonStudio() {
           </div>
 
           {/* GERÇEK CNC LAZER HARF KESİM AKRİLİK KONTUR FİLTRELERİ */}
-      <svg width="1" height="1" class="absolute opacity-0 pointer-events-none" aria-hidden="true">
-        <defs>
-          {/* 1. Şeffaf Pleksi Harf Kontur Filtresi */}
-          <filter id="clear-acrylic-contour" x="-30%" y="-40%" width="160%" height="180%">
-            <feMorphology in="SourceAlpha" operator="dilate" radius="16" result="dilated_outer" />
-            <feGaussianBlur in="dilated_outer" stdDeviation="6" result="shadow_blur" />
-            <feOffset in="shadow_blur" dx="0" dy="10" result="shadow_offset" />
-            <feComponentTransfer in="shadow_offset" result="shadow">
-              <feFuncA type="linear" slope="0.8" />
-            </feComponentTransfer>
-            <feComponentTransfer in="dilated_outer" result="acrylic_body">
-              <feFuncR type="linear" slope="1" />
-              <feFuncG type="linear" slope="1" />
-              <feFuncB type="linear" slope="1" />
-              <feFuncA type="linear" slope="0.04" />
-            </feComponentTransfer>
-            <feMorphology in="SourceAlpha" operator="dilate" radius="14" result="dilated_inner" />
-            <feComposite in="dilated_outer" in2="dilated_inner" operator="out" result="rim_edge" />
-            <feComponentTransfer in="rim_edge" result="glass_rim">
-              <feFuncR type="linear" slope="1" />
-              <feFuncG type="linear" slope="1" />
-              <feFuncB type="linear" slope="1" />
-              <feFuncA type="linear" slope="0.45" />
-            </feComponentTransfer>
-            <feMerge>
-              <feMergeNode in="shadow" />
-              <feMergeNode in="acrylic_body" />
-              <feMergeNode in="glass_rim" />
-            </feMerge>
-          </filter>
+          <svg
+            width="1"
+            height="1"
+            class="absolute opacity-0 pointer-events-none"
+            aria-hidden="true"
+          >
+            <defs>
+              {/* 1. Şeffaf Pleksi Harf Kontur Filtresi */}
+              <filter
+                id="clear-acrylic-contour"
+                x="-30%"
+                y="-40%"
+                width="160%"
+                height="180%"
+              >
+                <feMorphology
+                  in="SourceAlpha"
+                  operator="dilate"
+                  radius="16"
+                  result="dilated_outer"
+                />
+                <feGaussianBlur
+                  in="dilated_outer"
+                  stdDeviation="6"
+                  result="shadow_blur"
+                />
+                <feOffset
+                  in="shadow_blur"
+                  dx="0"
+                  dy="10"
+                  result="shadow_offset"
+                />
+                <feComponentTransfer in="shadow_offset" result="shadow">
+                  <feFuncA type="linear" slope="0.8" />
+                </feComponentTransfer>
+                <feComponentTransfer in="dilated_outer" result="acrylic_body">
+                  <feFuncR type="linear" slope="1" />
+                  <feFuncG type="linear" slope="1" />
+                  <feFuncB type="linear" slope="1" />
+                  <feFuncA type="linear" slope="0.04" />
+                </feComponentTransfer>
+                <feMorphology
+                  in="SourceAlpha"
+                  operator="dilate"
+                  radius="14"
+                  result="dilated_inner"
+                />
+                <feComposite
+                  in="dilated_outer"
+                  in2="dilated_inner"
+                  operator="out"
+                  result="rim_edge"
+                />
+                <feComponentTransfer in="rim_edge" result="glass_rim">
+                  <feFuncR type="linear" slope="1" />
+                  <feFuncG type="linear" slope="1" />
+                  <feFuncB type="linear" slope="1" />
+                  <feFuncA type="linear" slope="0.45" />
+                </feComponentTransfer>
+                <feMerge>
+                  <feMergeNode in="shadow" />
+                  <feMergeNode in="acrylic_body" />
+                  <feMergeNode in="glass_rim" />
+                </feMerge>
+              </filter>
 
-          {/* 2. Siyah Pleksi Harf Kontur Filtresi */}
-          <filter id="black-acrylic-contour" x="-30%" y="-40%" width="160%" height="180%">
-            <feMorphology in="SourceAlpha" operator="dilate" radius="16" result="dilated_outer" />
-            <feGaussianBlur in="dilated_outer" stdDeviation="8" result="shadow_blur" />
-            <feOffset in="shadow_blur" dx="0" dy="12" result="shadow_offset" />
-            <feComponentTransfer in="shadow_offset" result="shadow">
-              <feFuncA type="linear" slope="0.95" />
-            </feComponentTransfer>
-            <feComponentTransfer in="dilated_outer" result="black_body">
-              <feFuncR type="linear" slope="0.04" />
-              <feFuncG type="linear" slope="0.04" />
-              <feFuncB type="linear" slope="0.05" />
-              <feFuncA type="linear" slope="0.95" />
-            </feComponentTransfer>
-            <feMorphology in="SourceAlpha" operator="dilate" radius="14.5" result="dilated_inner" />
-            <feComposite in="dilated_outer" in2="dilated_inner" operator="out" result="rim_edge" />
-            <feComponentTransfer in="rim_edge" result="black_rim">
-              <feFuncR type="linear" slope="1" />
-              <feFuncG type="linear" slope="1" />
-              <feFuncB type="linear" slope="1" />
-              <feFuncA type="linear" slope="0.25" />
-            </feComponentTransfer>
-            <feMerge>
-              <feMergeNode in="shadow" />
-              <feMergeNode in="black_body" />
-              <feMergeNode in="black_rim" />
-            </feMerge>
-          </filter>
-        </defs>
-      </svg>
+              {/* 2. Siyah Pleksi Harf Kontur Filtresi */}
+              <filter
+                id="black-acrylic-contour"
+                x="-30%"
+                y="-40%"
+                width="160%"
+                height="180%"
+              >
+                <feMorphology
+                  in="SourceAlpha"
+                  operator="dilate"
+                  radius="16"
+                  result="dilated_outer"
+                />
+                <feGaussianBlur
+                  in="dilated_outer"
+                  stdDeviation="8"
+                  result="shadow_blur"
+                />
+                <feOffset
+                  in="shadow_blur"
+                  dx="0"
+                  dy="12"
+                  result="shadow_offset"
+                />
+                <feComponentTransfer in="shadow_offset" result="shadow">
+                  <feFuncA type="linear" slope="0.95" />
+                </feComponentTransfer>
+                <feComponentTransfer in="dilated_outer" result="black_body">
+                  <feFuncR type="linear" slope="0.04" />
+                  <feFuncG type="linear" slope="0.04" />
+                  <feFuncB type="linear" slope="0.05" />
+                  <feFuncA type="linear" slope="0.95" />
+                </feComponentTransfer>
+                <feMorphology
+                  in="SourceAlpha"
+                  operator="dilate"
+                  radius="14.5"
+                  result="dilated_inner"
+                />
+                <feComposite
+                  in="dilated_outer"
+                  in2="dilated_inner"
+                  operator="out"
+                  result="rim_edge"
+                />
+                <feComponentTransfer in="rim_edge" result="black_rim">
+                  <feFuncR type="linear" slope="1" />
+                  <feFuncG type="linear" slope="1" />
+                  <feFuncB type="linear" slope="1" />
+                  <feFuncA type="linear" slope="0.25" />
+                </feComponentTransfer>
+                <feMerge>
+                  <feMergeNode in="shadow" />
+                  <feMergeNode in="black_body" />
+                  <feMergeNode in="black_rim" />
+                </feMerge>
+              </filter>
+            </defs>
+          </svg>
 
-      {/* CAD KUTUSU MERKEZ: FERAH NEON ÖNİZLEME + SAĞ VE ALT ÖLÇÜ OKLARI */}
-          <div class="relative z-10 my-auto flex w-full flex-col items-center justify-center px-4 sm:px-6 py-4">
-            <div class="relative flex w-full items-center justify-center">
+          {/* CAD KUTUSU MERKEZ: FERAH NEON ÖNİZLEME + SAĞ VE ALT ÖLÇÜ OKLARI */}
+          <div class="relative z-10 flex-1 min-h-0 flex w-full flex-col items-center justify-center px-4 sm:px-6 py-2">
+            <div class="inline-grid grid-cols-[minmax(140px,auto)_auto] items-center justify-items-center max-w-full">
               {/* Neon Tabela Gövdesi */}
               <div
                 key={igniteTick}
@@ -2243,12 +2893,6 @@ export default function NeonStudio() {
                       ? `0 20px 60px rgba(0,0,0,0.85), 0 0 42px rgba(${activeColor.glowRgb}, 0.24), inset 0 0 22px rgba(${activeColor.glowRgb}, 0.12)`
                       : undefined,
                   ...neonBorderStyle,
-                  ...(activeBorderId === "circle"
-                    ? {
-                        width: `clamp(18rem, 74vw, 32rem)`,
-                        height: `clamp(18rem, 74vw, 32rem)`,
-                      }
-                    : undefined),
                 }}
                 class={`relative transition-all duration-300 ${backboardShapeClass} ${
                   activeBorderId !== "none" ? "border-[3px]" : ""
@@ -2263,17 +2907,17 @@ export default function NeonStudio() {
                 {hasExplicitFrame &&
                   (activeBorderId === "circle" ? (
                     <>
-                      <span class="absolute top-[16%] left-[16%] size-2 rounded-full bg-white/40 ring-1 ring-black pointer-events-none" />
-                      <span class="absolute top-[16%] right-[16%] size-2 rounded-full bg-white/40 ring-1 ring-black pointer-events-none" />
-                      <span class="absolute bottom-[16%] left-[16%] size-2 rounded-full bg-white/40 ring-1 ring-black pointer-events-none" />
-                      <span class="absolute bottom-[16%] right-[16%] size-2 rounded-full bg-white/40 ring-1 ring-black pointer-events-none" />
+                      <span class="absolute top-[20%] left-[20%] size-2 rounded-full bg-white/40 ring-1 ring-black pointer-events-none" />
+                      <span class="absolute top-[20%] right-[20%] size-2 rounded-full bg-white/40 ring-1 ring-black pointer-events-none" />
+                      <span class="absolute bottom-[20%] left-[20%] size-2 rounded-full bg-white/40 ring-1 ring-black pointer-events-none" />
+                      <span class="absolute bottom-[20%] right-[20%] size-2 rounded-full bg-white/40 ring-1 ring-black pointer-events-none" />
                     </>
                   ) : activeBorderId === "pill" ? (
                     <>
-                      <span class="absolute top-3.5 left-7 size-2 rounded-full bg-white/40 ring-1 ring-black" />
-                      <span class="absolute top-3.5 right-7 size-2 rounded-full bg-white/40 ring-1 ring-black" />
-                      <span class="absolute bottom-3.5 left-7 size-2 rounded-full bg-white/40 ring-1 ring-black" />
-                      <span class="absolute bottom-3.5 right-7 size-2 rounded-full bg-white/40 ring-1 ring-black" />
+                      <span class="absolute top-[18%] left-[14%] size-2 rounded-full bg-white/40 ring-1 ring-black pointer-events-none" />
+                      <span class="absolute top-[18%] right-[14%] size-2 rounded-full bg-white/40 ring-1 ring-black pointer-events-none" />
+                      <span class="absolute bottom-[18%] left-[14%] size-2 rounded-full bg-white/40 ring-1 ring-black pointer-events-none" />
+                      <span class="absolute bottom-[18%] right-[14%] size-2 rounded-full bg-white/40 ring-1 ring-black pointer-events-none" />
                     </>
                   ) : (
                     <>
@@ -2285,14 +2929,13 @@ export default function NeonStudio() {
                   ))}
 
                 <div
-                  class={`relative z-10 flex flex-nowrap items-center gap-3 sm:gap-5 max-w-full ${
-                    activeBorderId === "circle"
-                      ? "absolute inset-0 m-auto flex items-center justify-center p-6 sm:p-10 max-w-[84%] max-h-[84%]"
-                      : spec.align === "left"
-                        ? "justify-start text-left"
-                        : spec.align === "right"
-                          ? "justify-end text-right"
-                          : "justify-center text-center"
+                  ref={contentBoxRef}
+                  class={`relative z-10 flex ${symbolFlexDirClass} items-center gap-3 sm:gap-4 max-w-full ${
+                    spec.align === "left"
+                      ? "justify-start text-left"
+                      : spec.align === "right"
+                        ? "justify-end text-right"
+                        : "justify-center text-center"
                   }`}
                 >
                   {/* Gerçek CNC Lazer Harf Kesim Akrilik Kontur Tabanı */}
@@ -2304,15 +2947,12 @@ export default function NeonStudio() {
                           ? "url(#black-acrylic-contour)"
                           : "url(#clear-acrylic-contour)",
                       }}
-                      class="absolute inset-0 flex flex-nowrap items-center justify-center gap-3 sm:gap-5 pointer-events-none select-none z-0"
+                      class={`absolute inset-0 flex ${symbolFlexDirClass} items-center justify-center gap-3 sm:gap-4 pointer-events-none select-none z-0`}
                     >
                       <div
                         style={{
                           fontFamily: activeFont.cssFamily,
-                          fontSize:
-                            activeBorderId === "circle"
-                              ? `clamp(1.4rem, ${(3.8 * circleFontScale)}vw, ${(4.2 * circleFontScale)}rem)`
-                              : `clamp(1.4rem, ${(activeSize.fontScaleRem * circleFontScale) * 1.2}vw, ${(activeSize.fontScaleRem * circleFontScale) * 1.45}rem)`,
+                          fontSize: previewFontSizeCss,
                           letterSpacing:
                             spec.sizeId === "sm"
                               ? "0.06em"
@@ -2321,10 +2961,13 @@ export default function NeonStudio() {
                                 : "0.01em",
                           color: isBlackBackboard ? "#0A0A0E" : "#000000",
                         }}
-                        class="flex flex-col shrink min-w-0 leading-[1.2]"
+                        class="flex flex-col shrink min-w-0 leading-[1.12]"
                       >
-                        {formattedLines.map((line) => (
-                          <span key={line} class="block whitespace-pre-wrap">
+                        {formattedLines.map((line, idx) => (
+                          <span
+                            key={`${idx}-${line}`}
+                            class="block whitespace-pre-wrap"
+                          >
                             {line}
                           </span>
                         ))}
@@ -2336,7 +2979,11 @@ export default function NeonStudio() {
                           fill={isBlackBackboard ? "#0A0A0E" : "#000000"}
                           stroke={isBlackBackboard ? "#0A0A0E" : "#000000"}
                           stroke-width="2"
-                          class={`${activeSize.symbolSizeClass} shrink-0`}
+                          style={{
+                            width: previewSymbolSizeCss,
+                            height: previewSymbolSizeCss,
+                          }}
+                          class="shrink-0"
                         >
                           <path d={activeSymbol.svgPath} />
                         </svg>
@@ -2350,10 +2997,7 @@ export default function NeonStudio() {
                       fontFamily: activeFont.cssFamily,
                       color: isLit ? activeColor.hex : activeColor.unlitHex,
                       textShadow: tubeShadow,
-                      fontSize:
-                        activeBorderId === "circle"
-                          ? `clamp(1.4rem, ${(3.8 * circleFontScale)}vw, ${(4.2 * circleFontScale)}rem)`
-                          : `clamp(1.4rem, ${(activeSize.fontScaleRem * circleFontScale) * 1.2}vw, ${(activeSize.fontScaleRem * circleFontScale) * 1.45}rem)`,
+                      fontSize: previewFontSizeCss,
                       letterSpacing:
                         spec.sizeId === "sm"
                           ? "0.06em"
@@ -2361,7 +3005,7 @@ export default function NeonStudio() {
                             ? "0.03em"
                             : "0.01em",
                     }}
-                    class={`relative z-10 select-none leading-[1.2] transition-all duration-300 flex flex-col shrink min-w-0 ${
+                    class={`relative z-10 select-none leading-[1.12] transition-all duration-300 flex flex-col shrink min-w-0 ${
                       spec.align === "left"
                         ? "items-start text-left"
                         : spec.align === "right"
@@ -2369,8 +3013,11 @@ export default function NeonStudio() {
                           : "items-center text-center"
                     }`}
                   >
-                    {formattedLines.map((line) => (
-                      <span key={line} class="block whitespace-pre-wrap">
+                    {formattedLines.map((line, idx) => (
+                      <span
+                        key={`${idx}-${line}`}
+                        class="block whitespace-pre-wrap"
+                      >
                         {line}
                       </span>
                     ))}
@@ -2393,11 +3040,13 @@ export default function NeonStudio() {
                       stroke-linecap="round"
                       stroke-linejoin="round"
                       style={{
+                        width: previewSymbolSizeCss,
+                        height: previewSymbolSizeCss,
                         filter: isLit
                           ? `drop-shadow(0 0 4px #FFFFFF) drop-shadow(0 0 14px ${activeSymbolColor.hex}) drop-shadow(0 0 28px ${activeSymbolColor.hex})`
                           : "none",
                       }}
-                      class={`relative z-10 ${activeSize.symbolSizeClass} shrink-0 transition-all duration-300`}
+                      class="relative z-10 shrink-0 transition-all duration-300"
                       aria-label={activeSymbol.label}
                     >
                       <title>{activeSymbol.label}</title>
@@ -2407,70 +3056,110 @@ export default function NeonStudio() {
                 </div>
               </div>
 
-              {/* SAĞ DİKEY YÜKSEKLİK OKU */}
+              {/* SAĞ DİKEY YÜKSEKLİK OKU (Tabela yüksekliğine birebir kilitli) */}
               <div
                 aria-hidden="true"
-                class="flex flex-col items-center ml-4 sm:ml-8 lg:ml-12 font-mono text-white"
+                class="self-stretch flex flex-col items-center justify-between ml-3 sm:ml-6 lg:ml-8 py-1 font-mono text-white min-h-[72px]"
               >
                 <span class="mb-1 text-[11px] sm:text-xs font-bold text-white/90">
                   {estimate.heightCm}cm
                 </span>
-                <div
-                  style={
-                    activeBorderId === "circle"
-                      ? {
-                          height: `clamp(9rem, ${(estimate.heightCm / 50) * 12}rem, 24rem)`,
-                        }
-                      : undefined
-                  }
-                  class={`flex flex-col items-center ${
-                    activeBorderId === "circle"
-                      ? ""
-                      : activeBorderId === "pill"
-                        ? "h-24 sm:h-36"
-                        : "h-28 sm:h-44"
-                  }`}
-                >
+                <div class="flex flex-1 flex-col items-center w-full">
                   <span class="text-xs leading-none text-white/80">↑</span>
-                  <div class="w-px flex-1 bg-white/60" />
+                  <div class="w-px flex-1 bg-white/60 min-h-[36px]" />
                   <span class="text-xs leading-none text-white/80">↓</span>
                 </div>
               </div>
+
+              {/* ALT YATAY GENİŞLİK OKU (Tabela genişliğine birebir kilitli) */}
+              <div
+                aria-hidden="true"
+                class="col-start-1 row-start-2 mt-2.5 sm:mt-3.5 w-full min-w-[140px] flex items-center gap-2 sm:gap-3 font-mono text-white"
+              >
+                <span class="text-xs text-white/80">←</span>
+                <div class="h-px flex-1 bg-white/60" />
+                <div class="text-center leading-tight px-1 shrink-0">
+                  <span class="block text-xs font-bold text-white">
+                    {estimate.widthCm}cm
+                  </span>
+                  <span class="block text-[10px] text-white/55">
+                    {activeBorderId === "circle"
+                      ? "çap ölçüsü"
+                      : "akrilik ölçüsü"}
+                  </span>
+                </div>
+                <div class="h-px flex-1 bg-white/60" />
+                <span class="text-xs text-white/80">→</span>
+              </div>
             </div>
 
-            {/* ALT YATAY GENİŞLİK OKU */}
-            <div
-              aria-hidden="true"
-              style={
-                activeBorderId === "circle"
-                  ? {
-                      width: `clamp(12rem, ${(estimate.widthCm / 50) * 14}rem, 26rem)`,
-                    }
-                  : undefined
-              }
-              class={`mt-4 sm:mt-6 flex items-center gap-2 sm:gap-3 font-mono text-white ${
-                activeBorderId === "circle" ? "" : "w-[90%] sm:w-[85%] max-w-xl"
-              }`}
-            >
-              <span class="text-xs text-white/80">←</span>
-              <div class="h-px flex-1 bg-white/60" />
-              <div class="text-center leading-tight px-1">
-                <span class="block text-xs font-bold text-white">
-                  {estimate.widthCm}cm
-                </span>
-                <span class="block text-[10px] text-white/55">
-                  {activeBorderId === "circle"
-                    ? "çap ölçüsü"
-                    : "akrilik ölçüsü"}
-                </span>
+            {/* ATÖLYE ÜRETİM VE BÜKÜM UYARISI ROZETİ */}
+            {estimate.isSizeConstrained && (
+              <div class="relative mt-2 flex flex-col items-center z-30">
+                <button
+                  type="button"
+                  aria-expanded={showConstraintTip}
+                  onClick={() => setShowConstraintTip((prev) => !prev)}
+                  onMouseEnter={() => setShowConstraintTip(true)}
+                  onMouseLeave={() => setShowConstraintTip(false)}
+                  class="cursor-pointer inline-flex items-center gap-1.5 rounded-full border border-amber-400/50 bg-[#0E0E14]/90 px-3 py-1 font-mono text-[11px] font-semibold text-amber-300 shadow-[0_0_16px_rgba(245,158,11,0.22)] backdrop-blur-md transition-all hover:bg-amber-500/20 hover:border-amber-400 hover:scale-[1.03] active:scale-95"
+                >
+                  <span class="animate-pulse text-xs text-amber-400">⚠️</span>
+                  <span>Üretim Uyarısı: Sıkışık Metin</span>
+                  <span class="ml-0.5 rounded-full bg-amber-400/20 px-1.5 py-0.2 text-[9px] text-amber-200">
+                    Detay
+                  </span>
+                </button>
+
+                {showConstraintTip && (
+                  <div
+                    role="tooltip"
+                    class="absolute bottom-full mb-2 w-72 sm:w-84 rounded-xl border border-amber-400/40 bg-[#0A0A0E]/95 p-3.5 text-left font-sans shadow-2xl backdrop-blur-lg animate-in fade-in zoom-in-95 duration-150 z-50 pointer-events-auto"
+                  >
+                    <div class="flex items-start justify-between gap-2 mb-1.5 border-b border-white/10 pb-1.5">
+                      <div class="flex items-center gap-1.5 text-xs font-bold text-amber-400 font-mono">
+                        <span>⚠️</span>
+                        <span>ATÖLYE BÜKÜM UYARISI</span>
+                      </div>
+                      <button
+                        type="button"
+                        aria-label="Kapat"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowConstraintTip(false);
+                        }}
+                        class="text-white/40 hover:text-white text-xs px-1 cursor-pointer"
+                      >
+                        ✕
+                      </button>
+                    </div>
+
+                    <p class="text-xs text-white/85 leading-relaxed">
+                      Silikon neon tüplerin net ve estetik bükülebilmesi için
+                      harf başına en az <strong>7.5 cm</strong> mesafe gerekir.
+                    </p>
+
+                    <p class="mt-2 text-xs text-amber-200/90 leading-relaxed">
+                      Bu satırdaki harfler seçilen{" "}
+                      <strong>{NEON_SIZES[spec.sizeId].widthCm} cm</strong>{" "}
+                      ebada sığdırıldığında harf aralıkları kapanabilir ve ışık
+                      birbirine karışabilir (ideal alan:{" "}
+                      <strong>~{estimate.minRecommendedWidthCm} cm</strong>).
+                    </p>
+
+                    <div class="mt-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 p-2 text-[11px] text-amber-100/90 leading-normal">
+                      💡 <strong>Tavsiye:</strong> Uzun metni{" "}
+                      <strong>Enter</strong> tuşuyla 2 veya 3 satıra bölerek
+                      harflerin ferah ve kusursuz görünmesini sağlayabilirsiniz.
+                    </div>
+                  </div>
+                )}
               </div>
-              <div class="h-px flex-1 bg-white/60" />
-              <span class="text-xs text-white/80">→</span>
-            </div>
+            )}
           </div>
 
           {/* CAD KUTUSU ALT BÖLÜM: SIFIRLAMA KAPSÜLLERİ + KENARDAN KENARA 6 SÜTUNLU ANTET TABLOSU */}
-          <div class="relative z-20 space-y-3 pb-20 lg:pb-0">
+          <div class="relative z-20 shrink-0 space-y-2.5 pb-20 lg:pb-0">
             {/* Sıfırlama / Geri Al / İleri Al Kapsülleri (Mobilde gizli veya kompakt) */}
             <div class="hidden sm:flex flex-wrap items-center justify-center gap-2 px-4">
               <button
@@ -2505,6 +3194,8 @@ export default function NeonStudio() {
                     sizeId: "md",
                     backboardId: "contour_clear",
                     borderId: "none",
+                    symbolPosition: "right",
+                    symbolScale: 1,
                   })
                 }
                 class="cursor-pointer rounded-md border border-[#35E7FF]/40 bg-[#0A0A0E]/90 px-3 py-1.5 font-mono text-[11px] font-semibold text-white hover:border-[#35E7FF]"
